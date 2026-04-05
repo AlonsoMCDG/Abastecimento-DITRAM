@@ -65,6 +65,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_filters',
     'rest_framework',
     'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
@@ -73,6 +74,10 @@ INSTALLED_APPS = [
     'apps.cadastros',
     'apps.frota',
     'apps.usuarios',
+    'apps.novo.frota.v1',
+    'apps.novo.operacao.v1',
+    'apps.novo.organizacao.v1',
+    'apps.novo.pessoas.v1',
 ]
 
 # ======================
@@ -105,6 +110,22 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated', # Bloqueia tudo por padrão
     ),
     'EXCEPTION_HANDLER': 'api.exception_handler.custom_exception_handler',
+
+    ### Versionamento da API
+    'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.NamespaceVersioning',
+    'DEFAULT_VERSION': 'v1',            # Versão assumida se não houver namespace
+    'ALLOWED_VERSIONS': ['v1',],
+    'VERSION_PARAM': 'version',
+    ###
+
+    ### Paginação
+    # Paginação padrão (ex: 10 itens por página)
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10,
+    
+    # Define o backend de filtro padrão
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend']
+
 }
 
 # ======================
