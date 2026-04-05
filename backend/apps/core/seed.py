@@ -38,7 +38,7 @@ def load_default_data(fixture_name: str = DEFAULT_FIXTURE_NAME, verbosity: int =
 
 
 def seed_if_empty(verbosity: int = 1):
-    from apps.cadastros.models import Secretaria
+    from apps.organizacao.models import Secretaria
 
     if Secretaria.objects.exists():
         return False

@@ -90,9 +90,10 @@ def backup_sqlite_db(request):
 @api_view(["GET"])
 @permission_classes([IsSuperAdmin])
 def db_stats(request):
-    from apps.cadastros.models import Instituicao, Rota, Secretaria
-    from apps.frota.models import Condutor, Lotacao, Veiculo
-    from apps.abastecimento.models import GuiaAbastecimento
+    from apps.organizacao.models import Instituicao, Secretaria
+    from apps.frota.models import Rota, Veiculo
+    from apps.pessoas.models import Pessoa
+    from apps.operacao.models import Guia, OperadorVeiculo, AlocacaoServico, TipoServico
     from django.contrib.auth import get_user_model
 
     User = get_user_model()
@@ -106,10 +107,10 @@ def db_stats(request):
                 "secretarias": Secretaria.objects.count(),
                 "instituicoes": Instituicao.objects.count(),
                 "rotas": Rota.objects.count(),
-                "condutores": Condutor.objects.count(),
+                "condutores": Pessoa.objects.count(),
                 "veiculos": Veiculo.objects.count(),
-                "lotacoes": Lotacao.objects.count(),
-                "guias_abastecimento": GuiaAbastecimento.objects.count(),
+                "lotacoes": AlocacaoServico.objects.count(),
+                "guias": Guia.objects.count(),
                 "usuarios": User.objects.count(),
             },
         }

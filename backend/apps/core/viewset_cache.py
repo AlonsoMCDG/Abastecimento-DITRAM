@@ -10,24 +10,29 @@ class ModelViewSetCacheMixin:
     cache_list: bool = True
     cache_retrieve: bool = True
 
-    def _cache_key(self, action: str) -> str:
+    def _cache_key(self, action: str, kwargs: dict | None = None) -> str:
         model = self.get_queryset().model
         user_id = getattr(self.request.user, "id", None)
+        
         return build_view_cache_key(
             model=model,
             action=action,
             user_id=user_id,
-            query_params=dict(self.request.query_params),
+            query_params=self.request.query_params,
+            path_kwargs=kwargs or {}, # Repassa os parâmetros da URL (ex: 'pk')
         )
 
     def list(self, request, *args, **kwargs):
         if request.method == "GET" and self.cache_list:
-            key = self._cache_key("list")
+            key = self._cache_key("list", kwargs)
             cached = get_cached_response(key)
+
             if cached:
                 return Response(cached.data, status=cached.status_code)
 
+            # Executa a view original caso não tenha cache
             response = super().list(request, *args, **kwargs)
+            
             cache_response(key, response, ttl_seconds=self.cache_ttl_seconds)
             return response
 
