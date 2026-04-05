@@ -69,15 +69,16 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
-    'apps.core.apps.CoreConfig',
-    'apps.abastecimento',
-    'apps.cadastros',
-    'apps.frota',
+
+    # Apps de Infraestrutura
+    'apps.core',
     'apps.usuarios',
-    'apps.novo.frota.v1',
-    'apps.novo.operacao.v1',
-    'apps.novo.organizacao.v1',
-    'apps.novo.pessoas.v1',
+
+    # Apps de Domínio (Aponte para a pasta raiz do App)
+    'apps.frota',
+    'apps.operacao',
+    'apps.organizacao',
+    'apps.pessoas',
 ]
 
 # ======================
@@ -120,9 +121,8 @@ REST_FRAMEWORK = {
 
     ### Paginação
     # Paginação padrão (ex: 10 itens por página)
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10,
-    
+    'DEFAULT_PAGINATION_CLASS': 'apps.core.pagination.StandardResultsSetPagination',
+
     # Define o backend de filtro padrão
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend']
 
@@ -134,7 +134,7 @@ REST_FRAMEWORK = {
 
 SIMPLE_JWT = {
     # Tempo que o utilizador pode navegar sem precisar de usar o refresh token
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
     
     # Tempo total que o utilizador pode ficar logado (7 dias)
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
@@ -258,4 +258,70 @@ CACHES = {
         "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
         "LOCATION": "abastecimento-seme",
     }
+}
+
+
+# ======================
+# LOGGING
+# ======================
+
+import os
+
+# 1. Garante que a pasta "logs" exista na raiz do projeto para não dar erro
+LOGS_DIR = BASE_DIR / 'logs'
+os.makedirs(LOGS_DIR, exist_ok=True)
+
+# 2. Configuração do Logging
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False, # Muito importante: mantém os avisos nativos do Django
+    
+    # FORMATTERS: A "roupa" da mensagem (data, hora, nível, etc)
+    'formatters': {
+        'verbose': {
+            'format': '[{asctime}] {levelname} [{module}:{lineno}] - {message}',
+            'style': '{',
+            'datefmt': '%Y-%m-%d %H:%M:%S',
+        },
+        'simple': {
+            'format': '{levelname} - {message}',
+            'style': '{',
+        },
+    },
+    
+    # HANDLERS: Os entregadores (Terminal, Arquivo, E-mail, etc)
+    'handlers': {
+        # Para o Terminal: Mostra tudo (INFO pra cima) com visual simples
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+        # Para o Arquivo: Salva problemas graves (WARNING, ERROR) com detalhes técnicos
+        'file': {
+            'level': 'WARNING', 
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': LOGS_DIR / 'django_errors.log',
+            'maxBytes': 1024 * 1024 * 5, # Corta o arquivo quando chegar em 5MB
+            'backupCount': 3,            # Guarda até 3 arquivos antigos, apagando o resto
+            'formatter': 'verbose',
+            'encoding': 'utf-8',
+        },
+    },
+    
+    # LOGGERS: Os detetives que ficam escutando o código
+    'loggers': {
+        # Captura os erros internos do próprio Django
+        'django': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        # Captura os avisos do SEU código (a pasta 'apps' inteira)
+        'apps': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
 }

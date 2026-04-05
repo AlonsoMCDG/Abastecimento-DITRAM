@@ -1,20 +1,10 @@
 from django.db import models
+from apps.organizacao.models import Secretaria, Instituicao
 
-from apps.cadastros.models import Rota, Secretaria
-
-
-class Condutor(models.Model):
-    nome_completo = models.CharField(max_length=150)
-    cpf = models.CharField(max_length=11)
-    ativo = models.BooleanField(default=True)
-
-    def __str__(self):
-        return self.nome_completo
-
-    class Meta:
-        verbose_name = "Condutor"
-        verbose_name_plural = "Condutores"
-
+TIPO_LOCOMOCAO_CHOICES = [
+    ("TERRESTRE", "Terrestre"),
+    ("FLUVIAL", "Fluvial"),
+]
 
 class Veiculo(models.Model):
     TIPO_COMBUSTIVEL_CHOICES = [
@@ -25,13 +15,31 @@ class Veiculo(models.Model):
         ("GNV", "GNV"),
     ]
 
-    placa = models.CharField(max_length=10, unique=True)
+    UNIDADE_CONSUMO_CHOICES = [
+        ("KM_POR_L", "km/L"),
+        ("L_POR_H", "L/h")
+    ]
+
     modelo = models.CharField(max_length=100)
-    ano = models.IntegerField()
-    tipo_combustivel = models.CharField(
-        max_length=50,
-        choices=TIPO_COMBUSTIVEL_CHOICES,
+    placa = models.CharField(max_length=8, unique=True)
+    tipo_locomocao = models.CharField(max_length=50, choices=TIPO_LOCOMOCAO_CHOICES)
+    capacidade_carga_kg = models.FloatField()
+    capacidade_pessoas = models.IntegerField()
+    tipo_combustivel = models.CharField(max_length=50, choices=TIPO_COMBUSTIVEL_CHOICES,)
+    consumo_estimado_combustivel = models.DecimalField(
+        max_digits=10, 
+        decimal_places=3, 
+        verbose_name="Consumo Estimado (Combustível)"
     )
+    consumo_estimado_oleo = models.DecimalField(
+        max_digits=10, 
+        decimal_places=3, 
+        null=True, 
+        blank=True,
+        verbose_name="Consumo Estimado (Óleo)"
+    )
+    hodometro_atual = models.FloatField()
+    unidade_consumo = models.CharField(max_length=20, choices=UNIDADE_CONSUMO_CHOICES)
 
     secretaria = models.ForeignKey(
         Secretaria,
@@ -46,44 +54,51 @@ class Veiculo(models.Model):
         verbose_name = "Veículo"
         verbose_name_plural = "Veículos"
 
+class Rota(models.Model):
+    nome = models.CharField(max_length=100)
 
-class Lotacao(models.Model):
-    data = models.DateField()
+    distancia_km = models.DecimalField(max_digits=8, decimal_places=2, default=0)
+    consumo_estimado_combustivel = models.DecimalField(
+        max_digits=10, 
+        decimal_places=3, 
+        verbose_name="Consumo Estimado (Combustível)"
+    )
+    consumo_estimado_oleo = models.DecimalField(
+        max_digits=10, 
+        decimal_places=3, 
+        null=True, 
+        blank=True,
+        verbose_name="Consumo Estimado (Óleo)"
+    )
+
+    detalhes = models.CharField(max_length=256)
+    
+    tipo_locomocao = models.CharField(
+        max_length=50,
+        choices=TIPO_LOCOMOCAO_CHOICES
+    )
+
+    secretaria = models.ForeignKey(
+        Secretaria,
+        on_delete=models.PROTECT,
+        related_name="rotas",
+        null=True,
+        blank=True,
+    )
+
+    instituicao = models.ForeignKey(
+        Instituicao,
+        on_delete=models.PROTECT,
+        related_name="rotas",
+        null=True,
+        blank=True,
+    )
+
     ativa = models.BooleanField(default=True)
 
-    condutor = models.ForeignKey(
-        Condutor,
-        on_delete=models.PROTECT,
-        related_name="lotacoes",
-    )
-
-    rota = models.ForeignKey(
-        Rota,
-        on_delete=models.PROTECT,
-        null=True,
-        blank=True,
-        related_name="lotacoes",
-    )
-
-    veiculo = models.ForeignKey(
-        Veiculo,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name="lotacoes",
-    )
-
     def __str__(self):
-        return f"{self.condutor} - {self.data}"
+        return self.descricao
 
     class Meta:
-        verbose_name = "Lotação"
-        verbose_name_plural = "Lotações"
-        ordering = ["-data", "-id"]
-        constraints = [
-            models.UniqueConstraint(
-                fields=["condutor", "data"],
-                name="unique_lotacao_por_condutor_e_data",
-            ),
-        ]
-
+        verbose_name = "Rota"
+        verbose_name_plural = "Rotas"
