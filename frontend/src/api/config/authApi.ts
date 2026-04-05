@@ -1,0 +1,37 @@
+import { client } from './apiClient';
+import { ENDPOINTS } from "./endpoints";
+import {
+  ACCESS_TOKEN_STORAGE_KEY,
+  REFRESH_TOKEN_STORAGE_KEY,
+} from "../../auth/auth";
+import { getApiErrorMessage } from "./errorHandlers";
+
+
+// Tipagem exata do que o Django Rest Framework (SimpleJWT) retorna
+interface LoginResponse {
+  access: string;
+  refresh: string;
+  // Se no futuro você customizar o DRF para devolver os dados do usuário no login, 
+  // basta adicionar aqui (ex: user: { id: number, nome: string, cpf: string })
+}
+
+export const authApi = {
+  login: async (cpf: string, password: string): Promise<LoginResponse> => {
+    try {
+      // 3. Tipagem aplicada no método post e uso do Endpoint centralizado
+      const response = await client.post<LoginResponse>(ENDPOINTS.auth.login, { 
+        cpf, 
+        password 
+      });
+
+      // Salva os tokens no localStorage
+      localStorage.setItem(ACCESS_TOKEN_STORAGE_KEY, response.data.access);
+      localStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, response.data.refresh);
+
+      return response.data;
+    } catch (err: unknown) {
+      throw new Error(getApiErrorMessage(err, "CPF ou senha inválidos"));
+    }
+  }
+};
+

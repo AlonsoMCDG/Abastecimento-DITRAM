@@ -1,5 +1,16 @@
-import axios from "axios";
-import { ACCESS_TOKEN_STORAGE_KEY, clearAuthTokens } from "../auth/auth";
+import axios, { type InternalAxiosRequestConfig } from "axios";
+import { ACCESS_TOKEN_STORAGE_KEY, REFRESH_TOKEN_STORAGE_KEY, clearAuthTokens } from "../../auth/auth";
+
+// Tipagem para a fila de requisições retidas
+interface FailedQueueItem {
+  resolve: (value: string | null) => void;
+  reject: (reason?: any) => void;
+}
+
+// Tipagem estendida para evitar erro de TS no `_retry`
+interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
+  _retry?: boolean;
+}
 
 export const client = axios.create({
   baseURL: `${import.meta.env.VITE_API_URL}/api`,
@@ -11,7 +22,7 @@ export const client = axios.create({
 // Adiciona o token automaticamente em todas as chamadas
 client.interceptors.request.use((config) => {
   const token = localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
-  if (token) {
+  if (token && config.headers) {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
@@ -19,7 +30,7 @@ client.interceptors.request.use((config) => {
 
 // Variáveis para gerenciar a fila de requisições
 let isRefreshing = false;
-let failedQueue: any[] = [];
+let failedQueue: FailedQueueItem[] = [];
 
 // Processa a fila de requisições (fornece um novo token para todos ou null)
 const processQueue = (error: any, token: string | null = null) => {
@@ -37,18 +48,20 @@ const processQueue = (error: any, token: string | null = null) => {
 client.interceptors.response.use(
   (response) => response,
   async (error) => {
-    const originalRequest = error.config;
+    const originalRequest = error.config as CustomAxiosRequestConfig;
     
     // Deu erro de autorização (401) e é a primeira tentativa
     if (error.response?.status === 401 && !originalRequest._retry) {
       
       // Se já estamos renovando o token, coloca esta requisição na fila
       if (isRefreshing) {
-        return new Promise((resolve, reject) => {
+        return new Promise<string | null>((resolve, reject) => {
           failedQueue.push({ resolve, reject });
         })
           .then((token) => {
-            originalRequest.headers.Authorization = `Bearer ${token}`;
+            if (token && originalRequest.headers) {
+              originalRequest.headers.Authorization = `Bearer ${token}`;
+            }
             return client(originalRequest);
           })
           .catch((err) => Promise.reject(err));
@@ -57,9 +70,20 @@ client.interceptors.response.use(
       originalRequest._retry = true;
       isRefreshing = true;
 
+      const refreshToken = localStorage.getItem(REFRESH_TOKEN_STORAGE_KEY);
+
+      // Se não tem o refresh, nem gasta rede. Corta direto.
+      if (!refreshToken) {
+        processQueue(new Error("Token de refresh inexistente"), null);
+        clearAuthTokens(); // Garanta que essa função limpa tanto o access quanto o refresh no seu auth.ts
+        localStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY); 
+        window.location.href = '/login';
+        isRefreshing = false;
+        return Promise.reject(error);
+      }
+      
       return new Promise((resolve, reject) => {
-        const refreshToken = localStorage.getItem('refresh_token');
-        
+        // Usa uma nova instância (axios.post) em vez do 'client' para não cair em loop infinito
         axios.post(`${import.meta.env.VITE_API_URL}/api/token/refresh/`, {
           refresh: refreshToken,
         })
@@ -67,15 +91,17 @@ client.interceptors.response.use(
             const { access } = res.data;
             localStorage.setItem(ACCESS_TOKEN_STORAGE_KEY, access);
             
-            originalRequest.headers.Authorization = `Bearer ${access}`;
-            
-            processQueue(null, access); // Libera a fila com o novo token
+            if (originalRequest.headers) {
+              originalRequest.headers.Authorization = `Bearer ${access}`;
+            }
+
+            processQueue(null, access); // Libera a fila passando o novo token
             resolve(client(originalRequest));
           })
           .catch((err) => {
-            processQueue(err, null); // Rejeita toda a fila
+            processQueue(err, null); // Rejeita toda a fila passando o erro
             clearAuthTokens();
-            localStorage.removeItem('refresh_token');
+            localStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY);
             window.location.href = '/login';
             reject(err);
           })

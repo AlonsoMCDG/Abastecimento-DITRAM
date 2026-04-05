@@ -1,10 +1,17 @@
-export type FieldType =
-  | "text"
-  | "number"
-  | "date"
-  | "select"
-  | "textarea"
-  | "checkbox"
+// 1. TIPO PARA A TABELA (Simples, focado em exibição)
+export interface TableColumn {
+  key: string;       // O nome do campo no JSON da API
+  label: string;     // O título da coluna
+  // Função opcional para formatar o dado antes de exibir (ex: datas, booleanos)
+  format?: (value: any, row: any) => React.ReactNode; 
+}
+
+export interface TableSchema {
+  columns: TableColumn[];
+}
+
+// 2. TIPO PARA O FORMULÁRIO (Complexo, focado em interação)
+export type FieldType = "text" | "number" | "date" | "datetime-local" | "select" | "textarea" | "checkbox";
 
 export interface FieldOption {
   label: string
@@ -25,8 +32,6 @@ export interface FormField {
   dependsOn?: string        // Nome do campo que controla o filtro deste select.
   dependsOnParam?: string   // Nome do query param para o filtro. Se omitido, usa dependsOn.
   placeholder?: string      // Valor temporário para o campo até o usuário escrever algo
-  
-  // --- NOVAS PROPRIEDADES ADICIONADAS ---
   disabledUntilParentSelected?: boolean // Bloqueia o campo se o pai (dependsOn) estiver vazio
   autoSelectFirst?: boolean             // Seleciona automaticamente a primeira opção carregada
 }
