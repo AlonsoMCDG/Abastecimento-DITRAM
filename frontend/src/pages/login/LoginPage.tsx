@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { loginService } from '../../api/login'; 
+import { authApi } from '../../api/config/authApi';
+import { useAuth } from '../../auth/AuthContext';
 import { isAuthenticated } from '../../auth/auth';
-import { getApiErrorMessage } from '../../api/errorMessage';
+import { getApiErrorMessage } from '../../api/config/errorHandlers';
 
 export const LoginPage = () => {
   const [cpf, setCpf] = useState('');
@@ -11,7 +12,11 @@ export const LoginPage = () => {
   const [errorMsg, setErrorMsg] = useState('');
 
   const navigate = useNavigate();
+  
+  // 1. Extraímos o refreshUser do nosso estado global
+  const { refreshUser } = useAuth();
 
+  // Redireciona caso o usuário já tenha token ao acessar a tela de login
   useEffect(() => {
     if (isAuthenticated()) {
       navigate("/home", { replace: true });
@@ -24,16 +29,21 @@ export const LoginPage = () => {
     setErrorMsg('');
 
     try {
-      // Chama o serviço que você criou
       const cpfDigits = cpf.replace(/\D/g, "");
       if (cpfDigits.length !== 11) {
-        throw new Error("CPF deve conter 11 dígitos.");
+        throw new Error("O CPF deve conter exatamente 11 dígitos.");
       }
 
-      await loginService(cpfDigits, password);
+      // 2. Realiza o login (salva os tokens no localStorage)
+      await authApi.login(cpfDigits, password);
       
-      // Se o login der certo, redireciona para a home
+      // 3. MAGIA AQUI: Força o Contexto a buscar os dados do usuário (/me/) 
+      // usando o token que acabou de ser salvo, populando a memória do React.
+      await refreshUser();
+      
+      // 4. Só agora redirecionamos, com o estado global já atualizado!
       navigate('/home', { replace: true });
+      
     } catch (err: unknown) {
       setErrorMsg(getApiErrorMessage(err, "Falha ao realizar login."));
     } finally {
@@ -53,11 +63,11 @@ export const LoginPage = () => {
           <input
             id="cpf"
             type="text"
-            placeholder="00000000000"
+            placeholder="Apenas números (11 dígitos)"
             value={cpf}
             onChange={(e) => setCpf(e.target.value.replace(/\D/g, '').slice(0, 11))}
             required
-            maxLength={11}
+            maxLength={11} // Limita o input visualmente também
           />
         </div>
 

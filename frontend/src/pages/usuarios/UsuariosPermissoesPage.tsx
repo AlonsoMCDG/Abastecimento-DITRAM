@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { usuarioApi } from "../../api/usuarioApi";
+import { usuarioApi } from "../../api/usuarios/usuariosApi";
 import type { Usuario } from "../../types/models";
 
 type EditedMap = Record<number, Partial<Usuario>>;

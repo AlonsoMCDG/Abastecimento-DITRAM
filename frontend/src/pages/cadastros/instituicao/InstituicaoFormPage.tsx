@@ -2,8 +2,8 @@ import { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 
 import DynamicForm from "../../../components/DynamicForm"
-import { instituicaoFormSchema } from "../../../forms/instituicao.schema"
-import { instituicaoApi } from "../../../api/instituicaoApi"
+import { instituicaoFormSchema } from "../../../schemas/instituicao.schema"
+import { instituicoesApi } from "../../../api/organizacao/instituicoesApi"
 import "../../../assets/css/FormPage.css"
 
 import type { Instituicao } from "../../../types/models"
@@ -19,7 +19,7 @@ export default function InstituicaoFormPage() {
   useEffect(() => {
 
     if (id) {
-      instituicaoApi.buscar(Number(id))
+      instituicoesApi.buscar(Number(id))
         .then(res => setData(res.data))
     }
 
@@ -29,14 +29,14 @@ export default function InstituicaoFormPage() {
 
     if (id) {
 
-      await instituicaoApi.atualizar(
+      await instituicoesApi.atualizar(
         Number(id),
         form
       )
 
     } else {
 
-      await instituicaoApi.criar(form)
+      await instituicoesApi.criar(form)
 
     }
 

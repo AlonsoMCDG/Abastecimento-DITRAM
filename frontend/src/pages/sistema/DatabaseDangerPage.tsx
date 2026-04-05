@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../../assets/css/FormPage.css";
-import { coreApi } from "../../api/coreApi";
-import { getApiErrorMessage } from "../../api/errorMessage";
-import { logout } from "../../auth/auth";
+import { coreApi } from "../../api/core/coreApi";
+import { getApiErrorMessage } from "../../api/config/errorHandlers";
+import { useAuth } from "../../auth/AuthContext";
 
 type DbStats = {
   database_engine?: string;
@@ -34,6 +34,8 @@ export default function DatabaseDangerPage() {
 
   const canDestructive = confirmText.trim().toUpperCase() === "APAGAR TUDO";
   const isSqlite = Boolean(stats?.is_sqlite);
+
+  const { logout } = useAuth();
 
   const countsText = useMemo(() => {
     const c = stats?.counts;

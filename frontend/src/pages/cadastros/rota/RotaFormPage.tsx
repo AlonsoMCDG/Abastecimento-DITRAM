@@ -2,8 +2,8 @@ import { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 
 import DynamicForm from "../../../components/DynamicForm"
-import { rotaFormSchema } from "../../../forms/rota.schema"
-import { rotaApi } from "../../../api/rotaApi"
+import { rotaFormSchema } from "../../../schemas/rota.schema"
+import { rotaApi } from "../../../api/frota/rotasApi"
 import "../../../assets/css/FormPage.css"
 
 import type { Rota } from "../../../types/models"

@@ -1,99 +1,83 @@
 export const ROUTES = {
-
-  PERFIL: "/perfil",
-
-  PERFIL_EDIT: "/perfil/editar",
-
-  SISTEMA_DB: "/sistema/banco",
-
-  CADASTROS: "/cadastros",
+  // -----------------------
+  // SISTEMA E USUÁRIOS
+  // -----------------------
+  sistema: {
+    perfil: "/perfil",
+    db: "/sistema/banco",
+    usuarios: {
+      list: "/usuarios",
+      create: "/usuarios/criar",
+      edit: (id: number) => `/usuarios/editar/${id}`,
+    }
+  },
 
   // -----------------------
-  // /CADASTROS/SECRETARIAS
+  // 1. PESSOAS
   // -----------------------
-  
-  SECRETARIAS: "/cadastros/secretarias",
-  
-  SECRETARIA_CREATE: "/cadastros/secretarias/criar",
-  
-  SECRETARIA_EDIT: (id: number) =>
-    `/cadastros/secretarias/editar/${id}`,
-  
-  // -----------------------
-  // /CADASTROS/ROTAS
-  // -----------------------
-  
-  ROTAS: "/cadastros/rotas",
-
-  ROTA_CREATE: "/cadastros/rotas/criar",
-
-  ROTA_EDIT: (id: number) =>
-    `/cadastros/rotas/editar/${id}`,
-  
-  // -----------------------
-  // /CADASTROS/INSTITUICOES
-  // -----------------------
-  
-  INSTITUICOES: "/cadastros/instituicoes",
-
-  INSTITUICAO_CREATE: "/cadastros/instituicoes/criar",
-
-  INSTITUICAO_EDIT: (id: number) =>
-    `/cadastros/instituicoes/editar/${id}`,
+  pessoas: {
+    base: {
+      list: "/pessoas",
+      create: "/pessoas/criar",
+      edit: (id: number) => `/pessoas/editar/${id}`,
+    }
+  },
 
   // -----------------------
-  // /FROTA/CONDUTORES
+  // 2. ORGANIZAÇÃO
   // -----------------------
-  
-  CONDUTORES: "/frota/condutores",
-
-  CONDUTOR_CREATE: "/frota/condutores/criar",
-
-  CONDUTOR_EDIT: (id: number) =>
-    `/frota/condutores/editar/${id}`,
-
-  // -----------------------
-  // /FROTA/VEICULOS
-  // -----------------------
-  
-  VEICULOS: "/frota/veiculos",
-
-  VEICULO_CREATE: "/frota/veiculos/criar",
-
-  VEICULO_EDIT: (id: number) =>
-    `/frota/veiculos/editar/${id}`,
+  organizacao: {
+    secretarias: {
+      list: "/organizacao/secretarias",
+      create: "/organizacao/secretarias/criar",
+      edit: (id: number) => `/organizacao/secretarias/editar/${id}`,
+    },
+    instituicoes: {
+      list: "/organizacao/instituicoes",
+      create: "/organizacao/instituicoes/criar",
+      edit: (id: number) => `/organizacao/instituicoes/editar/${id}`,
+    }
+  },
 
   // -----------------------
-  // /FROTA/LOTACOES
+  // 3. FROTA
   // -----------------------
-
-  LOTACOES: "/frota/lotacoes",
-
-  LOTACOES_CREATE: "/frota/lotacoes/criar",
-
-  LOTACOES_EDIT: (id: number) =>
-    `/frota/lotacoes/editar/${id}`,
-
-  // -----------------------
-  // /USUARIOS
-  // -----------------------
-  
-  USUARIOS: "/usuarios",
-
-  USUARIO_CREATE: "/usuarios/criar",
-
-  USUARIO_EDIT: (id: number) =>
-    `/usuarios/editar/${id}`,
+  frota: {
+    veiculos: {
+      list: "/frota/veiculos",
+      create: "/frota/veiculos/criar",
+      edit: (id: number) => `/frota/veiculos/editar/${id}`,
+    },
+    rotas: {
+      list: "/frota/rotas",
+      create: "/frota/rotas/criar",
+      edit: (id: number) => `/frota/rotas/editar/${id}`,
+    }
+  },
 
   // -----------------------
-  // /ABASTECIMENTO/GUIAS
+  // 4. OPERAÇÃO
   // -----------------------
-  
-  GUIAS_ABASTECIMENTO: "/abastecimento/guias",
-
-  GUIA_ABASTECIMENTO_CREATE: "/abastecimento/guias/criar",
-
-  GUIA_ABASTECIMENTO_EDIT: (id: number) =>
-    `/abastecimento/guias/editar/${id}`,
-
+  operacao: {
+    tiposServico: {
+      list: "/operacao/tipos-servico",
+      create: "/operacao/tipos-servico/criar",
+      edit: (id: number) => `/operacao/tipos-servico/editar/${id}`,
+    },
+    alocacoesServico: {
+      list: "/operacao/alocacoes",
+      create: "/operacao/alocacoes/criar",
+      edit: (id: number) => `/operacao/alocacoes/editar/${id}`,
+    },
+    operadoresVeiculo: {
+      list: "/operacao/operadores",
+      create: "/operacao/operadores/criar",
+      edit: (id: number) => `/operacao/operadores/editar/${id}`,
+    },
+    guias: {
+      list: "/operacao/guias",
+      create: "/operacao/guias/criar",
+      edit: (id: number) => `/operacao/guias/editar/${id}`,
+    }
+  },
 };

@@ -2,9 +2,9 @@ import { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 
 import DynamicForm from "../../../components/DynamicForm"
-import { secretariaFormSchema } from "../../../forms/secretaria.schema"
+import { secretariaFormSchema } from "../../../schemas/secretaria.schema"
 
-import { secretariaApi } from "../../../api/secretariaApi"
+import { secretariaApi } from "../../../api/organizacao/secretariasApi"
 import "../../../assets/css/FormPage.css"
 
 import type { Secretaria } from "../../../types/models"

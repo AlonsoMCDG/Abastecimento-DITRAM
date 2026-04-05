@@ -1,76 +1,99 @@
-import { useEffect, useState } from "react"
+import { useState, useCallback, useRef } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
-import DataTable from "../../components/DataTable"
-import { usuarioApi } from "../../api/usuarioApi"
+import DataTable, { type DataTableParams } from "../../components/DataTable";
+import { usuarioApi } from "../../api/usuarios/usuariosApi";
+import { ROUTES } from "../../routes/routes";
+import { useAuth } from "../../auth/AuthContext";
+import { Can } from "../../components/auth/Can";
+import { getApiErrorMessage } from "../../api/config/errorHandlers";
 
-import { Link, useLocation, useNavigate } from "react-router-dom"
-import { ROUTES } from "../../routes/routes"
+import type { Usuario } from "../../types/models";
+import { usuarioFormSchema } from "../../schemas/usuario.schema";
 
-import type { Usuario } from "../../types/models"
-import { usuarioFormSchema } from "../../forms/usuario.schema"
-import "../../assets/css/ListPage.css"
+import "../../assets/css/ListPage.css";
 
 export default function UsuarioListPage() {
+  const navigate = useNavigate();
+  const { user: me } = useAuth();
 
-  const navigate = useNavigate()
-  const location = useLocation()
+  // Estados da Listagem e Paginação
+  const [usuarios, setUsuarios] = useState<Usuario[]>([]);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(false);
 
-  const [me, setMe] = useState<Usuario | null>(null)
-  const [usuarios, setUsuarios] =
-    useState<Usuario[]>([])
+  // Controle de atraso para não sobrecarregar a API durante a busca
+  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const isAdmin = Boolean(me?.is_staff)
+  // Permissão estrita: Apenas administradores (staff) gerenciam usuários
+  const isAdmin = Boolean(me?.is_staff);
 
-  async function load() {
-    const response = await usuarioApi.listar()
-    setUsuarios(response.data)
-  }
+  // Motor de busca paginado
+  const fetchUsuarios = useCallback(async (params: DataTableParams) => {
+    if (debounceTimer.current) clearTimeout(debounceTimer.current);
 
-  useEffect(() => {
-    load()
-    usuarioApi.me().then((res) => setMe(res.data)).catch(() => setMe(null))
-  }, [location.key])
+    debounceTimer.current = setTimeout(async () => {
+      setLoading(true);
+      try {
+        const res = await usuarioApi.listar({
+          page: params.page,
+          page_size: params.pageSize,
+          search: params.search,
+          ordering: params.ordering ?? undefined,
+        });
 
+        setUsuarios(res.data.results || []);
+        setTotal(res.data.count || 0);
+      } catch (err) {
+        console.error("Erro ao buscar usuários:", err);
+      } finally {
+        setLoading(false);
+      }
+    }, 500);
+  }, []);
+
+  // Exclusão segura com atualização em tempo real
   async function handleDelete(item: Usuario) {
+    if (!item.id) return;
 
-    if (!item.id) return
-
-    await usuarioApi.deletar(item.id)
-    load()
+    try {
+      await usuarioApi.deletar(item.id);
+      
+      // Retorna para a página 1 após excluir, atualizando a tabela suavemente
+      fetchUsuarios({ page: 1, pageSize: 10, search: "", ordering: null });
+    } catch (err: unknown) {
+      alert(getApiErrorMessage(err, "Falha ao excluir usuário. Verifique dependências."));
+    }
   }
 
   return (
-
     <div className="list-page">
-
       <div className="list-header">
         <div>
           <h2 className="list-title">Usuários</h2>
-          <p className="list-subtitle">Cadastro e manutenção de usuários.</p>
+          <p className="list-subtitle">Cadastro e manutenção de usuários do sistema.</p>
         </div>
 
         <div className="list-actions">
-          {isAdmin && (
-            <Link className="list-create" to={ROUTES.USUARIO_CREATE}>
+          <Can action="is_staff">
+            <Link className="list-create" to={ROUTES.sistema.usuarios.create}>
               <span className="plus">+</span> Novo usuário
             </Link>
-          )}
+          </Can>
         </div>
       </div>
 
       <DataTable
         data={usuarios}
+        total={total}
+        loading={loading}
         schema={usuarioFormSchema}
+        onParamsChange={fetchUsuarios}
         canEdit={isAdmin}
         canDelete={isAdmin}
-        onEdit={(item) => navigate(
-          ROUTES.USUARIO_EDIT(item.id!)
-        )}
+        onEdit={(item) => navigate(ROUTES.sistema.usuarios.edit(item.id!))}
         onDelete={handleDelete}
       />
-
     </div>
-
-  )
+  );
 }
-

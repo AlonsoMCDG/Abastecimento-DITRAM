@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { loginService } from "../../api/login";
-import { usuarioApi } from "../../api/usuarioApi";
+import { authApi } from "../../api/config/authApi";
+import { usuarioApi } from "../../api/usuarios/usuariosApi";
 import { isAuthenticated } from "../../auth/auth";
-import { getApiErrorMessage } from "../../api/errorMessage";
+import { getApiErrorMessage } from "../../api/config/errorHandlers";
 
 export function RegisterPage() {
   const [cpf, setCpf] = useState("");
@@ -41,7 +41,7 @@ export function RegisterPage() {
         email: email || undefined,
       });
 
-      await loginService(cpfDigits, password);
+      await authApi.login(cpfDigits, password);
       navigate("/home", { replace: true });
     } catch (err: unknown) {
       setErrorMsg(getApiErrorMessage(err, "Falha ao realizar cadastro."));

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { usuarioApi } from "../../api/usuarioApi";
-import { getApiErrorMessage } from "../../api/errorMessage";
+import { usuarioApi } from "../../api/usuarios/usuariosApi";
+import { getApiErrorMessage } from "../../api/config/errorHandlers";
 import type { Usuario } from "../../types/models";
 import "../../assets/css/FormPage.css";
 

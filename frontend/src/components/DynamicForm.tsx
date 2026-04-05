@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react"
 import type { FormField, FormSchema } from "../types/form"
-import { client } from "../api/client"
+import { client } from "../api/config/apiClient"
 
 interface Props<T> {
   schema: FormSchema
@@ -236,6 +236,16 @@ export default function DynamicForm<T>({
         )
 
       case "select":
+        const listId = `datalist-${field.name}`;
+        const options = field.options || selectOptions[field.name] || [];
+        const currentValue = getInputValue(field.name);
+        
+        // Encontra a label correspondente ao ID selecionado para exibir no input
+        const selectedOpt = options.find((o) => String(o.value) === String(currentValue));
+        
+        // Exibe a label validada ou o texto livre que o usuário está digitando
+        const displayValue = selectedOpt ? selectedOpt.label : ((formData as any)[`${field.name}_text`] || "");
+        
         return (
           <select
             className="form-select"

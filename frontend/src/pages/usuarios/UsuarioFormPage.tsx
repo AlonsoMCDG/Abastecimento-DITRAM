@@ -2,8 +2,8 @@ import { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 
 import DynamicForm from "../../components/DynamicForm"
-import { usuarioFormSchema } from "../../forms/usuario.schema"
-import { usuarioApi } from "../../api/usuarioApi"
+import { usuarioFormSchema } from "../../schemas/usuario.schema"
+import { usuarioApi } from "../../api/usuarios/usuariosApi"
 import "../../assets/css/FormPage.css"
 
 import type { Usuario } from "../../types/models"

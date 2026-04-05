@@ -1,49 +1,72 @@
-import { useEffect, useState } from "react"
+import { useState, useCallback, useRef } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
-import DataTable from "../../../components/DataTable"
-import { instituicaoApi } from "../../../api/instituicaoApi"
-import { usuarioApi } from "../../../api/usuarioApi"
+import DataTable, { type DataTableParams } from "../../../components/DataTable";
+import { instituicoesApi } from "../../../api/organizacao/instituicoesApi";
+import { ROUTES } from "../../../routes/routes";
+import { useAuth } from "../../../auth/AuthContext";
+import { Can } from "../../../components/auth/Can";
+import { getApiErrorMessage } from "../../../api/config/errorHandlers";
 
-import { Link, useLocation, useNavigate } from "react-router-dom"
-import { ROUTES } from "../../../routes/routes"
+import type { Instituicao } from "../../../types/models";
+import { instituicaoFormSchema } from "../../../schemas/instituicao.schema";
 
-import type { Instituicao, Usuario } from "../../../types/models"
-import { instituicaoFormSchema } from "../../../forms/instituicao.schema"
-import "../../../assets/css/ListPage.css"
+import "../../../assets/css/ListPage.css";
 
 export default function InstituicaoListPage() {
+  const navigate = useNavigate();
+  const { user: me } = useAuth();
 
-  const navigate = useNavigate()
-  const location = useLocation()
+  // Estados da paginação e listagem
+  const [instituicoes, setInstituicoes] = useState<Instituicao[]>([]);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(false);
 
-  const [instituicaos, setInstituicoes] =
-    useState<Instituicao[]>([])
-  const [me, setMe] = useState<Usuario | null>(null)
+  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const canWrite = Boolean(me?.is_staff || me?.can_write_cadastros)
+  // Permissão genérica para as ações das linhas da tabela
+  const hasWritePermission = Boolean(me?.is_staff || me?.can_write_cadastros);
 
-  async function load() {
-    const response = await instituicaoApi.listar()
-    setInstituicoes(response.data)
-  }
+  // Motor de busca com integração ao backend (Debounce de 500ms)
+  const fetchInstituicoes = useCallback(async (params: DataTableParams) => {
+    if (debounceTimer.current) clearTimeout(debounceTimer.current);
 
-  useEffect(() => {
-    load()
-    usuarioApi.me().then((res) => setMe(res.data)).catch(() => setMe(null))
-  }, [location.key])
+    debounceTimer.current = setTimeout(async () => {
+      setLoading(true);
+      try {
+        const res = await instituicoesApi.listar({
+          page: params.page,
+          page_size: params.pageSize,
+          search: params.search,
+          ordering: params.ordering ?? undefined,
+        });
 
+        setInstituicoes(res.data.results || []);
+        setTotal(res.data.count || 0);
+      } catch (err) {
+        console.error("Erro ao buscar instituições:", err);
+      } finally {
+        setLoading(false);
+      }
+    }, 500);
+  }, []);
+
+  // Tratamento seguro de exclusão com refresh da tabela
   async function handleDelete(item: Instituicao) {
+    if (!item.id) return;
 
-    if (!item.id) return
-
-    await instituicaoApi.deletar(item.id)
-    load()
+    try {
+      await instituicoesApi.deletar(item.id);
+      
+      // Retorna para a página 1 após excluir, evitando telas vazias
+      fetchInstituicoes({ page: 1, pageSize: 10, search: "", ordering: null });
+    } catch (err: unknown) {
+      alert(getApiErrorMessage(err, "Falha ao excluir instituição."));
+    }
   }
 
   return (
-
     <div className="list-page">
-
       <div className="list-header">
         <div>
           <h2 className="list-title">Instituições</h2>
@@ -51,27 +74,25 @@ export default function InstituicaoListPage() {
         </div>
 
         <div className="list-actions">
-          {canWrite && (
-            <Link className="list-create" to={ROUTES.INSTITUICAO_CREATE}>
+          <Can action="can_write_cadastros">
+            <Link className="list-create" to={ROUTES.organizacao.instituicoes.create}>
               <span className="plus">+</span> Nova instituição
             </Link>
-          )}
+          </Can>
         </div>
       </div>
 
       <DataTable
-        data={instituicaos}
+        data={instituicoes}
+        total={total}
+        loading={loading}
         schema={instituicaoFormSchema}
-        canEdit={canWrite}
-        canDelete={canWrite}
-        onEdit={(item) => navigate(
-          ROUTES.INSTITUICAO_EDIT(item.id!)
-        )}
+        onParamsChange={fetchInstituicoes}
+        canEdit={hasWritePermission}
+        canDelete={hasWritePermission}
+        onEdit={(item) => navigate(ROUTES.organizacao.instituicoes.edit(item.id!))}
         onDelete={handleDelete}
       />
-
     </div>
-
-  )
+  );
 }
-

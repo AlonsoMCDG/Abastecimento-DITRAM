@@ -9,8 +9,3 @@ export function clearAuthTokens() {
   localStorage.removeItem(ACCESS_TOKEN_STORAGE_KEY);
   localStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY);
 }
-
-export function logout() {
-  clearAuthTokens();
-}
-

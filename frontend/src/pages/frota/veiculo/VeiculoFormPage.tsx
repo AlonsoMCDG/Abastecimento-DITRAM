@@ -2,8 +2,8 @@ import { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 
 import DynamicForm from "../../../components/DynamicForm"
-import { veiculoFormSchema } from "../../../forms/veiculo.schema"
-import { veiculoApi } from "../../../api/veiculoApi"
+import { veiculoSchema } from "../../../schemas/veiculo.schema"
+import { veiculosApi } from "../../../api/frota/veiculosApi"
 import "../../../assets/css/FormPage.css"
 
 import type { Veiculo } from "../../../types/models"
@@ -19,7 +19,7 @@ export default function VeiculoFormPage() {
   useEffect(() => {
 
     if (id) {
-      veiculoApi.buscar(Number(id))
+      veiculosApi.buscar(Number(id))
         .then(res => setData(res.data))
     }
 
@@ -29,14 +29,14 @@ export default function VeiculoFormPage() {
 
     if (id) {
 
-      await veiculoApi.atualizar(
+      await veiculosApi.atualizar(
         Number(id),
         form
       )
 
     } else {
 
-      await veiculoApi.criar(form)
+      await veiculosApi.criar(form)
 
     }
 
@@ -55,7 +55,7 @@ export default function VeiculoFormPage() {
 
       <div className="form-container">
         <DynamicForm<Veiculo>
-          schema={veiculoFormSchema}
+          schema={veiculoSchema}
           initialData={data || {}}
           onSubmit={handleSubmit}
         />

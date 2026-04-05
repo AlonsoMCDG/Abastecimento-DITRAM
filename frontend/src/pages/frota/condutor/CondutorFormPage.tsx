@@ -2,11 +2,11 @@ import { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 
 import DynamicForm from "../../../components/DynamicForm"
-import { condutorFormSchema } from "../../../forms/condutor.schema"
-import { condutorApi } from "../../../api/condutorApi"
+import { condutorFormSchema } from "../../../schemas/condutor.schema"
+import { pessoasApi } from "../../../api/pessoas/pessoasApi"
 import "../../../assets/css/FormPage.css"
 
-import type { Condutor } from "../../../types/models"
+import type { Pessoa } from "../../../types/models"
 
 export default function CondutorFormPage() {
 
@@ -14,29 +14,29 @@ export default function CondutorFormPage() {
   const { id } = useParams()
 
   const [data, setData] =
-    useState<Condutor | null>(null)
+    useState<Pessoa | null>(null)
   
   useEffect(() => {
 
     if (id) {
-      condutorApi.buscar(Number(id))
+      pessoasApi.buscar(Number(id))
         .then(res => setData(res.data))
     }
 
   }, [id])
 
-  async function handleSubmit(form: Condutor) {
+  async function handleSubmit(form: Pessoa) {
 
     if (id) {
 
-      await condutorApi.atualizar(
+      await pessoasApi.atualizar(
         Number(id),
         form
       )
 
     } else {
 
-      await condutorApi.criar(form)
+      await pessoasApi.criar(form)
 
     }
 
@@ -49,12 +49,12 @@ export default function CondutorFormPage() {
 
       <div className="form-header condutor">
         <h2>
-          {id ? "Editar" : "Novo"} Condutor
+          {id ? "Editar" : "Novo"} Pessoa
         </h2>
       </div>
 
       <div className="form-container">
-        <DynamicForm<Condutor>
+        <DynamicForm<Pessoa>
           schema={condutorFormSchema}
           initialData={data || {}}
           onSubmit={handleSubmit}
