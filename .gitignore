@@ -1,10 +1,34 @@
-# python
+# --- BACKEND (Python/Django) ---
 venv/
-.venv
+.venv/
 __pycache__/
 *.pyc
+*.sqlite3
+*.log
+logs/
 
-# Variáveis de ambiente
+# --- FRONTEND (Node/React/Vite) ---
+# Adicionamos o prefixo frontend/ para garantir o mapeamento correto
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+frontend/pcpn-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/.tmp/
+
+# --- AMBIENTE E SEGURANÇA ---
 .env
 .env.*
-*.sqlite3
+*.local
+.DS_Store
+
+# --- EDITORES E IDEs ---
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
