@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 
-import DynamicForm from "../../../components/DynamicForm"
+import DynamicForm from "../../../components/DynamicForm/DynamicForm"
 import { veiculoSchema } from "../../../schemas/veiculo.schema"
 import { veiculosApi } from "../../../api/frota/veiculosApi"
 import "../../../assets/css/FormPage.css"

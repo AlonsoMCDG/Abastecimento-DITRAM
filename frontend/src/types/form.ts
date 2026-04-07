@@ -10,8 +10,16 @@ export interface TableSchema {
   columns: TableColumn[];
 }
 
-// 2. TIPO PARA O FORMULÁRIO (Complexo, focado em interação)
-export type FieldType = "text" | "number" | "date" | "datetime-local" | "select" | "textarea" | "checkbox";
+// TIPO DE CAMPOS ACEITO PELO FORMULÁRIO
+export type FieldType = 
+  | 'text' 
+  | 'number' 
+  | 'date' 
+  | 'datetime-local' 
+  | 'checkbox' 
+  | 'textarea' 
+  | 'select' 
+  | 'datalist';
 
 export interface FieldOption {
   label: string
@@ -19,23 +27,15 @@ export interface FieldOption {
 }
 
 export interface FormField {
-  name: string             // Nome do campo;
-  label: string            // Rótulo na tabela de listagem;
-  value?: number
-  type: FieldType          // Tipo de dado (number, string, select, etc.);
-  endpoint?: string        // Endpoint de onde os dados desse campo são buscados (usado em selects para FK);
-  required?: boolean       // Se o campo é obrigatório ou não de ser preenchido;
-  options?: FieldOption[]  // Se for tipo 'select' ele usa isso para a lista de opções;
-  optionLabel?: string
-  displayLabel?: string
-  optionValue?: string
-  hidden?: boolean
-  dependsOn?: string        // Nome do campo que controla o filtro deste select.
-  dependsOnParam?: string   // Nome do query param para o filtro. Se omitido, usa dependsOn.
-  placeholder?: string      // Valor temporário para o campo até o usuário escrever algo
-  disabledUntilParentSelected?: boolean // Bloqueia o campo se o pai (dependsOn) estiver vazio
-  autoSelectFirst?: boolean             // Seleciona automaticamente a primeira opção carregada
-  allowFreeText?: boolean;  // Permite texto livre (enviará para campo_texto no backend)
+  name: string;
+  label: string;
+  type: FieldType;
+  required?: boolean;
+  placeholder?: string;
+  colSpan?: 1 | 2 | 3; // Controle de colunas no Grid (1 a 3 colunas)
+  
+  // Propriedades futuras para selects e datalists que usaremos nas próximas etapas
+  options?: Array<{ value: number | string; label: string }>;
 }
 
 export interface FormSchema {
