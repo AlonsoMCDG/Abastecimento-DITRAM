@@ -55,10 +55,13 @@ class Guia(models.Model):
     veiculo = models.ForeignKey(Veiculo, on_delete=models.PROTECT, related_name='guias', verbose_name='Veículo')
     secretaria = models.ForeignKey(Secretaria, on_delete=models.PROTECT, related_name='guias', verbose_name='Secretaria')
 
-    # Rota e Tipo de Serviço podem ser opcionais dependendo da regra de negócio, 
-    # mas mantive obrigatórios conforme seu escopo. Se puderem ser nulos, adicione null=True, blank=True
+    # Pode ser passado uma rota existente (rota) ou uma genérica (rota_texto)
     rota = models.ForeignKey(Rota, on_delete=models.PROTECT, related_name='guias', null=True, blank=True)
+    rota_texto = models.CharField(max_length=200, null=True, blank=True)
+
+    # Mesma coisa com o tipo_servico e tipo_servico_texto
     tipo_servico = models.ForeignKey(TipoServico, on_delete=models.PROTECT, related_name='guias')
+    tipo_servico_texto = models.CharField(max_length=200, null=True, blank=True)
 
     quantidade_combustivel = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Qtd Combustível (L)")
     quantidade_oleo = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, verbose_name="Qtd Óleo (L)")

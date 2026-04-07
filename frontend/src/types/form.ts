@@ -21,6 +21,7 @@ export interface FieldOption {
 export interface FormField {
   name: string             // Nome do campo;
   label: string            // Rótulo na tabela de listagem;
+  value?: number
   type: FieldType          // Tipo de dado (number, string, select, etc.);
   endpoint?: string        // Endpoint de onde os dados desse campo são buscados (usado em selects para FK);
   required?: boolean       // Se o campo é obrigatório ou não de ser preenchido;
@@ -34,6 +35,7 @@ export interface FormField {
   placeholder?: string      // Valor temporário para o campo até o usuário escrever algo
   disabledUntilParentSelected?: boolean // Bloqueia o campo se o pai (dependsOn) estiver vazio
   autoSelectFirst?: boolean             // Seleciona automaticamente a primeira opção carregada
+  allowFreeText?: boolean;  // Permite texto livre (enviará para campo_texto no backend)
 }
 
 export interface FormSchema {

@@ -63,23 +63,16 @@ export default function DynamicForm<T>({
 
   // Carregar opções de selects via API
   useEffect(() => {
-
     async function loadOptions() {
-
       for (const field of schema.fields) {
-
         if (field.type !== "select" || !field.endpoint) {
           continue
         }
-
         let dependencyValue: string | number | undefined
-
         if (field.dependsOn) {
           const rawDependencyValue = (formData as Record<string, unknown>)[field.dependsOn]
-
           if (isEmptyDependency(rawDependencyValue)) {
             setSelectOptions((prev) => ({ ...prev, [field.name]: [] }))
-
             setFormData((prev) => {
               const previousValue = (prev as Record<string, unknown>)[field.name]
               if (previousValue === null || previousValue === undefined || previousValue === "") {
@@ -92,12 +85,10 @@ export default function DynamicForm<T>({
             })
             continue
           }
-
           dependencyValue = rawDependencyValue as string | number
         }
 
         const cacheKey = buildCacheKey(field, dependencyValue)
-
         if (selectCache[cacheKey]) {
           const cachedOptions = selectCache[cacheKey]
 
@@ -235,37 +226,94 @@ export default function DynamicForm<T>({
           />
         )
 
-      case "select":
+      case "select": {
         const listId = `datalist-${field.name}`;
+        
         const options = field.options || selectOptions[field.name] || [];
-        const currentValue = getInputValue(field.name);
         
-        // Encontra a label correspondente ao ID selecionado para exibir no input
-        const selectedOpt = options.find((o) => String(o.value) === String(currentValue));
+        // O valor atual do ID (Foreign Key)
+        const currentIdValue = getInputValue(field.name);
+        // O valor do texto livre (caso o usuário tenha digitado algo novo)
+        const currentTextValue = (formData as Record<string, any>)[`${field.name}_texto`];
         
-        // Exibe a label validada ou o texto livre que o usuário está digitando
-        const displayValue = selectedOpt ? selectedOpt.label : ((formData as any)[`${field.name}_text`] || "");
-        
-        return (
-          <select
-            className="form-select"
-            name={field.name}
-            required={field.required}
-            value={String(getInputValue(field.name))}
-            onChange={handleChange}
-          >
-            <option value="">Selecione</option>
+        // Encontra a label se houver um ID selecionado
+        const selectedOpt = options.find((o) => String(o.value) === String(currentIdValue));
 
-            {(field.options || selectOptions[field.name])?.map((opt) => (
-              <option
-                key={opt.value}
-                value={opt.value}
-              >
-                {opt.label}
-              </option>
-            ))}
-          </select>
-        )
+        console.log(`[${field.label} = ${selectedOpt}]`);
+        
+        // O que aparece na tela é a Label encontrada ou o texto livre digitado
+        const displayValue = selectedOpt 
+          ? selectedOpt.label 
+          : (currentTextValue || (formData as Record<string, any>)[`${field.name}_display`] || "");
+
+        // O campo é visualmente obrigatório se for required E não tiver nem ID nem Texto preenchido
+        const isEffectivelyRequired = field.required && !currentIdValue && !currentTextValue;
+
+        return (
+          <div className="combo-box-wrapper">
+            <input
+              list={listId}
+              className="form-input"
+              name={`${field.name}_display`} 
+              required={isEffectivelyRequired}
+              value={displayValue as string}
+              placeholder={field.disabledUntilParentSelected && isEmptyDependency((formData as any)[field.dependsOn!]) 
+                ? "Selecione o campo anterior primeiro..." 
+                : "Digite para buscar ou criar novo..."}
+              disabled={field.disabledUntilParentSelected && isEmptyDependency((formData as any)[field.dependsOn!])}
+              autoComplete="off"
+              onChange={(e) => {
+                const typedValue = e.target.value;
+                
+                // Busca ignorando maiúsculas/minúsculas
+                const match = options.find((o) => 
+                  String(o.label).toLowerCase() === typedValue.toLowerCase()
+                );
+                
+                setFormData((prev: any) => {
+                  const next = { ...prev };
+                  
+                  if (match) {
+                    // Achou no banco: Salva o ID e limpa o campo de texto livre
+                    next[field.name] = match.value;
+                    if (field.allowFreeText) next[`${field.name}_texto`] = null;
+                  } else {
+                    // Não achou no banco
+                    next[field.name] = null;
+                    // Se permite texto livre, salva no novo campo com sufixo _texto
+                    if (field.allowFreeText) {
+                      next[`${field.name}_texto`] = typedValue;
+                    }
+                  }
+                  
+                  // Atualiza a visualização da tela
+                  next[`${field.name}_display`] = typedValue; 
+                  return next;
+                });
+              }}
+            />
+            
+            <datalist id={listId}>
+              {options.map((opt, index) => (
+                // Correção do erro da Key: Combinando o valor com o índice
+                <option key={`opt-${opt.value}-${index}`} value={opt.label} />
+              ))}
+            </datalist>
+            
+            {/* Feedback visual para o usuário */}
+            {displayValue && !selectedOpt && !field.allowFreeText && (
+              <small style={{ color: "#eab308", display: "block", marginTop: "4px", fontSize: "0.8rem" }}>
+                ⚠️ Selecione um item válido da lista.
+              </small>
+            )}
+            {displayValue && !selectedOpt && field.allowFreeText && (
+              <small style={{ color: "#3b82f6", display: "block", marginTop: "4px", fontSize: "0.8rem" }}>
+                ℹ️ Um novo registro não-cadastrado será salvo temporariamente.
+              </small>
+            )}
+          </div>
+        );
+      }
 
       case "checkbox":
         return (
