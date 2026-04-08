@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useWatch, type Control, type UseFormSetValue, type UseFormRegister } from 'react-hook-form';
 import { client } from '../../api/config/apiClient';
 import styles from './DynamicForm.module.css';
-import type { FormField } from '../../types/form';
+import type { FieldOption, FormField } from '../../types/form';
 
 interface DatalistInputProps {
   field: FormField;
@@ -15,7 +15,7 @@ interface DatalistInputProps {
 export const DatalistInput: React.FC<DatalistInputProps> = ({ 
   field, control, setValue, register 
 }) => {
-  const [options, setOptions] = useState<{ value: string | number; label: string }[]>(field.options || []);
+  const [options, setOptions] = useState<FieldOption[]>(field.options || []);
   const [inputValue, setInputValue] = useState('');
 
   const parentValue = useWatch({

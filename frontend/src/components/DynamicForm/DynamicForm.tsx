@@ -71,7 +71,6 @@ export const DynamicForm: React.FC<DynamicFormProps> = ({
             />
           );
         }
-
         else {
           return (
             <select {...commonProps}>
@@ -114,8 +113,26 @@ export const DynamicForm: React.FC<DynamicFormProps> = ({
               {field.label} {field.required && '*'}
             </label>
           )}
-          
-          {renderField(field)}
+
+          {/* A MÁGICA DO QUICK ADD ACONTECE AQUI */}
+          <div className={field.quickActions?.length ? styles.inputWithActions : ''}>
+            {renderField(field)}
+            
+            {field.quickActions?.map((action, index) => (
+              <button
+                key={index}
+                type="button" // CRÍTICO: Evita que o botão submeta o formulário sem querer
+                className={styles.quickActionButton}
+                title={action.tooltip}
+                onClick={(e) => {
+                  e.preventDefault(); // Garante que a ação padrão seja bloqueada
+                  action.onClick();
+                }}
+              >
+                {action.icon}
+              </button>
+            ))}
+          </div>
           
           {field.type === 'checkbox' && (
             <label htmlFor={field.name} className={styles.label}>

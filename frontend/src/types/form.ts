@@ -14,6 +14,13 @@ export type FieldType =
   | 'text' | 'number' | 'date' | 'datetime-local' 
   | 'checkbox' | 'textarea' | 'select' | 'datalist';
 
+// Interface para os botões de ação
+export interface QuickAction {
+  icon: string; // Pode ser um emoji de string ou um ícone (ex: react-icons)
+  tooltip?: string;
+  onClick: () => void; // O callback que a página injetará (ex: abrir modal)
+}
+
 export interface FieldOption {
   label: string
   value: string | number
@@ -27,10 +34,10 @@ export interface FormField {
   placeholder?: string;
   colSpan?: 1 | 2 | 3;
   options?: Array<{ value: number | string; label: string }>;
-  
   endpoint?: string;       // Entidade para o lookup (ex: 'veiculos')
   dependsOn?: string;      // Nome do campo que este campo observa
   dependsOnParam?: string; // Nome do parâmetro na API (ex: 'secretaria_id')
+  quickActions?: QuickAction[];
 }
 
 export interface FormSchema {

@@ -62,5 +62,5 @@ export const ENDPOINTS = {
     alocacoesServico: "/v1/operacao/alocacoes-servicos/",
     operadoresVeiculos: "/v1/operacao/operadores-veiculos/",
     guias: "/v1/operacao/guias/",
-  },
+  },  
 }

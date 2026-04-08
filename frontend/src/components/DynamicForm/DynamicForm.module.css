@@ -67,3 +67,42 @@
 .submitButton:hover {
   background-color: #1d4ed8;
 }
+
+.inputWithActions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+/* Garante que o input (ou select/datalist) ocupe todo o espaço restante */
+.inputWithActions > :first-child {
+  flex: 1;
+  min-width: 0; /* Evita estouro de flexbox em inputs muito longos */
+}
+
+.quickActionButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 2.375rem; /* Mesma altura aproximada dos inputs */
+  min-width: 2.375rem;
+  background-color: #f3f4f6;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  font-size: 1rem;
+  color: #4b5563;
+  transition: all 0.2s ease-in-out;
+}
+
+.quickActionButton:hover {
+  background-color: #e5e7eb;
+  color: #111827;
+  border-color: #9ca3af;
+}
+
+.quickActionButton:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(156, 163, 175, 0.5);
+}

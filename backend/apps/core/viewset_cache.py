@@ -32,7 +32,8 @@ class ModelViewSetCacheMixin:
 
             # Executa a view original caso não tenha cache
             response = super().list(request, *args, **kwargs)
-            
+
+            # Só faz o cache depois que os dados estiverem prontos
             cache_response(key, response, ttl_seconds=self.cache_ttl_seconds)
             return response
 
@@ -40,8 +41,9 @@ class ModelViewSetCacheMixin:
 
     def retrieve(self, request, *args, **kwargs):
         if request.method == "GET" and self.cache_retrieve:
-            key = self._cache_key("retrieve")
+            key = self._cache_key("retrieve", kwargs)
             cached = get_cached_response(key)
+            
             if cached:
                 return Response(cached.data, status=cached.status_code)
 
