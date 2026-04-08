@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from "react-router-dom"
 
-import DynamicForm from "../../components/DynamicForm/DynamicForm"
+import { DynamicForm } from "../../components/DynamicForm/DynamicForm"
 import { alocacaoFormSchema } from "../../schemas/alocacao.schema"
 import { alocacoesApi } from "../../api/operacao/alocacoesApi"
 import "../../assets/css/FormPage.css"

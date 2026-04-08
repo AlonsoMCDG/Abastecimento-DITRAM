@@ -1,26 +1,38 @@
 // components/DynamicForm/DatalistInput.tsx
 import React, { useEffect, useState } from 'react';
-import { useWatch, type Control, type UseFormSetValue, type UseFormRegister } from 'react-hook-form';
+import { 
+  useWatch, 
+  type Control, 
+  type UseFormSetValue, 
+  type UseFormRegister, 
+  type FieldValues, 
+  type Path, 
+  type PathValue 
+} from 'react-hook-form';
 import { client } from '../../api/config/apiClient';
 import styles from './DynamicForm.module.css';
 import type { FieldOption, FormField } from '../../types/form';
 
-interface DatalistInputProps {
+interface DatalistInputProps<T extends FieldValues> {
   field: FormField;
-  control: Control<any>;
-  setValue: UseFormSetValue<any>;
-  register: UseFormRegister<any>;
+  control: Control<T>;
+  setValue: UseFormSetValue<T>;
+  register: UseFormRegister<T>;
+  error?: any;
 }
 
-export const DatalistInput: React.FC<DatalistInputProps> = ({ 
-  field, control, setValue, register 
-}) => {
+export const DatalistInput = <T extends FieldValues>({ 
+  field, control, setValue, register, error
+}: DatalistInputProps<T>) => {
   const [options, setOptions] = useState<FieldOption[]>(field.options || []);
   const [inputValue, setInputValue] = useState('');
 
+  const fieldPath = field.name as Path<T>;
+  const dependsOnPath = (field.dependsOn || '_none_') as Path<T>;
+
   const parentValue = useWatch({
     control,
-    name: field.dependsOn || '_none_',
+    name: dependsOnPath,
   });
 
   const isDisabled = !!field.dependsOn && !parentValue;
@@ -28,21 +40,23 @@ export const DatalistInput: React.FC<DatalistInputProps> = ({
   useEffect(() => {
     if (!field.endpoint) return;
 
-    // Limpa tudo do filho
     if (field.dependsOn && !parentValue) {
       setOptions([]);
       setInputValue('');
-      setValue(field.name, '');
+      setValue(fieldPath, '' as PathValue<T, Path<T>>);
       return;
     }
 
     const fetchOptions = async () => {
       try {
-        const queryParam = field.dependsOnParam && parentValue 
-          ? `?${field.dependsOnParam}=${parentValue}` 
-          : '';
+        const requestParams = field.dependsOnParam && parentValue 
+          ? { [field.dependsOnParam]: parentValue } 
+          : {};
           
-        const response = await client.get(`${field.endpoint}${queryParam}`);
+        const response = await client.get(field.endpoint as string, {
+          params: requestParams
+        });
+        
         setOptions(response.data);
       } catch (err) {
         console.error(`Erro no datalist ${field.name}`, err);
@@ -50,7 +64,7 @@ export const DatalistInput: React.FC<DatalistInputProps> = ({
     };
 
     fetchOptions();
-  }, [parentValue, field.endpoint, field.dependsOn, field.name, setValue, field.dependsOnParam]);
+  }, [parentValue, field.endpoint, field.dependsOn, fieldPath, setValue, field.dependsOnParam, field.name]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
@@ -59,9 +73,9 @@ export const DatalistInput: React.FC<DatalistInputProps> = ({
     const matchedOption = options.find(opt => opt.label === val);
     
     if (matchedOption) {
-      setValue(field.name, matchedOption.value, { shouldDirty: true, shouldValidate: true });
+      setValue(fieldPath, matchedOption.value as PathValue<T, Path<T>>, { shouldDirty: true, shouldValidate: true });
     } else {
-      setValue(field.name, val, { shouldDirty: true, shouldValidate: true });
+      setValue(fieldPath, val as PathValue<T, Path<T>>, { shouldDirty: true, shouldValidate: true });
     }
   };
 
@@ -72,19 +86,22 @@ export const DatalistInput: React.FC<DatalistInputProps> = ({
       <input 
         type="text"
         list={listId}
-        className={styles.input}
+        className={`${styles.input} ${error ? styles.inputError : ''}`}
         placeholder={field.placeholder}
         value={inputValue}
         onChange={handleInputChange}
         disabled={isDisabled}
       />
-      <input type="hidden" {...register(field.name, { required: field.required })} />
+      {/* Input oculto que registra o valor real (ID ou Texto) no react-hook-form */}
+      <input type="hidden" {...register(fieldPath, { required: field.required })} />
       
       <datalist id={listId}>
         {options.map((opt) => (
           <option key={opt.value} value={opt.label} />
         ))}
       </datalist>
+
+      {error && <span className={styles.error}>Este campo é obrigatório</span>}
     </>
   );
 };

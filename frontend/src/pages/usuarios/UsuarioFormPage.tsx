@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 
-import DynamicForm from "../../components/DynamicForm/DynamicForm"
+import { DynamicForm } from "../../components/DynamicForm/DynamicForm"
 import { usuarioFormSchema } from "../../schemas/usuario.schema"
 import { usuarioApi } from "../../api/usuarios/usuariosApi"
 import "../../assets/css/FormPage.css"
@@ -56,7 +56,7 @@ export default function UsuarioFormPage() {
       <div className="form-container">
         <DynamicForm<Usuario>
           schema={usuarioFormSchema}
-          initialData={data || {}}
+          initialValues={(data || {}) as Partial<Usuario>}
           onSubmit={handleSubmit}
         />
       </div>

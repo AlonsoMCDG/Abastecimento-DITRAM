@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 
-import DynamicForm from "../../../components/DynamicForm/DynamicForm"
+import { DynamicForm } from "../../../components/DynamicForm/DynamicForm"
 import { condutorFormSchema } from "../../../schemas/condutor.schema"
 import { pessoasApi } from "../../../api/pessoas/pessoasApi"
 import "../../../assets/css/FormPage.css"
@@ -56,7 +56,7 @@ export default function CondutorFormPage() {
       <div className="form-container">
         <DynamicForm<Pessoa>
           schema={condutorFormSchema}
-          initialData={data || {}}
+          initialValues={(data || {}) as Partial<Pessoa>}
           onSubmit={handleSubmit}
         />
       </div>

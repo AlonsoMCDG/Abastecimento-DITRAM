@@ -1,37 +1,47 @@
-// DynamicForm.tsx
 import React, { useEffect } from 'react';
-import { useForm, type SubmitHandler, type UseFormSetValue } from 'react-hook-form';
+import { useForm, type SubmitHandler, type UseFormSetValue, type DefaultValues, type FieldValues, type Path } from 'react-hook-form';
 import type { FormSchema, FormField } from '../../types/form';
 import styles from './DynamicForm.module.css';
 import { AsyncSelect } from './AsyncSelect';
+import { DatalistInput } from './DatalistInput';
 
-interface DynamicFormProps {
+interface DynamicFormProps<T extends FieldValues> {
+  title?: string;
+  subtitle?: string;
   schema: FormSchema;
-  initialValues?: Record<string, any>;
-  onSubmit: (data: Record<string, any>) => void;
+  initialValues?: DefaultValues<T>;
+  onSubmit: SubmitHandler<T>;
   onValuesChange?: (
     changedField: { name: string; value: any },
-    currentValues: Record<string, any>,
-    setValue: UseFormSetValue<any>
+    currentValues: Partial<T>,
+    setValue: UseFormSetValue<T>
   ) => void;
 }
 
-export const DynamicForm: React.FC<DynamicFormProps> = ({ 
+export const DynamicForm = <T extends FieldValues>({
+  title,
+  subtitle,
   schema, 
-  initialValues = {}, 
+  initialValues, 
   onSubmit,
   onValuesChange
-}) => {
-  const { register, handleSubmit, control, setValue, watch, formState: { errors } } = useForm({
+}: DynamicFormProps<T>) => {
+  const { register, handleSubmit, control, setValue, watch, reset, formState: { errors } } = useForm<T>({
     defaultValues: initialValues,
   });
+
+  useEffect(() => {
+    if (initialValues) {
+      reset(initialValues);
+    }
+  }, [initialValues, reset]);
 
   // O motor de observação que dispara o callback para o Pai
   useEffect(() => {
     const subscription = watch((value, { name, type }) => {
       // type === 'change' garante que só dispare quando o usuário interagir
       if (name && type === 'change' && onValuesChange) {
-        onValuesChange({ name, value: value[name] }, value, setValue);
+        onValuesChange({ name, value: (value as any)[name] }, value as Partial<T>, setValue);
       }
     });
     
@@ -39,8 +49,10 @@ export const DynamicForm: React.FC<DynamicFormProps> = ({
   }, [watch, onValuesChange, setValue]);
 
   const renderField = (field: FormField) => {
+    const fieldPath = field.name as Path<T>;
+    
     const commonProps = {
-      ...register(field.name, { required: field.required }),
+      ...register(fieldPath, { required: field.required }),
       id: field.name,
       className: styles.input,
       placeholder: field.placeholder,
@@ -54,7 +66,7 @@ export const DynamicForm: React.FC<DynamicFormProps> = ({
         return (
           <input 
             type="checkbox" 
-            {...register(field.name, { required: field.required })} 
+            {...register(fieldPath, { required: field.required })} 
             id={field.name} 
           />
         );
@@ -83,30 +95,57 @@ export const DynamicForm: React.FC<DynamicFormProps> = ({
         }
 
       case 'datalist':
-        const listId = `${field.name}-list`;
         return (
-          <>
-            <input list={listId} {...commonProps} />
-            <datalist id={listId}>
-              {field.options?.map(opt => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
-              ))}
-            </datalist>
-          </>
+          <DatalistInput
+            field={field}
+            control={control}
+            setValue={setValue}
+            register={register}
+            error={errors[field.name]}
+          />
         );
 
       default: // text, number, date, datetime-local
-        return <input type={field.type} {...commonProps} />;
+        // Renderiza o input normal
+        const baseInput = (
+          <input 
+            type={field.type} 
+            readOnly={field.readOnly}
+            {...commonProps} 
+          />
+        );
+
+        // Se tiver prefixo ou sufixo, envelopa numa estrutura
+        if (field.prefix || field.suffix) {
+          return (
+            <div className={styles.inputGroup}>
+              {field.prefix && <span className={styles.prefix}>{field.prefix}</span>}
+              {baseInput}
+              {field.suffix && <span className={styles.suffix}>{field.suffix}</span>}
+            </div>
+          );
+        }
+      
+        // Se não tiver, retorna o input puro normalmente
+        return baseInput;
     }
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className={styles.formContainer}>
+    <div className={styles.layoutContainer}>
+      {(title || subtitle) && (
+        <header className={styles.layoutHeader}>
+          {title && <h1 className={styles.layoutTitle}>{title}</h1>}
+          {subtitle && <p className={styles.layoutSubtitle}>{subtitle}</p>}
+        </header>
+      )}
+
+      <form onSubmit={handleSubmit(onSubmit)} className={styles.formContainer}>
       {schema.fields.map((field) => (
         <div 
           key={field.name} 
           className={`${styles.fieldWrapper} ${field.type === 'checkbox' ? styles.checkboxWrapper : ''}`}
-          style={{ gridColumn: `span ${field.colSpan || 1}` }}
+          style={{ '--col-span': field.colSpan || 1 } as React.CSSProperties}
         >
           {field.type !== 'checkbox' && (
             <label htmlFor={field.name} className={styles.label}>
@@ -150,5 +189,6 @@ export const DynamicForm: React.FC<DynamicFormProps> = ({
         Salvar
       </button>
     </form>
+    </div>
   );
 };

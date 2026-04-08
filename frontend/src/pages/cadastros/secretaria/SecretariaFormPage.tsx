@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 
-import DynamicForm from "../../../components/DynamicForm/DynamicForm"
+import { DynamicForm } from "../../../components/DynamicForm/DynamicForm"
+
 import { secretariaFormSchema } from "../../../schemas/secretaria.schema"
 
 import { secretariaApi } from "../../../api/organizacao/secretariasApi"
@@ -57,7 +58,7 @@ export default function SecretariaFormPage() {
       <div className="form-container">
         <DynamicForm<Secretaria>
           schema={secretariaFormSchema}
-          initialData={data || {}}
+          initialValues={(data || {}) as Partial<Secretaria>}
           onSubmit={handleSubmit}
         />
       </div>

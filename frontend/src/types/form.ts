@@ -31,6 +31,7 @@ export interface FormField {
   label: string;
   type: FieldType;
   required?: boolean;
+  readOnly?: boolean;
   placeholder?: string;
   colSpan?: 1 | 2 | 3;
   options?: Array<{ value: number | string; label: string }>;
@@ -38,6 +39,8 @@ export interface FormField {
   dependsOn?: string;      // Nome do campo que este campo observa
   dependsOnParam?: string; // Nome do parâmetro na API (ex: 'secretaria_id')
   quickActions?: QuickAction[];
+  prefix?: string | React.ReactNode;  // (Ex: R$, Kg, m²) 
+  suffix?: string | React.ReactNode;  // (Ex: R$, Kg, m²)
 }
 
 export interface FormSchema {

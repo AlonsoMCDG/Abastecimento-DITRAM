@@ -1,27 +1,30 @@
 // Este componente gerencia o próprio ciclo de vida de dados baseado no valor da dependência.
-import React, { useEffect, useState } from 'react';
-import { useWatch, type Control, type UseFormSetValue, type UseFormRegister } from 'react-hook-form';
+import { useEffect, useState } from 'react';
+import { useWatch, type Control, type UseFormSetValue, type UseFormRegister, type FieldValues, type Path, type PathValue } from 'react-hook-form';
 import { client } from '../../api/config/apiClient';
 import styles from './DynamicForm.module.css';
 import type { FormField } from '../../types/form';
 
-interface AsyncSelectProps {
+interface AsyncSelectProps<T extends FieldValues> {
   field: FormField;
-  control: Control<any>;
-  setValue: UseFormSetValue<any>;
-  register: UseFormRegister<any>;
+  control: Control<T>;
+  setValue: UseFormSetValue<T>;
+  register: UseFormRegister<T>;
   error?: any;
 }
 
-export const AsyncSelect: React.FC<AsyncSelectProps> = ({ 
+export const AsyncSelect = <T extends FieldValues>({ 
   field, control, setValue, register, error
-}) => {
+}: AsyncSelectProps<T>) => {
   const [options, setOptions] = useState<{ value: any; label: string }[]>([]);
   const [loading, setLoading] = useState(false);
 
+  const fieldPath = field.name as Path<T>;
+  const dependsOnPath = (field.dependsOn || '_none_') as Path<T>;
+
   const parentValue = useWatch({
     control,
-    name: field.dependsOn || '_none_',
+    name: dependsOnPath,
   });
 
   const isDisabled = !!field.dependsOn && !parentValue;
@@ -29,18 +32,22 @@ export const AsyncSelect: React.FC<AsyncSelectProps> = ({
   useEffect(() => {
     if (field.dependsOn && !parentValue) {
       setOptions([]);
-      setValue(field.name, ""); 
+      setValue(fieldPath, "" as PathValue<T, Path<T>>); 
       return;
     }
 
     const fetchOptions = async () => {
+      const endpoint = field.endpoint;
+
+      if (!endpoint) return; // Impede requisições acidentais na raiz
+
       setLoading(true);
       try {
-        const queryParam = field.dependsOnParam && parentValue 
-          ? `?${field.dependsOnParam}=${parentValue}` 
-          : '';
+        const params = field.dependsOnParam && parentValue 
+          ? { [field.dependsOnParam]: parentValue } 
+          : {};
         
-        const response = await client.get(`${field.endpoint}${queryParam}`);
+        const response = await client.get(endpoint, { params });
         setOptions(response.data);
       } catch (err) {
         console.error(`Erro ao carregar lookup de ${field.name}`, err);
@@ -52,18 +59,22 @@ export const AsyncSelect: React.FC<AsyncSelectProps> = ({
     if (!field.dependsOn || parentValue) {
       fetchOptions();
     }
-  }, [parentValue, field.endpoint, field.dependsOn, field.name, setValue, field.dependsOnParam]);
+  }, [parentValue, field.endpoint, field.dependsOn, fieldPath, setValue, field.dependsOnParam]);
 
   return (
-    <select 
-      {...register(field.name, { required: field.required })}
-      className={styles.input}
-      disabled={isDisabled || loading}
-    >
-      <option value="">{loading ? 'Carregando...' : 'Selecione...'}</option>
-      {options.map((opt) => (
-        <option key={opt.value} value={opt.value}>{opt.label}</option>
-      ))}
-    </select>
+    <>
+      <select 
+        {...register(fieldPath, { required: field.required })}
+        className={`${styles.input} ${error ? styles.inputError : ''}`}
+        disabled={isDisabled || loading}
+      >
+        <option value="">{loading ? 'Carregando...' : 'Selecione...'}</option>
+        {options.map((opt) => (
+          <option key={opt.value} value={opt.value}>{opt.label}</option>
+        ))}
+      </select>
+
+      {error && <span className={styles.error}>Este campo é obrigatório</span>}
+    </>
   );
 };

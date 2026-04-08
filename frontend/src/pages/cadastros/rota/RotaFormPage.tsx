@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 
-import DynamicForm from "../../../components/DynamicForm/DynamicForm"
+import { DynamicForm } from "../../../components/DynamicForm/DynamicForm"
 import { rotaFormSchema } from "../../../schemas/rota.schema"
 import { rotaApi } from "../../../api/frota/rotasApi"
 import "../../../assets/css/FormPage.css"
@@ -56,7 +56,7 @@ export default function RotaFormPage() {
       <div className="form-container">
         <DynamicForm<Rota>
           schema={rotaFormSchema}
-          initialData={data || {}}
+          initialValues={(data || {}) as Partial<Rota>}
           onSubmit={handleSubmit}
         />
       </div>
