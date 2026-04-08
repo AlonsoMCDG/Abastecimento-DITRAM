@@ -1,23 +1,42 @@
 // DynamicForm.tsx
-import React from 'react';
-import { useForm, type SubmitHandler } from 'react-hook-form';
+import React, { useEffect } from 'react';
+import { useForm, type SubmitHandler, type UseFormSetValue } from 'react-hook-form';
 import type { FormSchema, FormField } from '../../types/form';
 import styles from './DynamicForm.module.css';
+import { AsyncSelect } from './AsyncSelect';
 
 interface DynamicFormProps {
   schema: FormSchema;
   initialValues?: Record<string, any>;
   onSubmit: (data: Record<string, any>) => void;
+  onValuesChange?: (
+    changedField: { name: string; value: any },
+    currentValues: Record<string, any>,
+    setValue: UseFormSetValue<any>
+  ) => void;
 }
 
 export const DynamicForm: React.FC<DynamicFormProps> = ({ 
   schema, 
   initialValues = {}, 
-  onSubmit 
+  onSubmit,
+  onValuesChange
 }) => {
-  const { register, handleSubmit, formState: { errors } } = useForm({
+  const { register, handleSubmit, control, setValue, watch, formState: { errors } } = useForm({
     defaultValues: initialValues,
   });
+
+  // O motor de observação que dispara o callback para o Pai
+  useEffect(() => {
+    const subscription = watch((value, { name, type }) => {
+      // type === 'change' garante que só dispare quando o usuário interagir
+      if (name && type === 'change' && onValuesChange) {
+        onValuesChange({ name, value: value[name] }, value, setValue);
+      }
+    });
+    
+    return () => subscription.unsubscribe();
+  }, [watch, onValuesChange, setValue]);
 
   const renderField = (field: FormField) => {
     const commonProps = {
@@ -41,14 +60,28 @@ export const DynamicForm: React.FC<DynamicFormProps> = ({
         );
       
       case 'select':
-        return (
-          <select {...commonProps}>
-            <option value="">Selecione...</option>
-            {field.options?.map(opt => (
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
-            ))}
-          </select>
-        );
+        if (field.endpoint) {
+          return (
+            <AsyncSelect 
+              field={field} 
+              control={control} 
+              setValue={setValue} 
+              register={register}
+              error={errors[field.name]}
+            />
+          );
+        }
+
+        else {
+          return (
+            <select {...commonProps}>
+              <option value="">Selecione...</option>
+              {field.options?.map(opt => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+          );
+        }
 
       case 'datalist':
         const listId = `${field.name}-list`;

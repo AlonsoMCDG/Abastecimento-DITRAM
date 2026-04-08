@@ -10,16 +10,9 @@ export interface TableSchema {
   columns: TableColumn[];
 }
 
-// TIPO DE CAMPOS ACEITO PELO FORMULÁRIO
 export type FieldType = 
-  | 'text' 
-  | 'number' 
-  | 'date' 
-  | 'datetime-local' 
-  | 'checkbox' 
-  | 'textarea' 
-  | 'select' 
-  | 'datalist';
+  | 'text' | 'number' | 'date' | 'datetime-local' 
+  | 'checkbox' | 'textarea' | 'select' | 'datalist';
 
 export interface FieldOption {
   label: string
@@ -32,10 +25,12 @@ export interface FormField {
   type: FieldType;
   required?: boolean;
   placeholder?: string;
-  colSpan?: 1 | 2 | 3; // Controle de colunas no Grid (1 a 3 colunas)
-  
-  // Propriedades futuras para selects e datalists que usaremos nas próximas etapas
+  colSpan?: 1 | 2 | 3;
   options?: Array<{ value: number | string; label: string }>;
+  
+  endpoint?: string;       // Entidade para o lookup (ex: 'veiculos')
+  dependsOn?: string;      // Nome do campo que este campo observa
+  dependsOnParam?: string; // Nome do parâmetro na API (ex: 'secretaria_id')
 }
 
 export interface FormSchema {
