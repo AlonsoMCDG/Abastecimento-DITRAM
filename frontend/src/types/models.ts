@@ -22,7 +22,7 @@ export interface Instituicao {
 export interface Pessoa {
   id: number;
   cpf: string;
-  nome: string; // Atualizado para refletir seu model plano no Django
+  nome: string;
   ativo: boolean;
 }
 

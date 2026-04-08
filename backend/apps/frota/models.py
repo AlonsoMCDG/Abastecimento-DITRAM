@@ -6,14 +6,18 @@ TIPO_LOCOMOCAO_CHOICES = [
     ("FLUVIAL", "Fluvial"),
 ]
 
+class TipoCombustivel(models.Model):
+    nome = models.CharField(max_length=50, unique=True) # Ex: Gasolina, Diesel S10
+    ativo = models.BooleanField(default=True)
+
 class Veiculo(models.Model):
-    TIPO_COMBUSTIVEL_CHOICES = [
-        ("GASOLINA", "Gasolina"),
-        ("DIESEL_S10", "Diesel S10"),
-        ("DIESEL", "Diesel Comum"),
-        ("ETANOL", "Etanol"),
-        ("GNV", "GNV"),
-    ]
+    # TIPO_COMBUSTIVEL_CHOICES = [
+    #     ("GASOLINA", "Gasolina"),
+    #     ("DIESEL_S10", "Diesel S10"),
+    #     ("DIESEL", "Diesel Comum"),
+    #     ("ETANOL", "Etanol"),
+    #     ("GNV", "GNV"),
+    # ]
 
     UNIDADE_CONSUMO_CHOICES = [
         ("KM_POR_L", "km/L"),
@@ -25,7 +29,8 @@ class Veiculo(models.Model):
     tipo_locomocao = models.CharField(max_length=50, choices=TIPO_LOCOMOCAO_CHOICES)
     capacidade_carga_kg = models.FloatField()
     capacidade_pessoas = models.IntegerField()
-    tipo_combustivel = models.CharField(max_length=50, choices=TIPO_COMBUSTIVEL_CHOICES,)
+    # tipo_combustivel = models.CharField(max_length=50, choices=TIPO_COMBUSTIVEL_CHOICES,)
+    tipo_combustivel = models.ForeignKey(TipoCombustivel, on_delete=models.PROTECT)
     consumo_estimado_combustivel = models.DecimalField(
         max_digits=10, 
         decimal_places=3, 

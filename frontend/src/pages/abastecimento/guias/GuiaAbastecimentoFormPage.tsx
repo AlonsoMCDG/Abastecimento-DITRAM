@@ -1,76 +1,96 @@
-import { useEffect, useState } from "react"
-import { useNavigate, useParams, useSearchParams } from "react-router-dom"
+// pages/GuiaAbastecimentoFormPage.tsx
+import React, { useEffect, useMemo, useState } from 'react';
+import type { UseFormSetValue } from 'react-hook-form';
+import { DynamicForm } from '../../../components/DynamicForm/DynamicForm'; 
+import { guiaAbastecimentoFormSchema } from '../../../schemas/guiaAbastecimento.schema';
+import { guiasApi } from '../../../api/operacao/guiasApi';
+import { rotaApi } from '../../../api/frota/rotasApi';
+import type { GuiaAbastecimento } from '../../../types/models';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { ROUTES } from '../../../routes/routes';
 
-import DynamicForm from "../../../components/DynamicForm/DynamicForm"
-import { guiaAbastecimentoFormSchema } from "../../../schemas/guiaAbastecimento.schema"
-import { guiasApi } from "../../../api/operacao/guiasApi"
-import "../../../assets/css/FormPage.css"
+export const GuiaAbastecimentoFormPage: React.FC = () => {
+  const navigate = useNavigate();
+  const { id } = useParams();
+  const [searchParams] = useSearchParams();
 
-import type { GuiaAbastecimento } from "../../../types/models"
+  const [initialValues, setInitialValues] = useState<Partial<GuiaAbastecimento> | undefined>(undefined);
+  const [loading, setLoading] = useState(!!id);
 
-export default function GuiaAbastecimentoFormPage() {
-
-  const navigate = useNavigate()
-  const { id } = useParams()
-  const [searchParams] = useSearchParams()
-
-  const [data, setData] = useState<GuiaAbastecimento | null>(null)
-
-  const secretariaParam = searchParams.get("secretaria")
-  const secretariaId = secretariaParam ? Number(secretariaParam) : undefined
-
-  const currentDateTime = (() => {
-    const now = new Date();
-    // Ajusta o timezone (Traz o fuso horário local, ignorando o UTC do toISOString)
-    const localNow = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
-    return localNow.toISOString().slice(0, 16);
-  })()
+  // Definição dos valores padrão para novas guias
+  const defaultValues = useMemo((): Partial<GuiaAbastecimento> => {
+    const secretariaParam = searchParams.get("secretaria");
+    return {
+      data_hora: new Date().toISOString().split('T')[0], // YYYY-MM-DD
+      secretaria_id: secretariaParam ? Number(secretariaParam) : undefined,
+    } as Partial<GuiaAbastecimento>;
+  }, [searchParams]);
   
   useEffect(() => {
     if (id) {
       guiasApi.buscar(Number(id))
-        .then(res => setData(res.data))
-    }
-  }, [id])
-
-  async function handleSubmit(form: GuiaAbastecimento) {
-    if (id) {
-      await guiasApi.atualizar(Number(id), form)
+        .then(res => {
+          setInitialValues(res.data);
+        })
+        .catch(err => console.error("Erro ao carregar guia:", err))
+        .finally(() => setLoading(false));
     } else {
-      await guiasApi.criar(form)
+      setInitialValues(defaultValues);
     }
+  }, [id, defaultValues]);
+  
+  const handleSubmit = async (formData: GuiaAbastecimento) => {
+    try {
+      if (id) {
+        await guiasApi.atualizar(Number(id), formData);
+      } else {
+        await guiasApi.criar(formData);
+      }
+      alert('Guia salva com sucesso!');
+      navigate(ROUTES.operacao.guias.list);
+    } catch (error) {
+      console.error('Erro ao salvar guia', error);
+    }
+  };
 
-    navigate("/abastecimento/guias")
-  }
+  // Escuta as mudanças do DynamicForm
+  const handleValuesChange = async (
+    changedField: { name: string; value: string | number },
+    _currentValues: Partial<GuiaAbastecimento>,
+    setValue: UseFormSetValue<GuiaAbastecimento>
+  ) => {
+    
+    // Rota preenche Instituição e Combustível
+    if (changedField.name === 'rota') {
+      const isId = !isNaN(Number(changedField.value)) && changedField.value !== '';
+      
+      if (isId) {
+        // Se for ID, o usuário escolheu uma rota existente. Buscamos os detalhes.
+        try {
+          const response = await rotaApi.buscar(Number(changedField.value));
+          const rotaData = response.data;
+          // Preenche os outros campos automaticamente
+          setValue('instituicao' as keyof GuiaAbastecimento, rotaData.instituicao, { shouldValidate: true });
+        } catch (err) {
+          console.error('Erro ao buscar detalhes da rota', err);
+        }
+      } else {
+        // Se for texto livre, limpamos a instituição para ele digitar manualmente
+        setValue('instituicao' as keyof GuiaAbastecimento, '');
+      }
+    }
+  };
+
+  if (loading) return <div>Carregando dados...</div>;
 
   return (
-    <div className="form-page">
-      <div className="form-header">
-        <h2>
-          {id ? "Editar" : "Nova"} Guia de Abastecimento
-        </h2>
-      </div>
-
-      <div className="form-container">
-        <DynamicForm<GuiaAbastecimento>
-          schema={guiaAbastecimentoFormSchema}
-          initialData={
-            id
-              ? (data || {})
-              : {
-                data_hora: currentDateTime,
-                quantidade_oleo: 0,
-                observacao: "",
-                ...(typeof secretariaId === "number" && Number.isFinite(secretariaId)
-                  ? { secretaria: secretariaId }
-                  : {}),
-                ...(data || {}),
-              }
-          }
-          onSubmit={handleSubmit}
-        />
-      </div>
-
-    </div>
-  )
-}
+    <DynamicForm 
+      title={id ? "Editar Guia de Abastecimento" : "Nova Guia de Abastecimento"}
+      subtitle={id ? `Editando registro #${id}` : "Preencha os dados para gerar uma nova guia."}
+      schema={guiaAbastecimentoFormSchema}
+      initialValues={initialValues}
+      onSubmit={handleSubmit}
+      onValuesChange={handleValuesChange}
+    />
+  );
+};

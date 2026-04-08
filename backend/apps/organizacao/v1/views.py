@@ -81,7 +81,10 @@ class InstituicaoViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
         queryset = self.filter_queryset(self.get_queryset())
 
         # Otimiza a query trazendo apenas o necessário para o Select
-        queryset = queryset.only('id', 'nome')
+        queryset = queryset.only(
+            'id', 'nome',
+            'secretaria_id'  # Busca o ID de secretaria por causa do `queryset = (...).select_related('secretaria')`
+        )
 
         # Usamos o serializer leve e com dados embutidos para o Select
         serializer = InstituicaoLookupSerializer(queryset, many=True)

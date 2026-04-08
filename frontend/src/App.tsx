@@ -18,7 +18,7 @@ import AlocacaoFormPage from "./pages/frota/AlocacaoFormPage";
 import UsuarioListPage from "./pages/usuarios/UsuarioListPage";
 import UsuarioFormPage from "./pages/usuarios/UsuarioFormPage";
 import GuiaAbastecimentoListPage from "./pages/abastecimento/guias/GuiaAbastecimentoListPage";
-import GuiaAbastecimentoFormPage from "./pages/abastecimento/guias/GuiaAbastecimentoFormPage";
+import { GuiaAbastecimentoFormPage } from "./pages/abastecimento/guias/GuiaAbastecimentoFormPage";
 import { LoginPage } from "./pages/login/LoginPage";
 import { RegisterPage } from "./pages/login/RegisterPage";
 import { PrivateRoute } from "./components/PrivateRoute";

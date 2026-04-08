@@ -7,10 +7,11 @@ from django_filters.rest_framework import DjangoFilterBackend
 from apps.core.viewset_cache import ModelViewSetCacheMixin
 from apps.usuarios.permissions import FrotaPermission
 
-from apps.frota.models import Veiculo, Rota
+from apps.frota.models import Veiculo, Rota, TipoCombustivel
 from .serializers import (
     VeiculoWriteSerializer, VeiculoReadSerializer, VeiculoLookupSerializer,
-    RotaWriteSerializer, RotaReadSerializer, RotaLookupSerializer
+    RotaWriteSerializer, RotaReadSerializer, RotaLookupSerializer,
+    TipoCombustivelSerializer, TipoCombustivelLookupSerializer
 )
 
 class VeiculoViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
@@ -29,10 +30,10 @@ class VeiculoViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
     filterset_fields = ['id', 'secretaria_id', 'tipo_locomocao', 'tipo_combustivel']
 
     # Busca Textual (?search=hilux)
-    search_fields = ['placa', 'modelo', 'secretaria__nome']
+    search_fields = ['placa', 'modelo', 'secretaria__nome', 'tipo_combustivel__nome']
 
     # Ordenação
-    ordering_fields = ['placa', 'modelo', 'id', 'secretaria__nome']
+    ordering_fields = ['placa', 'modelo', 'id', 'secretaria__nome', 'tipo_combustivel__nome']
     ordering = ['id']
     
     def get_serializer_class(self):
@@ -51,7 +52,7 @@ class VeiculoViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
         queryset = queryset.only(
             'id', 'modelo', 'placa', 'tipo_combustivel', 
             'consumo_estimado_combustivel', 'unidade_consumo', 
-            'secretaria_id'
+            'secretaria_id', 'tipo_combustivel_id'
         )
 
         # Usamos o serializer leve e com dados embutidos para o Select
@@ -96,4 +97,37 @@ class RotaViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
         )
 
         serializer = RotaLookupSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+
+class TipoCombustivelViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
+    queryset = TipoCombustivel.objects.all()
+    serializer_class = TipoCombustivelSerializer
+    permission_classes = [IsAuthenticated]
+
+    # Habilitando os motores (Filtro Exato, Busca Textual, Ordenação)
+    filter_backends = [
+        DjangoFilterBackend, 
+        filters.SearchFilter, 
+        filters.OrderingFilter
+    ]
+
+    # Configuração do Busca Textual (?search=SME ou ?search=Saúde)
+    search_fields = ['nome']
+
+    # Configuração do Filtro Exato (?sigla=SME)
+    filterset_fields = ['id']
+
+    # Configuração de Ordenação (?ordering=-id)
+    ordering_fields = ['nome']
+    ordering = ['nome'] # Ordenação padrão alfabética
+    
+    # endpoint customizado: /api/secretaria/lookup/
+    @action(detail=False, methods=['get'])
+    def lookup(self, request):
+        # Usamos o .only() para otimizar a query no banco, já que o lookup precisa de poucos campos
+        queryset = self.get_queryset().only('nome')
+
+        # Usa o serializer leve para o Select
+        serializer = TipoCombustivelLookupSerializer(queryset, many=True)
         return Response(serializer.data)

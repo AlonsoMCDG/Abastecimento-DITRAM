@@ -33,6 +33,8 @@ export const ENDPOINTS = {
     veiculosLookup: "/v1/frota/veiculos/lookup/",
     rotas: "/v1/frota/rotas/",
     rotasLookup: "/v1/frota/rotas/lookup/",
+    tiposCombustivel: "/v1/frota/tipos-combustivel/",
+    tiposCombustivelLookup: "/v1/frota/tipos-combustivel/lookup/",
   },
 
   // -----------------------
@@ -62,5 +64,5 @@ export const ENDPOINTS = {
     alocacoesServico: "/v1/operacao/alocacoes-servicos/",
     operadoresVeiculos: "/v1/operacao/operadores-veiculos/",
     guias: "/v1/operacao/guias/",
-  },  
+  },
 }

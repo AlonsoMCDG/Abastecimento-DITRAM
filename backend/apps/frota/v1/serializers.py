@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from apps.frota.models import Veiculo, Rota
+from apps.frota.models import Veiculo, Rota, TipoCombustivel
 from apps.organizacao.models import Secretaria, Instituicao
 
 # --- SERIALIZERS DE VEÍCULO ---
@@ -10,15 +10,20 @@ class VeiculoWriteSerializer(serializers.ModelSerializer):
         source='secretaria', 
         queryset=Secretaria.objects.all()
     )
+    
+    tipo_combustivel_id = serializers.PrimaryKeyRelatedField(
+        source='tipo_combustivel',
+        queryset=TipoCombustivel.objects.all()
+    )
 
     class Meta:
         model = Veiculo
         fields = [
             'id', 'modelo', 'placa', 'tipo_locomocao', 
             'capacidade_carga_kg', 'capacidade_pessoas', 
-            'tipo_combustivel', 'consumo_estimado_combustivel', 
-            'consumo_estimado_oleo', 'hodometro_atual', 
-            'unidade_consumo', 'secretaria_id'
+            'consumo_estimado_combustivel', 'consumo_estimado_oleo',
+            'unidade_consumo', 'hodometro_atual', 
+            'secretaria_id', 'tipo_combustivel_id',
         ]
 
 # DTO de Leitura
@@ -26,47 +31,51 @@ class VeiculoReadSerializer(serializers.ModelSerializer):
     # Relacionamentos
     secretaria_id = serializers.IntegerField(source='secretaria.id', read_only=True)
     secretaria_nome = serializers.CharField(source='secretaria.nome', read_only=True)
+
+    tipo_combustivel_id = serializers.IntegerField(source='tipo_combustivel.id', read_only=True)
+    tipo_combustivel_nome = serializers.CharField(source='tipo_combustivel.nome', read_only=True)
     
     # Displays (Choices)
     tipo_locomocao_display = serializers.CharField(source='get_tipo_locomocao_display', read_only=True)
-    tipo_combustivel_display = serializers.CharField(source='get_tipo_combustivel_display', read_only=True)
     unidade_consumo_display = serializers.CharField(source='get_unidade_consumo_display', read_only=True)
 
     class Meta:
         model = Veiculo
         fields = [
-            'id', 'modelo', 'placa', 'tipo_combustivel', 'tipo_combustivel_display',
+            'id', 'modelo', 'placa',
             'consumo_estimado_combustivel', 'unidade_consumo', 'unidade_consumo_display',
             'tipo_locomocao', 'tipo_locomocao_display',
+            'tipo_combustivel_id', 'tipo_combustivel_nome',
             'secretaria_id', 'secretaria_nome'
         ]
 
 # DTO de Lookup
 class VeiculoLookupSerializer(serializers.ModelSerializer):
     """
-    Serializer para o Select de Veículos.
+    Serializer para o Select de Veículos no Frontend.
     """
     label = serializers.SerializerMethodField()
     value = serializers.ReadOnlyField(source='id')
 
-    secretaria_id = serializers.ReadOnlyField()
-    tipo_combustivel_display = serializers.CharField(source='get_tipo_combustivel_display', read_only=True)
+    secretaria_id = serializers.IntegerField(source='secretaria.id', read_only=True)
+    tipo_combustivel_id = serializers.IntegerField(source='tipo_combustivel.id', read_only=True)
 
     class Meta:
         model = Veiculo
         fields = [
-            'value', # ID no banco de dados
-            'label', # Retorno da função 'get_label()'
-            'tipo_combustivel', 
-            'tipo_combustivel_display',
-            'consumo_estimado_combustivel', 
+            'value',
+            'label',
+            'consumo_estimado_combustivel',
             'unidade_consumo',
+            'tipo_combustivel_id',
             'secretaria_id'
         ]
 
     def get_label(self, obj: Veiculo):
+        nome_combustivel = obj.tipo_combustivel.nome if obj.tipo_combustivel else "N/I"
+        
         # Formatação: "Hilux - ABC1234 (Diesel S10)"
-        return f"{obj.modelo} - {obj.placa} ({obj.get_tipo_combustivel_display()})"
+        return f"{obj.modelo} - {obj.placa} ({nome_combustivel})"
 
 
 # --- SERIALIZERS DE ROTA ---
@@ -133,3 +142,23 @@ class RotaLookupSerializer(serializers.ModelSerializer):
             'secretaria_id', 
             'instituicao_id'
         ]
+
+
+# --- SERIALIZERS DE TipoCombustivel ---
+
+class TipoCombustivelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TipoCombustivel
+        fields = "__all__"
+
+class TipoCombustivelLookupSerializer(serializers.ModelSerializer):
+    value = serializers.ReadOnlyField(source='id')
+    label = serializers.ReadOnlyField(source='nome')
+    
+    class Meta:
+        model = TipoCombustivel
+        fields = [
+            'value',
+            'label',
+        ]
+
