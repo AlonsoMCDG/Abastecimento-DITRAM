@@ -8,6 +8,7 @@ import { getApiErrorMessage } from "../../api/config/errorHandlers";
 
 import styles from "./RegisterPage.module.css";
 import { IMaskInput } from "react-imask";
+import { MASKS } from "../../utils/masks";
 
 export function RegisterPage() {
   const [cpf, setCpf] = useState("");
@@ -81,7 +82,7 @@ export function RegisterPage() {
         <div className={styles.inputGroup}>
           <label htmlFor="cpf" className={styles.label}>CPF</label>
           <IMaskInput
-            mask="000.000.000-00" // 0 representa números na IMask
+            mask={MASKS.CPF}
             id="cpf"
             type="text"
             className={styles.input}

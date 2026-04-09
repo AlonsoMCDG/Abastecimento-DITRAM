@@ -7,6 +7,7 @@ import { getApiErrorMessage } from '../../api/config/errorHandlers';
 import { IMaskInput } from 'react-imask';
 
 import styles from './LoginPage.module.css';
+import { MASKS } from '../../utils/masks';
 
 export const LoginPage = () => {
   const [cpf, setCpf] = useState('');
@@ -78,7 +79,7 @@ export const LoginPage = () => {
         <div className={styles.inputGroup}>
           <label htmlFor="cpf" className={styles.label}>CPF</label>
           <IMaskInput
-            mask="000.000.000-00"
+            mask={MASKS.CPF}
             id="cpf"
             type="text"
             className={styles.input}
