@@ -10,6 +10,8 @@ export interface TableSchema {
   columns: TableColumn[];
 }
 
+// 2. TIPO PARA FORMULÁRIO
+
 export type FieldType = 
   | 'text' | 'number' | 'date' | 'datetime-local' 
   | 'checkbox' | 'textarea' | 'select' | 'datalist';
@@ -32,6 +34,7 @@ export interface FormField {
   type: FieldType;
   required?: boolean;
   readOnly?: boolean;
+  disabled?: boolean;
   placeholder?: string;
   colSpan?: 1 | 2 | 3;
   options?: Array<{ value: number | string; label: string }>;
@@ -41,6 +44,7 @@ export interface FormField {
   quickActions?: QuickAction[];
   prefix?: string | React.ReactNode;  // (Ex: R$, Kg, m²) 
   suffix?: string | React.ReactNode;  // (Ex: R$, Kg, m²)
+  mask?: string;
 }
 
 export interface FormSchema {

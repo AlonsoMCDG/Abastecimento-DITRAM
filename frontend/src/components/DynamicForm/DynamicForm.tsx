@@ -1,7 +1,9 @@
 import React, { useEffect } from 'react';
-import { useForm, type SubmitHandler, type UseFormSetValue, type DefaultValues, type FieldValues, type Path } from 'react-hook-form';
+import { IMaskInput } from 'react-imask';
+import { useForm, Controller, type SubmitHandler, type UseFormSetValue, type DefaultValues, type FieldValues, type Path } from 'react-hook-form';
 import type { FormSchema, FormField } from '../../types/form';
 import styles from './DynamicForm.module.css';
+
 import { AsyncSelect } from './AsyncSelect';
 import { DatalistInput } from './DatalistInput';
 
@@ -36,10 +38,9 @@ export const DynamicForm = <T extends FieldValues>({
     }
   }, [initialValues, reset]);
 
-  // O motor de observação que dispara o callback para o Pai
+  // Motor de observação que dispara o callback para o Pai
   useEffect(() => {
     const subscription = watch((value, { name, type }) => {
-      // type === 'change' garante que só dispare quando o usuário interagir
       if (name && type === 'change' && onValuesChange) {
         onValuesChange({ name, value: (value as any)[name] }, value as Partial<T>, setValue);
       }
@@ -48,17 +49,47 @@ export const DynamicForm = <T extends FieldValues>({
     return () => subscription.unsubscribe();
   }, [watch, onValuesChange, setValue]);
 
-  const renderField = (field: FormField) => {
-    const fieldPath = field.name as Path<T>;
+  // Renomeado de 'field' para 'fieldConfig' para evitar colisão com o 'field' do Controller
+  const renderField = (fieldConfig: FormField) => {
+    const fieldPath = fieldConfig.name as Path<T>;
+    const hasError = !!errors[fieldPath];
+
+    // 1. EARLY RETURN: Campos com Máscara (Controlados)
+    if (fieldConfig.mask) {
+      return (
+        <Controller
+          key={fieldConfig.name}
+          name={fieldPath}
+          control={control}
+          rules={{ required: fieldConfig.required }}
+          render={({ field: { onChange, onBlur, value, ref } }) => (
+            <IMaskInput
+              mask={fieldConfig.mask!}
+              value={(value as string) || ''}
+              unmask={true} 
+              onAccept={(unmaskedValue) => onChange(unmaskedValue)}
+              onBlur={onBlur}
+              inputRef={ref}
+              id={fieldConfig.name}
+              className={`${styles.input} ${hasError ? styles.inputError : ''}`}
+              placeholder={fieldConfig.placeholder || ''}
+              disabled={fieldConfig.disabled}
+            />
+          )}
+        />
+      );
+    }
     
+    // 2. CASO PADRÃO: Campos Nativos (Não Controlados)
     const commonProps = {
-      ...register(fieldPath, { required: field.required }),
-      id: field.name,
-      className: styles.input,
-      placeholder: field.placeholder,
+      ...register(fieldPath, { required: fieldConfig.required }),
+      id: fieldConfig.name,
+      className: `${styles.input} ${hasError ? styles.inputError : ''}`,
+      placeholder: fieldConfig.placeholder,
+      disabled: fieldConfig.disabled,
     };
 
-    switch (field.type) {
+    switch (fieldConfig.type) {
       case 'textarea':
         return <textarea {...commonProps} rows={4} />;
       
@@ -66,20 +97,20 @@ export const DynamicForm = <T extends FieldValues>({
         return (
           <input 
             type="checkbox" 
-            {...register(fieldPath, { required: field.required })} 
-            id={field.name} 
+            {...commonProps}
+            id={fieldConfig.name} 
           />
         );
       
       case 'select':
-        if (field.endpoint) {
+        if (fieldConfig.endpoint) {
           return (
             <AsyncSelect 
-              field={field} 
+              field={fieldConfig} 
               control={control} 
               setValue={setValue} 
               register={register}
-              error={errors[field.name]}
+              error={errors[fieldConfig.name]}
             />
           );
         }
@@ -87,8 +118,10 @@ export const DynamicForm = <T extends FieldValues>({
           return (
             <select {...commonProps}>
               <option value="">Selecione...</option>
-              {field.options?.map(opt => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              {fieldConfig.options?.map(opt => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
               ))}
             </select>
           );
@@ -97,11 +130,11 @@ export const DynamicForm = <T extends FieldValues>({
       case 'datalist':
         return (
           <DatalistInput
-            field={field}
+            field={fieldConfig}
             control={control}
             setValue={setValue}
             register={register}
-            error={errors[field.name]}
+            error={errors[fieldConfig.name]}
           />
         );
 
@@ -109,19 +142,19 @@ export const DynamicForm = <T extends FieldValues>({
         // Renderiza o input normal
         const baseInput = (
           <input 
-            type={field.type} 
-            readOnly={field.readOnly}
+            type={fieldConfig.type} 
+            readOnly={fieldConfig.readOnly}
             {...commonProps} 
           />
         );
 
         // Se tiver prefixo ou sufixo, envelopa numa estrutura
-        if (field.prefix || field.suffix) {
+        if (fieldConfig.prefix || fieldConfig.suffix) {
           return (
             <div className={styles.inputGroup}>
-              {field.prefix && <span className={styles.prefix}>{field.prefix}</span>}
+              {fieldConfig.prefix && <span className={styles.prefix}>{fieldConfig.prefix}</span>}
               {baseInput}
-              {field.suffix && <span className={styles.suffix}>{field.suffix}</span>}
+              {fieldConfig.suffix && <span className={styles.suffix}>{fieldConfig.suffix}</span>}
             </div>
           );
         }

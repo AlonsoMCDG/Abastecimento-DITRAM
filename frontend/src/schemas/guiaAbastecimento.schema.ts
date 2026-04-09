@@ -64,7 +64,7 @@ export const guiaAbastecimentoFormSchema: FormSchema = {
       dependsOn: 'secretaria_id',
       dependsOnParam: 'secretaria_id',
       placeholder: 'Selecione ou digite uma nova rota...',
-      colSpan: 2,
+      colSpan: 3,
       required: true,
     },
     {
@@ -75,7 +75,14 @@ export const guiaAbastecimentoFormSchema: FormSchema = {
       dependsOn: 'secretaria_id',
       dependsOnParam: 'secretaria_id',
       placeholder: 'Selecione uma instituição...',
-      colSpan: 2,
+      colSpan: 3,
+      required: true,
+    },
+    {
+      name: 'hodometro',
+      label: 'Hodômetro (Km)',
+      type: 'number',
+      colSpan: 1,
       required: true,
     },
     {
@@ -83,7 +90,7 @@ export const guiaAbastecimentoFormSchema: FormSchema = {
       label: 'Hodômetro Anterior (Km)',
       type: 'number',
       colSpan: 1,
-      required: true,
+      readOnly: true,
     },
     {
       name: 'quantidade_combustivel',

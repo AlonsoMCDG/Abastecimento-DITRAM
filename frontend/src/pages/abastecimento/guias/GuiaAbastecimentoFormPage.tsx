@@ -21,7 +21,7 @@ export const GuiaAbastecimentoFormPage: React.FC = () => {
   const defaultValues = useMemo((): Partial<GuiaAbastecimento> => {
     const secretariaParam = searchParams.get("secretaria");
     return {
-      data_hora: new Date().toISOString().split('T')[0], // YYYY-MM-DD
+      data_hora: new Date().toISOString().slice(0, 16),  // remove s e ms
       secretaria_id: secretariaParam ? Number(secretariaParam) : undefined,
     } as Partial<GuiaAbastecimento>;
   }, [searchParams]);
