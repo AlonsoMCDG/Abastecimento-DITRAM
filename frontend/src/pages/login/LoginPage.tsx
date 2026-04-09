@@ -13,7 +13,6 @@ export const LoginPage = () => {
 
   const navigate = useNavigate();
   
-  // 1. Extraímos o refreshUser do nosso estado global
   const { refreshUser } = useAuth();
 
   // Redireciona caso o usuário já tenha token ao acessar a tela de login
@@ -31,21 +30,32 @@ export const LoginPage = () => {
     try {
       const cpfDigits = cpf.replace(/\D/g, "");
       if (cpfDigits.length !== 11) {
-        throw new Error("O CPF deve conter exatamente 11 dígitos.");
+        setErrorMsg("O CPF deve conter exatamente 11 dígitos.");
+        setLoading(false);
+        return;
       }
 
-      // 2. Realiza o login (salva os tokens no localStorage)
+      // Tenta o login
       await authApi.login(cpfDigits, password);
       
-      // 3. MAGIA AQUI: Força o Contexto a buscar os dados do usuário (/me/) 
-      // usando o token que acabou de ser salvo, populando a memória do React.
+      // Busca dados do usuário.
       await refreshUser();
       
-      // 4. Só agora redirecionamos, com o estado global já atualizado!
+      // Redireciona
       navigate('/home', { replace: true });
       
     } catch (err: unknown) {
-      setErrorMsg(getApiErrorMessage(err, "Falha ao realizar login."));
+      let message = getApiErrorMessage(err, "Falha ao realizar login.");
+      
+      // Tradução rápida para mensagens comuns do Django/SimpleJWT
+      if (message.includes("No active account found")) {
+        message = "CPF ou senha incorretos.";
+      } else if (message.includes("User is inactive")) {
+        message = "Sua conta está desativada. Entre em contato com o administrador.";
+      }
+      
+      // Atualiza o estado para exibir na tela sem recarregar
+      setErrorMsg(message);
     } finally {
       setLoading(false);
     }

@@ -1,7 +1,8 @@
 import axios, { type InternalAxiosRequestConfig } from "axios";
 import { ACCESS_TOKEN_STORAGE_KEY, REFRESH_TOKEN_STORAGE_KEY, clearAuthTokens } from "../../auth/auth";
+import { ENDPOINTS } from "./endpoints";
 
-// Tipagem para a fila de requisições retidas
+// Fila de requisições retidas
 interface FailedQueueItem {
   resolve: (value: string | null) => void;
   reject: (reason?: any) => void;
@@ -49,8 +50,15 @@ client.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config as CustomAxiosRequestConfig;
+    const url = originalRequest.url || '';
+
+    // Se o erro 401 aconteceu na tentativa de login ou refresh, não fazemos nada aqui. 
+    // Deixamos o erro chegar no catch() do componente (evita recarregar a página)
+    if (url.includes('/login') || url.includes('/token/')) {
+      return Promise.reject(error);
+    }
     
-    // Deu erro de autorização (401) e é a primeira tentativa
+    // Deu erro de autorização (401) e é a primeira tentativa em uma rota comum
     if (error.response?.status === 401 && !originalRequest._retry) {
       
       // Se já estamos renovando o token, coloca esta requisição na fila
@@ -75,7 +83,7 @@ client.interceptors.response.use(
       // Se não tem o refresh, nem gasta rede. Corta direto.
       if (!refreshToken) {
         processQueue(new Error("Token de refresh inexistente"), null);
-        clearAuthTokens(); // Garanta que essa função limpa tanto o access quanto o refresh no seu auth.ts
+        clearAuthTokens();
         localStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY); 
         window.location.href = '/login';
         isRefreshing = false;
@@ -84,7 +92,10 @@ client.interceptors.response.use(
       
       return new Promise((resolve, reject) => {
         // Usa uma nova instância (axios.post) em vez do 'client' para não cair em loop infinito
-        axios.post(`${import.meta.env.VITE_API_URL}/api/token/refresh/`, {
+        const baseUrl = import.meta.env.VITE_API_URL.replace(/\/$/, "");  // usa regex para remover '/' no fim (se tiver)
+        const refreshUrl = `${baseUrl}${ENDPOINTS.auth.refresh}`;
+        
+        axios.post(refreshUrl, {
           refresh: refreshToken,
         })
           .then((res) => {
@@ -101,8 +112,7 @@ client.interceptors.response.use(
           .catch((err) => {
             processQueue(err, null); // Rejeita toda a fila passando o erro
             clearAuthTokens();
-            localStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY);
-            window.location.href = '/login';
+            window.location.href = ENDPOINTS.auth.login;
             reject(err);
           })
           .finally(() => {
