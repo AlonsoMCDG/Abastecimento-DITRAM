@@ -1,0 +1,159 @@
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+  padding: 20px;
+  font-family: inherit;
+}
+
+.form {
+  background-color: #ffffff;
+  padding: 40px 32px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05), 0 4px 10px rgba(0, 0, 0, 0.03);
+  width: 100%;
+  max-width: 450px; /* Levemente mais largo que o login para acomodar mais campos */
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 5px;
+}
+
+.header h2 {
+  color: #2d3748;
+  margin: 0 0 8px 0;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.header p {
+  color: #718096;
+  margin: 0;
+  font-size: 14px;
+}
+
+.errorBox {
+  background-color: #fff5f5;
+  border-left: 4px solid #e53e3e;
+  padding: 12px 16px;
+  border-radius: 4px;
+  animation: slideDown 0.3s ease;
+}
+
+.errorMessage {
+  color: #c53030;
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Agrupa campos lado a lado (ex: Nome e Sobrenome) */
+.rowGroup {
+  display: flex;
+  gap: 15px;
+}
+
+.rowGroup .inputGroup {
+  flex: 1;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  color: #4a5568;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 15px;
+  color: #2d3748;
+  background-color: #f8fafc;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.input::placeholder {
+  color: #a0aec0;
+}
+
+.input:focus {
+  background-color: #ffffff;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+}
+
+.button {
+  width: 100%;
+  padding: 14px;
+  margin-top: 8px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.1s ease, box-shadow 0.2s ease;
+}
+
+.button:hover:not(.buttonDisabled) {
+  box-shadow: 0 6px 12px rgba(118, 75, 162, 0.2);
+  transform: translateY(-1px);
+}
+
+.button:active:not(.buttonDisabled) {
+  transform: translateY(1px);
+}
+
+.buttonDisabled {
+  background: #cbd5e0;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.smallText {
+  text-align: center;
+  margin: 8px 0 0 0;
+  color: #718096;
+  font-size: 14px;
+}
+
+.link {
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+.link:hover {
+  color: #764ba2;
+  text-decoration: underline;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsividade para o rowGroup empilhar no celular */
+@media (max-width: 480px) {
+  .rowGroup {
+    flex-direction: column;
+    gap: 20px;
+  }
+}

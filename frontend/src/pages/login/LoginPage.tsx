@@ -4,6 +4,9 @@ import { authApi } from '../../api/config/authApi';
 import { useAuth } from '../../auth/AuthContext';
 import { isAuthenticated } from '../../auth/auth';
 import { getApiErrorMessage } from '../../api/config/errorHandlers';
+import { IMaskInput } from 'react-imask';
+
+import styles from './LoginPage.module.css';
 
 export const LoginPage = () => {
   const [cpf, setCpf] = useState('');
@@ -12,7 +15,6 @@ export const LoginPage = () => {
   const [errorMsg, setErrorMsg] = useState('');
 
   const navigate = useNavigate();
-  
   const { refreshUser } = useAuth();
 
   // Redireciona caso o usuário já tenha token ao acessar a tela de login
@@ -35,13 +37,11 @@ export const LoginPage = () => {
         return;
       }
 
-      // Tenta o login
+      // Tenta o login (salva token no localstorage)
       await authApi.login(cpfDigits, password);
       
       // Busca dados do usuário.
       await refreshUser();
-      
-      // Redireciona
       navigate('/home', { replace: true });
       
     } catch (err: unknown) {
@@ -62,30 +62,40 @@ export const LoginPage = () => {
   };
 
   return (
-    <div className="login-container" style={styles.container}>
-      <form onSubmit={handleSubmit} style={styles.form}>
-        <h2>Acesso ao Sistema</h2>
+    <div className={styles.container}>
+      <form onSubmit={handleSubmit} className={styles.form}>
+        <div className={styles.header}>
+          <h2>Acesso ao Sistema</h2>
+          <p>Informe suas credenciais para continuar</p>
+        </div>
         
-        {errorMsg && <p style={styles.error}>{errorMsg}</p>}
+        {errorMsg && (
+          <div className={styles.errorBox}>
+            <p className={styles.errorMessage}>{errorMsg}</p>
+          </div>
+        )}
 
-        <div style={styles.inputGroup}>
-          <label htmlFor="cpf">CPF</label>
-          <input
+        <div className={styles.inputGroup}>
+          <label htmlFor="cpf" className={styles.label}>CPF</label>
+          <IMaskInput
+            mask="000.000.000-00"
             id="cpf"
             type="text"
-            placeholder="Apenas números (11 dígitos)"
+            className={styles.input}
+            placeholder="000.000.000-00"
             value={cpf}
-            onChange={(e) => setCpf(e.target.value.replace(/\D/g, '').slice(0, 11))}
+            unmask={false} // false = mantém a máscara visualmente no value
+            onAccept={(value) => setCpf(value)} // Na IMask usamos onAccept em vez de onChange
             required
-            maxLength={11} // Limita o input visualmente também
           />
         </div>
 
-        <div style={styles.inputGroup}>
-          <label htmlFor="password">Senha</label>
+        <div className={styles.inputGroup}>
+          <label htmlFor="password" className={styles.label}>Senha</label>
           <input
             id="password"
             type="password"
+            className={styles.input}
             placeholder="********"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -96,26 +106,15 @@ export const LoginPage = () => {
         <button 
           type="submit" 
           disabled={loading} 
-          style={loading ? styles.buttonDisabled : styles.button}
+          className={`${styles.button} ${loading ? styles.buttonDisabled : ''}`}
         >
           {loading ? 'Autenticando...' : 'Entrar'}
         </button>
 
-        <p style={styles.smallText}>
-          Não tem cadastro? <Link to="/register">Criar conta</Link>
+        <p className={styles.smallText}>
+          Não tem cadastro? <Link to="/register" className={styles.link}>Criar conta</Link>
         </p>
       </form>
     </div>
   );
-};
-
-// Estilização básica inline para teste rápido
-const styles: { [key: string]: React.CSSProperties } = {
-  container: { display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: '#f5f5f5' },
-  form: { padding: '2rem', background: '#fff', borderRadius: '8px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', width: '100%', maxWidth: '350px' },
-  inputGroup: { marginBottom: '1rem', display: 'flex', flexDirection: 'column' },
-  error: { color: 'red', fontSize: '0.85rem', marginBottom: '1rem' },
-  button: { padding: '0.8rem', backgroundColor: '#007bff', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' },
-  buttonDisabled: { padding: '0.8rem', backgroundColor: '#ccc', border: 'none', borderRadius: '4px', cursor: 'not-allowed' },
-  smallText: { marginTop: '1rem', fontSize: '0.9rem', textAlign: 'center' },
 };

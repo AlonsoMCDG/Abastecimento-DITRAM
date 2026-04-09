@@ -2,8 +2,12 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { authApi } from "../../api/config/authApi";
 import { usuarioApi } from "../../api/usuarios/usuariosApi";
+import { useAuth } from "../../auth/AuthContext";
 import { isAuthenticated } from "../../auth/auth";
 import { getApiErrorMessage } from "../../api/config/errorHandlers";
+
+import styles from "./RegisterPage.module.css";
+import { IMaskInput } from "react-imask";
 
 export function RegisterPage() {
   const [cpf, setCpf] = useState("");
@@ -15,6 +19,8 @@ export function RegisterPage() {
   const [errorMsg, setErrorMsg] = useState("");
 
   const navigate = useNavigate();
+  // Pegamos o refreshUser para atualizar o contexto após o cadastro/login
+  const { refreshUser } = useAuth();
 
   useEffect(() => {
     if (isAuthenticated()) {
@@ -30,9 +36,10 @@ export function RegisterPage() {
     try {
       const cpfDigits = cpf.replace(/\D/g, "");
       if (cpfDigits.length !== 11) {
-        throw new Error("CPF deve conter 11 dígitos.");
+        throw new Error("O CPF deve conter exatamente 11 dígitos.");
       }
 
+      // Registra o usuário
       await usuarioApi.registrar({
         cpf: cpfDigits,
         password,
@@ -41,8 +48,15 @@ export function RegisterPage() {
         email: email || undefined,
       });
 
+      // Faz o login automático
       await authApi.login(cpfDigits, password);
+      
+      // Atualiza o contexto do React com os dados do novo usuário
+      await refreshUser();
+      
+      // Redireciona para a home
       navigate("/home", { replace: true });
+      
     } catch (err: unknown) {
       setErrorMsg(getApiErrorMessage(err, "Falha ao realizar cadastro."));
     } finally {
@@ -51,30 +65,40 @@ export function RegisterPage() {
   };
 
   return (
-    <div className="login-container" style={styles.container}>
-      <form onSubmit={handleSubmit} style={styles.form}>
-        <h2>Criar conta</h2>
+    <div className={styles.container}>
+      <form onSubmit={handleSubmit} className={styles.form}>
+        <div className={styles.header}>
+          <h2>Criar Conta</h2>
+          <p>Preencha os dados para solicitar acesso</p>
+        </div>
 
-        {errorMsg && <p style={styles.error}>{errorMsg}</p>}
+        {errorMsg && (
+          <div className={styles.errorBox}>
+            <p className={styles.errorMessage}>{errorMsg}</p>
+          </div>
+        )}
 
-        <div style={styles.inputGroup}>
-          <label htmlFor="cpf">CPF</label>
-          <input
+        <div className={styles.inputGroup}>
+          <label htmlFor="cpf" className={styles.label}>CPF</label>
+          <IMaskInput
+            mask="000.000.000-00" // 0 representa números na IMask
             id="cpf"
             type="text"
-            placeholder="00000000000"
+            className={styles.input}
+            placeholder="000.000.000-00"
             value={cpf}
-            onChange={(e) => setCpf(e.target.value.replace(/\D/g, "").slice(0, 11))}
+            unmask={false} // false = mantém a máscara visualmente no value
+            onAccept={(value) => setCpf(value)} // Na IMask usamos onAccept em vez de onChange
             required
-            maxLength={11}
           />
         </div>
 
-        <div style={styles.inputGroup}>
-          <label htmlFor="password">Senha</label>
+        <div className={styles.inputGroup}>
+          <label htmlFor="password" className={styles.label}>Senha</label>
           <input
             id="password"
             type="password"
+            className={styles.input}
             placeholder="********"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -82,31 +106,40 @@ export function RegisterPage() {
           />
         </div>
 
-        <div style={styles.inputGroup}>
-          <label htmlFor="firstName">Primeiro nome</label>
-          <input
-            id="firstName"
-            type="text"
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-          />
+        {/* Agrupando Nome e Sobrenome lado a lado para otimizar espaço */}
+        <div className={styles.rowGroup}>
+          <div className={styles.inputGroup}>
+            <label htmlFor="firstName" className={styles.label}>Primeiro nome</label>
+            <input
+              id="firstName"
+              type="text"
+              className={styles.input}
+              placeholder="Ex: João"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+            />
+          </div>
+
+          <div className={styles.inputGroup}>
+            <label htmlFor="lastName" className={styles.label}>Sobrenome</label>
+            <input
+              id="lastName"
+              type="text"
+              className={styles.input}
+              placeholder="Ex: Silva"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+            />
+          </div>
         </div>
 
-        <div style={styles.inputGroup}>
-          <label htmlFor="lastName">Sobrenome</label>
-          <input
-            id="lastName"
-            type="text"
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-          />
-        </div>
-
-        <div style={styles.inputGroup}>
-          <label htmlFor="email">Email</label>
+        <div className={styles.inputGroup}>
+          <label htmlFor="email" className={styles.label}>Email</label>
           <input
             id="email"
             type="email"
+            className={styles.input}
+            placeholder="joao@exemplo.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
@@ -115,53 +148,15 @@ export function RegisterPage() {
         <button
           type="submit"
           disabled={loading}
-          style={loading ? styles.buttonDisabled : styles.button}
+          className={`${styles.button} ${loading ? styles.buttonDisabled : ''}`}
         >
           {loading ? "Cadastrando..." : "Cadastrar"}
         </button>
 
-        <p style={styles.smallText}>
-          Já tem conta? <Link to="/login">Entrar</Link>
+        <p className={styles.smallText}>
+          Já tem conta? <Link to="/login" className={styles.link}>Entrar</Link>
         </p>
       </form>
     </div>
   );
 }
-
-const styles: { [key: string]: React.CSSProperties } = {
-  container: {
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    height: "100vh",
-    backgroundColor: "#f5f5f5",
-  },
-  form: {
-    padding: "2rem",
-    background: "#fff",
-    borderRadius: "8px",
-    boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
-    width: "100%",
-    maxWidth: "420px",
-  },
-  inputGroup: { marginBottom: "1rem", display: "flex", flexDirection: "column" },
-  error: { color: "red", fontSize: "0.85rem", marginBottom: "1rem" },
-  button: {
-    padding: "0.8rem",
-    backgroundColor: "#007bff",
-    color: "#fff",
-    border: "none",
-    borderRadius: "4px",
-    cursor: "pointer",
-    width: "100%",
-  },
-  buttonDisabled: {
-    padding: "0.8rem",
-    backgroundColor: "#ccc",
-    border: "none",
-    borderRadius: "4px",
-    cursor: "not-allowed",
-    width: "100%",
-  },
-  smallText: { marginTop: "1rem", fontSize: "0.9rem", textAlign: "center" },
-};
