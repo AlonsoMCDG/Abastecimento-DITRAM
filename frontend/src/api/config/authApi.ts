@@ -11,8 +11,6 @@ import { getApiErrorMessage } from "./errorHandlers";
 interface LoginResponse {
   access: string;
   refresh: string;
-  // Se no futuro você customizar o DRF para devolver os dados do usuário no login, 
-  // basta adicionar aqui (ex: user: { id: number, nome: string, cpf: string })
 }
 
 export const authApi = {
@@ -30,7 +28,7 @@ export const authApi = {
 
       return response.data;
     } catch (err: unknown) {
-      throw new Error(getApiErrorMessage(err, "CPF ou senha inválidos"));
+      throw new Error(getApiErrorMessage(err));
     }
   }
 };
