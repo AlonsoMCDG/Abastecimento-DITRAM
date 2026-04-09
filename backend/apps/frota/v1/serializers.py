@@ -51,7 +51,8 @@ class VeiculoReadSerializer(serializers.ModelSerializer):
         model = Veiculo
         fields = [
             'id', 'modelo', 'placa',
-            'consumo_estimado_combustivel', 'unidade_consumo', 'unidade_consumo_display',
+            'consumo_estimado_combustivel', 'consumo_estimado_oleo', 
+            'unidade_consumo', 'unidade_consumo_display',
             'hodometro_atual',
             'tipo_locomocao', 'tipo_locomocao_display',
             'tipo_combustivel_id', 'tipo_combustivel_nome',
@@ -77,6 +78,7 @@ class VeiculoLookupSerializer(serializers.ModelSerializer):
             'value',
             'label',
             'consumo_estimado_combustivel',
+            'consumo_estimado_oleo',
             'unidade_consumo',
             'tipo_combustivel_id',
             'tipo_veiculo_id',
@@ -108,7 +110,7 @@ class RotaWriteSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'nome', 'distancia_km', 'tipo_locomocao', 
             'consumo_estimado_combustivel', 'consumo_estimado_oleo', 
-            'secretaria_id', 'instituicao_id', 'ativa'
+            'secretaria_id', 'instituicao_id', 'ativa', 'detalhes'
         ]
 
 # DTO de Leitura
@@ -129,8 +131,10 @@ class RotaReadSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'nome', 'distancia_km', 'ativa',
             'tipo_locomocao', 'tipo_locomocao_display',
+            'consumo_estimado_combustivel', 'consumo_estimado_oleo', 
             'secretaria_id', 'secretaria_nome',
-            'instituicao_id', 'instituicao_nome'
+            'instituicao_id', 'instituicao_nome',
+            'detalhes'
         ]
 
 # DTO de Lookup

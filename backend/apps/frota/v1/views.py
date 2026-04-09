@@ -89,7 +89,7 @@ class RotaViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
     filterset_fields = ['id', 'secretaria_id', 'instituicao_id', 'tipo_locomocao', 'ativa']
 
     # Busca Textual: Busca no próprio nome e nos nomes das entidades relacionadas
-    search_fields = ['nome', 'secretaria__nome', 'instituicao__nome']
+    search_fields = ['nome', 'secretaria__nome', 'instituicao__nome', 'detalhes']
 
     # Ordenação
     ordering_fields = ['nome', 'distancia_km', 'id']
@@ -107,7 +107,7 @@ class RotaViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
         # OTIMIZAÇÃO AQUI: 
         # Limpa o select_related('secretaria', 'instituicao') vindo da classe
         queryset = queryset.select_related(None).only(
-            'id', 'nome', 'distancia_km', 'tipo_locomocao', 
+            'id', 'nome', 'distancia_km', 'tipo_locomocao', 'detalhes', 
             'secretaria_id', 'instituicao_id'
         )
 
