@@ -88,13 +88,13 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'api.urls'
@@ -232,16 +232,22 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # CORS
 # ======================
 
+# Leitura do CORS
 cors_allowed_origins_env = os.getenv("CORS_ALLOWED_ORIGINS", "").strip()
 if cors_allowed_origins_env:
     CORS_ALLOW_ALL_ORIGINS = False
     CORS_ALLOWED_ORIGINS = [o.strip() for o in cors_allowed_origins_env.split(",") if o.strip()]
 else:
-    CORS_ALLOW_ALL_ORIGINS = True
+    CORS_ALLOWED_ORIGINS = []
 
+# Leitura do CSRF
 csrf_trusted_env = os.getenv("CSRF_TRUSTED_ORIGINS", "").strip()
 if csrf_trusted_env:
     CSRF_TRUSTED_ORIGINS = [o.strip() for o in csrf_trusted_env.split(",") if o.strip()]
+else:
+    CSRF_TRUSTED_ORIGINS = []
+
+# CORS_ALLOW_CREDENTIALS = True
 
 # ======================
 # AUTH
