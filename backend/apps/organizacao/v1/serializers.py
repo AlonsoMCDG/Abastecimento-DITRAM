@@ -41,7 +41,7 @@ class InstituicaoWriteSerializer(serializers.ModelSerializer):
 # DTO de Leitura (Retorna o ID e o Nome extra)
 class InstituicaoReadSerializer(serializers.ModelSerializer):
     # Pega o ID e o Nome
-    secretaria_id = serializers.IntegerField(source='secretaria.id', read_only=True)
+    secretaria_id = serializers.IntegerField(read_only=True)
     secretaria_nome = serializers.CharField(source='secretaria.nome', read_only=True)
 
     class Meta:

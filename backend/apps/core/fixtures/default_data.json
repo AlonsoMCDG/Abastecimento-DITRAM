@@ -428,6 +428,76 @@
     }
   },
   {
+    "model": "frota.tipoveiculo",
+    "pk": 1,
+    "fields": {
+      "nome": "ÔNIBUS"
+    }
+  },
+  {
+    "model": "frota.tipoveiculo",
+    "pk": 2,
+    "fields": {
+      "nome": "CARRO"
+    }
+  },
+  {
+    "model": "frota.tipoveiculo",
+    "pk": 3,
+    "fields": {
+      "nome": "MOTO"
+    }
+  },
+  {
+    "model": "frota.tipoveiculo",
+    "pk": 4,
+    "fields": {
+      "nome": "CAMINHÃO"
+    }
+  },
+  {
+    "model": "frota.tipoveiculo",
+    "pk": 5,
+    "fields": {
+      "nome": "CAMINHONETE"
+    }
+  },
+  {
+    "model": "frota.tipoveiculo",
+    "pk": 6,
+    "fields": {
+      "nome": "MARRUÁ"
+    }
+  },
+  {
+    "model": "frota.tipoveiculo",
+    "pk": 7,
+    "fields": {
+      "nome": "BARCO"
+    }
+  },
+  {
+    "model": "frota.tipoveiculo",
+    "pk": 8,
+    "fields": {
+      "nome": "BALSA"
+    }
+  },
+  {
+    "model": "frota.tipoveiculo",
+    "pk": 9,
+    "fields": {
+      "nome": "FURGÃO"
+    }
+  },
+  {
+    "model": "frota.tipoveiculo",
+    "pk": 10,
+    "fields": {
+      "nome": "AMBULÂNCIA"
+    }
+  },
+  {
     "model": "frota.veiculo",
     "pk": 1,
     "fields": {
@@ -436,6 +506,7 @@
       "tipo_locomocao": "TERRESTRE",
       "capacidade_carga_kg": "5000.0",
       "capacidade_pessoas": 45,
+      "tipo_veiculo": 1,
       "tipo_combustivel": 2,
       "consumo_estimado_combustivel": "3.500",
       "consumo_estimado_oleo": "0.500",
@@ -453,6 +524,7 @@
       "tipo_locomocao": "TERRESTRE",
       "capacidade_carga_kg": "17000.0",
       "capacidade_pessoas": 3,
+      "tipo_veiculo": 4,
       "tipo_combustivel": 3,
       "consumo_estimado_combustivel": "2.800",
       "consumo_estimado_oleo": "0.800",
@@ -470,6 +542,7 @@
       "tipo_locomocao": "TERRESTRE",
       "capacidade_carga_kg": "650.0",
       "capacidade_pessoas": 2,
+      "tipo_veiculo": 2,
       "tipo_combustivel": 1,
       "consumo_estimado_combustivel": "11.500",
       "consumo_estimado_oleo": "0.100",
@@ -487,6 +560,7 @@
       "tipo_locomocao": "TERRESTRE",
       "capacidade_carga_kg": "375.0",
       "capacidade_pessoas": 5,
+      "tipo_veiculo": 2,
       "tipo_combustivel": 4,
       "consumo_estimado_combustivel": "8.500",
       "consumo_estimado_oleo": "0.050",
@@ -504,6 +578,7 @@
       "modelo": "Renault Logan 1.6 Expression",
       "capacidade_carga_kg": "10.5",
       "capacidade_pessoas": 20,
+      "tipo_veiculo": 2,
       "tipo_combustivel": 5,
       "consumo_estimado_combustivel": "15.000",
       "consumo_estimado_oleo": "2.000",
@@ -522,6 +597,7 @@
       "tipo_locomocao": "TERRESTRE",
       "capacidade_carga_kg": "10.5",
       "capacidade_pessoas": 20,
+      "tipo_veiculo": 9,
       "tipo_combustivel": 2,
       "consumo_estimado_combustivel": "15.000",
       "consumo_estimado_oleo": "2.000",
@@ -540,6 +616,7 @@
       "tipo_locomocao": "TERRESTRE",
       "capacidade_carga_kg": "10.5",
       "capacidade_pessoas": 20,
+      "tipo_veiculo": 4,
       "tipo_combustivel": 3,
       "consumo_estimado_combustivel": "15.000",
       "consumo_estimado_oleo": "2.000",
@@ -557,6 +634,7 @@
       "tipo_locomocao": "TERRESTRE",
       "capacidade_carga_kg": "1000.0",
       "capacidade_pessoas": 5,
+      "tipo_veiculo": 5,
       "tipo_combustivel": 3,
       "consumo_estimado_combustivel": "9.200",
       "consumo_estimado_oleo": "0.200",
@@ -574,6 +652,7 @@
       "tipo_locomocao": "TERRESTRE",
       "capacidade_carga_kg": "10.5",
       "capacidade_pessoas": 20,
+      "tipo_veiculo": 4,
       "tipo_combustivel": 4,
       "consumo_estimado_combustivel": "15.000",
       "consumo_estimado_oleo": "2.000",
@@ -591,6 +670,7 @@
       "tipo_locomocao": "TERRESTRE",
       "capacidade_carga_kg": "10.5",
       "capacidade_pessoas": 20,
+      "tipo_veiculo": 2,
       "tipo_combustivel": 5,
       "consumo_estimado_combustivel": "15.000",
       "consumo_estimado_oleo": "2.000",
@@ -608,6 +688,7 @@
       "tipo_locomocao": "TERRESTRE",
       "capacidade_carga_kg": "25000.0",
       "capacidade_pessoas": 2,
+      "tipo_veiculo": 4,
       "tipo_combustivel": 2,
       "consumo_estimado_combustivel": "2.200",
       "consumo_estimado_oleo": "1.000",
@@ -626,6 +707,7 @@
       "tipo_locomocao": "TERRESTRE",
       "capacidade_carga_kg": "10.5",
       "capacidade_pessoas": 20,
+      "tipo_veiculo": 9,
       "tipo_combustivel": 3,
       "consumo_estimado_combustivel": "15.000",
       "consumo_estimado_oleo": "2.000",
@@ -643,6 +725,7 @@
       "tipo_locomocao": "TERRESTRE",
       "capacidade_carga_kg": "10.5",
       "capacidade_pessoas": 20,
+      "tipo_veiculo": 3,
       "tipo_combustivel": 1,
       "consumo_estimado_combustivel": "15.000",
       "consumo_estimado_oleo": "2.000",
@@ -660,6 +743,7 @@
       "tipo_locomocao": "TERRESTRE",
       "capacidade_carga_kg": "10.5",
       "capacidade_pessoas": 20,
+      "tipo_veiculo": 3,
       "tipo_combustivel": 4,
       "consumo_estimado_combustivel": "15.000",
       "consumo_estimado_oleo": "2.000",
@@ -677,6 +761,7 @@
       "tipo_locomocao": "TERRESTRE",
       "capacidade_carga_kg": "10.5",
       "capacidade_pessoas": 20,
+      "tipo_veiculo": 3,
       "tipo_combustivel": 5,
       "consumo_estimado_combustivel": "15.000",
       "consumo_estimado_oleo": "2.000",
@@ -694,6 +779,7 @@
       "tipo_locomocao": "TERRESTRE",
       "capacidade_carga_kg": "1200.0",
       "capacidade_pessoas": 4,
+      "tipo_veiculo": 10,
       "tipo_combustivel": 3,
       "consumo_estimado_combustivel": "10.000",
       "consumo_estimado_oleo": "0.200",
@@ -711,6 +797,7 @@
       "tipo_locomocao": "TERRESTRE",
       "capacidade_carga_kg": "10.5",
       "capacidade_pessoas": 20,
+      "tipo_veiculo": 9,
       "tipo_combustivel": 3,
       "consumo_estimado_combustivel": "15.000",
       "consumo_estimado_oleo": "2.000",
@@ -728,6 +815,7 @@
       "tipo_locomocao": "TERRESTRE",
       "capacidade_carga_kg": "10.5",
       "capacidade_pessoas": 20,
+      "tipo_veiculo": 2,
       "tipo_combustivel": 1,
       "consumo_estimado_combustivel": "15.000",
       "consumo_estimado_oleo": "2.000",
@@ -745,6 +833,7 @@
       "tipo_locomocao": "TERRESTRE",
       "capacidade_carga_kg": "10.5",
       "capacidade_pessoas": 20,
+      "tipo_veiculo": 2,
       "tipo_combustivel": 4,
       "consumo_estimado_combustivel": "15.000",
       "consumo_estimado_oleo": "2.000",
@@ -762,6 +851,7 @@
       "tipo_locomocao": "TERRESTRE",
       "capacidade_carga_kg": "10.5",
       "capacidade_pessoas": 20,
+      "tipo_veiculo": 2,
       "tipo_combustivel": 5,
       "consumo_estimado_combustivel": "15.000",
       "consumo_estimado_oleo": "2.000",
@@ -779,6 +869,7 @@
       "tipo_locomocao": "FLUVIAL",
       "capacidade_carga_kg": "600.0",
       "capacidade_pessoas": 5,
+      "tipo_veiculo": 7,
       "tipo_combustivel": 1,
       "consumo_estimado_combustivel": "15.000",
       "consumo_estimado_oleo": "0.500",
@@ -796,6 +887,7 @@
       "tipo_locomocao": "FLUVIAL",
       "capacidade_carga_kg": "1200.0",
       "capacidade_pessoas": 15,
+      "tipo_veiculo": 7,
       "tipo_combustivel": 1,
       "consumo_estimado_combustivel": "25.000",
       "consumo_estimado_oleo": "1.000",
@@ -813,6 +905,7 @@
       "tipo_locomocao": "FLUVIAL",
       "capacidade_carga_kg": "800.0",
       "capacidade_pessoas": 4,
+      "tipo_veiculo": 7,
       "tipo_combustivel": 1,
       "consumo_estimado_combustivel": "20.000",
       "consumo_estimado_oleo": "0.800",
@@ -830,6 +923,7 @@
       "tipo_locomocao": "FLUVIAL",
       "capacidade_carga_kg": "5000.0",
       "capacidade_pessoas": 3,
+      "tipo_veiculo": 8,
       "tipo_combustivel": 2,
       "consumo_estimado_combustivel": "12.000",
       "consumo_estimado_oleo": "2.000",
@@ -1293,14 +1387,14 @@
     "model": "operacao.tiposervico",
     "pk": 1,
     "fields": {
-      "nome": "ÔNIBUS"
+      "nome": "TRANSPORTE ESCOLAR"
     }
   },
   {
     "model": "operacao.tiposervico",
     "pk": 2,
     "fields": {
-      "nome": "CAMINHONETE"
+      "nome": "TRANSPORTE DE MERENDA"
     }
   },
   {
@@ -1314,14 +1408,21 @@
     "model": "operacao.tiposervico",
     "pk": 4,
     "fields": {
-      "nome": "MOTOCICLETA"
+      "nome": "TRANSPORTE DE MEDICAMENTOS"
     }
   },
   {
     "model": "operacao.tiposervico",
     "pk": 5,
     "fields": {
-      "nome": "BARQUEIRO"
+      "nome": "TRANSPORTE DE ENTIDADE PÚBLICA"
+    }
+  },
+  {
+    "model": "operacao.tiposervico",
+    "pk": 6,
+    "fields": {
+      "nome": "COROTE"
     }
   },
   {
@@ -1329,6 +1430,7 @@
     "pk": 1,
     "fields": {
       "pessoa": 1,
+      "secretaria": 1,
       "tipo_servico": 1,
       "is_principal": true
     }
@@ -1338,6 +1440,7 @@
     "pk": 2,
     "fields": {
       "pessoa": 2,
+      "secretaria": 1,
       "tipo_servico": 2,
       "is_principal": true
     }
@@ -1347,6 +1450,7 @@
     "pk": 3,
     "fields": {
       "pessoa": 3,
+      "secretaria": 2,
       "tipo_servico": 3,
       "is_principal": true
     }
@@ -1356,6 +1460,7 @@
     "pk": 4,
     "fields": {
       "pessoa": 4,
+      "secretaria": 3,
       "tipo_servico": 4,
       "is_principal": true
     }
@@ -1365,6 +1470,7 @@
     "pk": 5,
     "fields": {
       "pessoa": 5,
+      "secretaria": 4,
       "tipo_servico": 5,
       "is_principal": true
     }
@@ -1374,6 +1480,7 @@
     "pk": 6,
     "fields": {
       "pessoa": 6,
+      "secretaria": 1,
       "tipo_servico": 1,
       "is_principal": true
     }
@@ -1383,6 +1490,7 @@
     "pk": 7,
     "fields": {
       "pessoa": 7,
+      "secretaria": 2,
       "tipo_servico": 2,
       "is_principal": true
     }
@@ -1392,6 +1500,7 @@
     "pk": 8,
     "fields": {
       "pessoa": 8,
+      "secretaria": 3,
       "tipo_servico": 3,
       "is_principal": true
     }
@@ -1401,6 +1510,7 @@
     "pk": 9,
     "fields": {
       "pessoa": 9,
+      "secretaria": 4,
       "tipo_servico": 4,
       "is_principal": true
     }
@@ -1410,6 +1520,7 @@
     "pk": 10,
     "fields": {
       "pessoa": 10,
+      "secretaria": 1,
       "tipo_servico": 5,
       "is_principal": true
     }
@@ -1419,6 +1530,7 @@
     "pk": 11,
     "fields": {
       "pessoa": 11,
+      "secretaria": 2,
       "tipo_servico": 1,
       "is_principal": true
     }
@@ -1428,6 +1540,7 @@
     "pk": 12,
     "fields": {
       "pessoa": 12,
+      "secretaria": 3,
       "tipo_servico": 2,
       "is_principal": true
     }
@@ -1437,6 +1550,7 @@
     "pk": 13,
     "fields": {
       "pessoa": 13,
+      "secretaria": 4,
       "tipo_servico": 3,
       "is_principal": true
     }
@@ -1446,6 +1560,7 @@
     "pk": 14,
     "fields": {
       "pessoa": 14,
+      "secretaria": 1,
       "tipo_servico": 4,
       "is_principal": true
     }
@@ -1455,6 +1570,7 @@
     "pk": 15,
     "fields": {
       "pessoa": 15,
+      "secretaria": 2,
       "tipo_servico": 5,
       "is_principal": true
     }
@@ -1464,6 +1580,7 @@
     "pk": 16,
     "fields": {
       "pessoa": 1,
+      "secretaria": 3,
       "tipo_servico": 2,
       "is_principal": false
     }
@@ -1473,6 +1590,7 @@
     "pk": 17,
     "fields": {
       "pessoa": 17,
+      "secretaria": 4,
       "tipo_servico": 5,
       "is_principal": true
     }
@@ -1482,6 +1600,7 @@
     "pk": 18,
     "fields": {
       "pessoa": 18,
+      "secretaria": 1,
       "tipo_servico": 5,
       "is_principal": true
     }
@@ -1491,6 +1610,7 @@
     "pk": 19,
     "fields": {
       "pessoa": 19,
+      "secretaria": 2,
       "tipo_servico": 4,
       "is_principal": true
     }
@@ -1500,6 +1620,7 @@
     "pk": 20,
     "fields": {
       "pessoa": 20,
+      "secretaria": 3,
       "tipo_servico": 5,
       "is_principal": true
     }

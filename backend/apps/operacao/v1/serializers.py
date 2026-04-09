@@ -26,9 +26,9 @@ class TipoServicoLookupSerializer(serializers.ModelSerializer):
 # --- SERIALIZERS DE AlocacaoServico ---
 
 class AlocacaoServicoReadSerializer(serializers.ModelSerializer):
-    pessoa_id = serializers.IntegerField(source='pessoa.id', read_only=True)
+    pessoa_id = serializers.IntegerField(read_only=True)
     pessoa_nome = serializers.CharField(source='pessoa.nome', read_only=True)
-    tipo_servico_id = serializers.IntegerField(source='tipo_servico.id', read_only=True)
+    tipo_servico_id = serializers.IntegerField(read_only=True)
     tipo_servico_nome = serializers.CharField(source='tipo_servico.nome', read_only=True)
 
     class Meta:
@@ -44,13 +44,23 @@ class AlocacaoServicoWriteSerializer(serializers.ModelSerializer):
         model = AlocacaoServico
         fields = ['id', 'pessoa_id', 'tipo_servico_id', 'is_principal']
 
+class AlocacaoServicoLookupSerializer(serializers.ModelSerializer):
+    value = serializers.ReadOnlyField(source='id')
+    label = serializers.ReadOnlyField(source='pessoa.nome')
+
+    secretaria_id = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = AlocacaoServico
+        fields = ['value', 'label', 'secretaria_id', 'is_principal']
+
 # --- SERIALIZERS DE OPERADOR DE VEÍCULO ---
 
 class OperadorVeiculoReadSerializer(serializers.ModelSerializer):
-    pessoa_id = serializers.IntegerField(source='pessoa.id', read_only=True)
+    pessoa_id = serializers.IntegerField(read_only=True)
     pessoa_nome = serializers.CharField(source='pessoa.nome', read_only=True)
     
-    veiculo_id = serializers.IntegerField(source='veiculo.id', read_only=True)
+    veiculo_id = serializers.IntegerField(read_only=True)
     veiculo_placa = serializers.CharField(source='veiculo.placa', read_only=True)
     veiculo_modelo = serializers.CharField(source='veiculo.modelo', read_only=True)
 
@@ -67,24 +77,33 @@ class OperadorVeiculoWriteSerializer(serializers.ModelSerializer):
         model = OperadorVeiculo
         fields = ['id', 'pessoa_id', 'veiculo_id', 'is_principal']
 
+class OperadorVeiculoLookupSerializer(serializers.ModelSerializer):
+    value = serializers.ReadOnlyField(source='id')
+    label = serializers.ReadOnlyField(source='pessoa.nome')
+
+    secretaria_id = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = OperadorVeiculo
+        fields = ['value', 'label', 'secretaria_id', 'is_principal']
 
 # --- SERIALIZERS DE GUIA (ABASTECIMENTO) ---
 
 class GuiaReadSerializer(serializers.ModelSerializer):
     # Tradução das 5 Chaves Estrangeiras para o Frontend
-    pessoa_id = serializers.IntegerField(source='pessoa.id', read_only=True)
+    pessoa_id = serializers.IntegerField(read_only=True)
     pessoa_nome = serializers.CharField(source='pessoa.nome', read_only=True)
 
-    veiculo_id = serializers.IntegerField(source='veiculo.id', read_only=True)
+    veiculo_id = serializers.IntegerField(read_only=True)
     veiculo_placa = serializers.CharField(source='veiculo.placa', read_only=True)
 
-    rota_id = serializers.IntegerField(source='rota.id', read_only=True)
+    rota_id = serializers.IntegerField(read_only=True)
     rota_nome = serializers.CharField(source='rota.nome', read_only=True)
 
-    tipo_servico_id = serializers.IntegerField(source='tipo_servico.id', read_only=True)
+    tipo_servico_id = serializers.IntegerField(read_only=True)
     tipo_servico_nome = serializers.CharField(source='tipo_servico.nome', read_only=True)
 
-    secretaria_id = serializers.IntegerField(source='secretaria.id', read_only=True)
+    secretaria_id = serializers.IntegerField(read_only=True)
     secretaria_nome = serializers.CharField(source='secretaria.nome', read_only=True)
     secretaria_sigla = serializers.CharField(source='secretaria.sigla', read_only=True)
 

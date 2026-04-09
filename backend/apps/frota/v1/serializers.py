@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from apps.frota.models import Veiculo, Rota, TipoCombustivel
+from apps.frota.models import Veiculo, Rota, TipoCombustivel, TipoVeiculo
 from apps.organizacao.models import Secretaria, Instituicao
 
 # --- SERIALIZERS DE VEÍCULO ---
@@ -15,6 +15,11 @@ class VeiculoWriteSerializer(serializers.ModelSerializer):
         source='tipo_combustivel',
         queryset=TipoCombustivel.objects.all()
     )
+    
+    tipo_veiculo_id = serializers.PrimaryKeyRelatedField(
+        source='tipo_veiculo',
+        queryset=TipoVeiculo.objects.all()
+    )
 
     class Meta:
         model = Veiculo
@@ -23,17 +28,20 @@ class VeiculoWriteSerializer(serializers.ModelSerializer):
             'capacidade_carga_kg', 'capacidade_pessoas', 
             'consumo_estimado_combustivel', 'consumo_estimado_oleo',
             'unidade_consumo', 'hodometro_atual', 
-            'secretaria_id', 'tipo_combustivel_id',
+            'secretaria_id', 'tipo_combustivel_id', 'tipo_veiculo_id'
         ]
 
 # DTO de Leitura
 class VeiculoReadSerializer(serializers.ModelSerializer):
     # Relacionamentos
-    secretaria_id = serializers.IntegerField(source='secretaria.id', read_only=True)
+    secretaria_id = serializers.IntegerField(read_only=True)
     secretaria_nome = serializers.CharField(source='secretaria.nome', read_only=True)
 
-    tipo_combustivel_id = serializers.IntegerField(source='tipo_combustivel.id', read_only=True)
-    tipo_combustivel_nome = serializers.CharField(source='tipo_combustivel.nome', read_only=True)
+    tipo_combustivel_id = serializers.IntegerField(read_only=True)
+    tipo_combustivel_nome = serializers.CharField(source='tipo_combustivel.nome', read_only=True)    
+
+    tipo_veiculo_id = serializers.IntegerField(read_only=True)
+    tipo_veiculo_nome = serializers.CharField(source='tipo_veiculo.nome', read_only=True)
     
     # Displays (Choices)
     tipo_locomocao_display = serializers.CharField(source='get_tipo_locomocao_display', read_only=True)
@@ -44,9 +52,11 @@ class VeiculoReadSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'modelo', 'placa',
             'consumo_estimado_combustivel', 'unidade_consumo', 'unidade_consumo_display',
+            'hodometro_atual',
             'tipo_locomocao', 'tipo_locomocao_display',
             'tipo_combustivel_id', 'tipo_combustivel_nome',
-            'secretaria_id', 'secretaria_nome'
+            'tipo_veiculo_id', 'tipo_veiculo_nome',
+            'secretaria_id', 'secretaria_nome',
         ]
 
 # DTO de Lookup
@@ -57,8 +67,9 @@ class VeiculoLookupSerializer(serializers.ModelSerializer):
     label = serializers.SerializerMethodField()
     value = serializers.ReadOnlyField(source='id')
 
-    secretaria_id = serializers.IntegerField(source='secretaria.id', read_only=True)
-    tipo_combustivel_id = serializers.IntegerField(source='tipo_combustivel.id', read_only=True)
+    secretaria_id = serializers.IntegerField(read_only=True)
+    tipo_combustivel_id = serializers.IntegerField(read_only=True)
+    tipo_veiculo_id = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Veiculo
@@ -68,6 +79,7 @@ class VeiculoLookupSerializer(serializers.ModelSerializer):
             'consumo_estimado_combustivel',
             'unidade_consumo',
             'tipo_combustivel_id',
+            'tipo_veiculo_id',
             'secretaria_id'
         ]
 
@@ -102,11 +114,11 @@ class RotaWriteSerializer(serializers.ModelSerializer):
 # DTO de Leitura
 class RotaReadSerializer(serializers.ModelSerializer):
     # Relacionamento: Secretaria
-    secretaria_id = serializers.IntegerField(source='secretaria.id', read_only=True)
+    secretaria_id = serializers.IntegerField(read_only=True)
     secretaria_nome = serializers.CharField(source='secretaria.nome', read_only=True)
     
     # Relacionamento: Instituição
-    instituicao_id = serializers.IntegerField(source='instituicao.id', read_only=True)
+    instituicao_id = serializers.IntegerField(read_only=True)
     instituicao_nome = serializers.CharField(source='instituicao.nome', read_only=True)
     
     # Displays
@@ -129,7 +141,7 @@ class RotaLookupSerializer(serializers.ModelSerializer):
     label = serializers.ReadOnlyField(source='nome')
     value = serializers.ReadOnlyField(source='id')
 
-    secretaria_id = serializers.IntegerField(source='secretaria.id', read_only=True)
+    secretaria_id = serializers.IntegerField(read_only=True)
     instituicao_id = serializers.IntegerField(source='instituicao.id', read_only=True)
 
     class Meta:
@@ -157,6 +169,24 @@ class TipoCombustivelLookupSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = TipoCombustivel
+        fields = [
+            'value',
+            'label',
+        ]
+
+# --- SERIALIZERS DE TipoVeiculo ---
+
+class TipoVeiculoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TipoVeiculo
+        fields = "__all__"
+
+class TipoVeiculoLookupSerializer(serializers.ModelSerializer):
+    value = serializers.ReadOnlyField(source='id')
+    label = serializers.ReadOnlyField(source='nome')
+    
+    class Meta:
+        model = TipoVeiculo
         fields = [
             'value',
             'label',
