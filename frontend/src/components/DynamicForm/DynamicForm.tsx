@@ -41,7 +41,9 @@ export const DynamicForm = <T extends FieldValues>({
   // Motor de observação que dispara o callback para o Pai
   useEffect(() => {
     const subscription = watch((value, { name, type }) => {
-      if (name && type === 'change' && onValuesChange) {
+      // name garante que não dispare na inicialização do form (onde name é undefined)
+      // Removemi a trava do type === 'change' para aceitar os setValues dos custom components
+      if (name && onValuesChange) {
         onValuesChange({ name, value: (value as any)[name] }, value as Partial<T>, setValue);
       }
     });
@@ -164,6 +166,43 @@ export const DynamicForm = <T extends FieldValues>({
     }
   };
 
+  // Vai para o próximo campo ao apertar Enter
+  const handleFormKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
+    const target = e.target as HTMLElement;
+
+    // Se a tecla for Enter e não estivermos segurando Shift
+    if (e.key === 'Enter' && !e.shiftKey) {
+      
+      // EXCEÇÕES: Não queremos bloquear o Enter nesses casos:
+      // 1. Textarea (onde o Enter serve para quebrar linha)
+      // 2. Botões (onde o Enter serve para clicar, como no botão Salvar ou no Quick Add)
+      if (target.tagName === 'TEXTAREA' || target.tagName === 'BUTTON') {
+        return;
+      }
+
+      e.preventDefault(); // Bloqueia o submit automático do form
+
+      // Pega o formulário inteiro
+      const form = e.currentTarget;
+      
+      // Cria uma lista com todos os campos que podem receber foco (ignorando os desativados/hidden/readOnly)
+      const focusableElements = Array.from(
+        form.querySelectorAll(
+          'input:not([type="hidden"]):not([disabled]):not([readonly]), select:not([disabled]), textarea:not([disabled]):not([readonly]), button[type="submit"]:not([disabled])'
+        )
+      ) as HTMLElement[];
+
+      // Descobre em qual posição da lista nós estamos agora
+      const currentIndex = focusableElements.indexOf(target);
+
+      // Se achou o elemento atual e ele não for o último da lista
+      if (currentIndex > -1 && currentIndex < focusableElements.length - 1) {
+        // Joga o foco para o próximo elemento!
+        focusableElements[currentIndex + 1].focus();
+      }
+    }
+  };
+
   return (
     <div className={styles.layoutContainer}>
       {(title || subtitle) && (
@@ -173,7 +212,11 @@ export const DynamicForm = <T extends FieldValues>({
         </header>
       )}
 
-      <form onSubmit={handleSubmit(onSubmit)} className={styles.formContainer}>
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        onKeyDown={handleFormKeyDown}
+        className={styles.formContainer}
+      >
       {schema.fields.map((field) => (
         <div 
           key={field.name} 
