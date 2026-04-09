@@ -1,10 +1,20 @@
 import axios from "axios";
 
+// Utilitário para formatar valores de erro do DRF (geralmente arrays de strings)
 function stringifyValue(value: unknown): string {
+  if (value == null || value == undefined) return ""; // Cobre null e undefined
   if (Array.isArray(value)) return value.map(stringifyValue).join(", ");
   if (typeof value === "string") return value;
-  if (value == null || value === undefined) return "";
-  if (typeof value === "object") return JSON.stringify(value); // Previne a exibição "[object Object]"
+  
+  // DRF pode retornar erros aninhados. Ex: perfil: { idade: ["Obrigatória"] }
+  // Extraímos os valores internos em vez de mostrar um JSON crú na tela.
+  if (typeof value === "object") {
+    return Object.values(value as Record<string, unknown>)
+      .map(stringifyValue)
+      .filter(Boolean)
+      .join(", ");
+  }
+  
   return String(value);
 }
 
@@ -13,41 +23,61 @@ export function getApiErrorMessage(err: unknown, fallback: string = "Ocorreu um 
     return err instanceof Error ? err.message : fallback;
   }
 
-  // Proteção para HTML do Django em erros de servidor (500+)
-  if (err.response?.status && err.response.status >= 500) {
-    return "Erro interno no servidor. Tente novamente mais tarde.";
+  // 1. Erro de Rede (Servidor fora do ar, CORS, ou IP errado)
+  if (!err.response) {
+    const baseMsg = "Não foi possível conectar ao servidor. Verifique sua conexão com a internet.";
+    
+    // DEBUG PARA DESENVOLVIMENTO: Só mostra o IP se estiver rodando localmente (npm run dev)
+    if (import.meta.env.DEV) {
+      return `${baseMsg}\n(Dev Info: Verifique se o backend em ${import.meta.env.VITE_API_URL} está rodando e acessível)`;
+    }
+    
+    return baseMsg;
   }
 
-  const data = err.response?.data as unknown;
-  if (!data) return fallback;
+  const status = err.response.status;
+  const data = err.response.data as unknown;
 
-  // Proteção para strings puras (só retorna se for um erro curto, não um HTML)
+  // 2. Erros críticos do servidor (500+) ou respostas HTML (Django Debug Page)
+  // Usa Regex para pegar qualquer variação de página HTML de erro
+  if (status >= 500 || (typeof data === "string" && /<html/i.test(data))) {
+    return "Erro interno no servidor. Nossa equipe já foi notificada. Tente novamente mais tarde.";
+  }
+
+  // 3. Se a resposta for apenas uma string de erro simples (não HTML)
   if (typeof data === "string") {
-    return data.includes("<html") ? "Erro interno no servidor." : data;
+    return data.trim() || fallback;
   }
 
-  if (typeof data === "object" && data !== null) {
+  // 4. Tratamento de Erros de Validação do Django REST Framework (DRF)
+  if (data && typeof data === "object") {
     const anyData = data as Record<string, unknown>;
 
-    // Padrão de exceção explícita do DRF
-    if (typeof anyData.detail === "string") return anyData.detail;
-
-    // Tratamento especial para regras de validação do Model (unique_together, etc)
-    if (anyData.non_field_errors) {
-        return stringifyValue(anyData.non_field_errors);
+    // Padrão de exceção explícita do DRF (ex: Autenticação falhou)
+    if (typeof anyData.detail === "string") {
+      return anyData.detail;
     }
 
+    // Tratamento especial para regras de validação globais do Model (unique_together, etc)
+    if (anyData.non_field_errors) {
+      return stringifyValue(anyData.non_field_errors);
+    }
+
+    // Erros atrelados a campos específicos do formulário
     const parts: string[] = [];
     for (const [key, value] of Object.entries(anyData)) {
       const msg = stringifyValue(value).trim();
       if (msg) {
+        // Formata a chave: "first_name" -> "First Name"
         const humanKey = key.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase());
         parts.push(`${humanKey}: ${msg}`);
       }
     }
-    if (parts.length) return parts.join("\n");
+    
+    if (parts.length > 0) {
+      return parts.join("\n");
+    }
   }
 
   return fallback;
 }
-
