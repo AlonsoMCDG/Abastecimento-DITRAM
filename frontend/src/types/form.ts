@@ -14,8 +14,8 @@ export interface TableSchema {
 // 2. TIPO PARA FORMULÁRIO
 
 export type FieldType = 
-  | 'text' | 'number' | 'date' | 'datetime-local' 
-  | 'checkbox' | 'textarea' | 'select' | 'datalist' | 'hidden';
+  | 'text' | 'number' | 'date' | 'datetime-local' | 'checkbox' | 'textarea' 
+  | 'select' | 'datalist' | 'hidden' | 'email' | 'tel';
 
 // Interface para os botões de ação
 export interface QuickAction {
