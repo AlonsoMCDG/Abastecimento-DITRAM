@@ -95,9 +95,12 @@ class OperadorVeiculoViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
 
 
 class GuiaViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
-    # PERFORMANCE CRÍTICA: Faz o JOIN nas 5 tabelas de uma só vez
+    # ==========================================
+    # Faz o INNER JOIN entre as tabelas para prevenção de N+1 Queries
+    # ==========================================
     queryset = Guia.objects.select_related(
-        'pessoa', 'veiculo', 'secretaria', 'rota', 'tipo_servico'
+        'pessoa', 'veiculo', 'secretaria', 'rota', 'tipo_servico',
+        'instituicao', 'tipo_veiculo', 'tipo_combustivel', 'usuario'
     ).all()
 
     permission_classes = [IsAuthenticated, GuiaAbastecimentoPermission]
@@ -108,9 +111,11 @@ class GuiaViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
         filters.OrderingFilter
     ]
 
-    # Filtros exatos: Perfeito para relatórios (ex: "Todas as guias da SEME no veículo X")
+    # Filtros exatos atualizados com as novas FKs (Excelentes para relatórios)
     filterset_fields = [
-        'pessoa_id', 'veiculo_id', 'secretaria_id', 'rota_id', 'tipo_servico_id'
+        'pessoa_id', 'veiculo_id', 'secretaria_id', 'rota_id', 
+        'tipo_servico_id', 'instituicao_id', 'tipo_veiculo_id', 
+        'tipo_combustivel_id', 'usuario_id'
     ]
 
     # Busca Textual cruzando para as outras tabelas
@@ -118,13 +123,21 @@ class GuiaViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
         'veiculo__placa', 
         'pessoa__nome', 
         'pessoa__cpf', 
-        'secretaria__sigla'
+        'secretaria__sigla',
+        'instituicao__nome',
     ]
 
-    ordering_fields = ['data_hora', 'id', 'hodometro_atual']
+    ordering_fields = ['data_hora', 'id', 'hodometro_atual', 'secretaria__nome', 'pessoa__nome']
     ordering = ['-data_hora']
 
     def get_serializer_class(self):
         if self.request.method in ['GET', 'HEAD', 'OPTIONS']:
             return GuiaReadSerializer
         return GuiaWriteSerializer
+
+    # ==========================================
+    # INJEÇÃO DE AUTORIA (Segurança)
+    # ==========================================
+    def perform_create(self, serializer):
+        # O frontend não envia o usuario_id. O backend extrai do token JWT.
+        serializer.save(usuario=self.request.user)

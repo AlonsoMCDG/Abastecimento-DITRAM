@@ -1,8 +1,8 @@
 from django.db import models
 
 from apps.pessoas.models import Pessoa
-from apps.frota.models import Veiculo, Rota
-from apps.organizacao.models import Secretaria
+from apps.frota.models import Veiculo, Rota, TipoVeiculo, TipoCombustivel
+from apps.organizacao.models import Secretaria, Instituicao
 
 class TipoServico(models.Model):
     nome = models.CharField(max_length=100, verbose_name="Nome do Serviço")
@@ -47,28 +47,67 @@ class OperadorVeiculo(models.Model):
     def __str__(self):
         return f"{self.pessoa.nome} -> {self.veiculo.placa}"
 
+from django.db import models
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 class Guia(models.Model):
     """Registro de Abastecimento/Serviço da Frota"""
     data_hora = models.DateTimeField(verbose_name="Data e Hora")
 
-    pessoa = models.ForeignKey(Pessoa, on_delete=models.PROTECT, related_name='guias', verbose_name='Pessoa')
+    # ==========================================
+    # REFERÊNCIAS PRINCIPAIS
+    # ==========================================
+    pessoa = models.ForeignKey(Pessoa, on_delete=models.PROTECT, related_name='guias', verbose_name='Motorista')
     veiculo = models.ForeignKey(Veiculo, on_delete=models.PROTECT, related_name='guias', verbose_name='Veículo')
     secretaria = models.ForeignKey(Secretaria, on_delete=models.PROTECT, related_name='guias', verbose_name='Secretaria')
+    instituicao = models.ForeignKey(Instituicao, on_delete=models.PROTECT, related_name='guias', verbose_name='Instituição')
 
-    # Pode ser passado uma rota existente (rota) ou uma genérica (rota_texto)
+    # Desnormalização histórica: garante que saibamos o que era no dia da guia
+    tipo_veiculo = models.ForeignKey(TipoVeiculo, on_delete=models.PROTECT, related_name='guias')
+    tipo_combustivel = models.ForeignKey(TipoCombustivel, on_delete=models.PROTECT, related_name='guias')
+
+    # ==========================================
+    # CAMPOS COM TEXTO GENÉRICO (Fallback)
+    # ==========================================
     rota = models.ForeignKey(Rota, on_delete=models.PROTECT, related_name='guias', null=True, blank=True)
     rota_texto = models.CharField(max_length=200, null=True, blank=True)
 
-    # Mesma coisa com o tipo_servico e tipo_servico_texto
     tipo_servico = models.ForeignKey(TipoServico, on_delete=models.PROTECT, related_name='guias')
     tipo_servico_texto = models.CharField(max_length=200, null=True, blank=True)
 
-    quantidade_combustivel = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Qtd Combustível (L)")
+    # ==========================================
+    # VOLUMES (Combustível com 3 casas, Óleo com 2)
+    # ==========================================
+    quantidade_combustivel = models.DecimalField(max_digits=10, decimal_places=3, verbose_name="Qtd Combustível (L)")
     quantidade_oleo = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, verbose_name="Qtd Óleo (L)")
-    hodometro_atual = models.PositiveIntegerField(verbose_name="Hodômetro")
 
+    # ==========================================
+    # HODÔMETROS (Alterado para DecimalField)
+    # ==========================================
+    hodometro_atual = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Hodômetro Atual")
+    hodometro_anterior = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Hodômetro Anterior")
+    distancia_percorrida = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Distância Percorrida")
+
+    # ==========================================
+    # AUDITORIA E EXTRAS
+    # ==========================================
     observacao = models.TextField(max_length=256, null=True, blank=True)
+    
+    # Rastreabilidade de quem emitiu a guia no sistema
+    usuario = models.ForeignKey(User, on_delete=models.PROTECT, related_name='guias_emitidas', verbose_name="Emitido por")
+    criado_em = models.DateTimeField(auto_now_add=True)
+    atualizado_em = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Guia de Abastecimento"
+        verbose_name_plural = "Guias de Abastecimento"
+        ordering = ['-data_hora'] # Facilita listar as mais recentes primeiro
+
+    def __str__(self):
+        return f"Guia #{self.id} - {self.veiculo} - {self.data_hora.strftime('%d/%m/%Y')}"
+
 
     class Meta:
         verbose_name = "Guia de Abastecimento"

@@ -1765,14 +1765,22 @@
     "pk": 1,
     "fields": {
       "data_hora": "2026-03-01T08:00:00Z",
+      "criado_em": "2026-03-01T08:00:00Z",
+      "atualizado_em": "2026-03-01T08:00:00Z",
       "pessoa": 1,
       "veiculo": 1,
       "secretaria": 1,
+      "instituicao": 1,
       "rota": 1,
       "tipo_servico": 1,
+      "tipo_veiculo": 1,
+      "tipo_combustivel": 2,
       "quantidade_combustivel": "31.75",
       "quantidade_oleo": "0.00",
-      "hodometro_atual": 10125
+      "hodometro_anterior": "10132.25",
+      "distancia_percorrida": "7.25",
+      "hodometro_atual": "10139.50",
+      "usuario": 1
     }
   },
   {
@@ -1780,14 +1788,22 @@
     "pk": 2,
     "fields": {
       "data_hora": "2026-03-02T09:30:00Z",
+      "criado_em": "2026-03-02T09:30:00Z",
+      "atualizado_em": "2026-03-02T09:30:00Z",
       "pessoa": 2,
       "veiculo": 2,
       "secretaria": 1,
       "rota": 2,
+      "instituicao": 1,
       "tipo_servico": 2,
+      "tipo_veiculo": 4,
+      "tipo_combustivel": 3,
       "quantidade_combustivel": "33.50",
       "quantidade_oleo": "0.00",
-      "hodometro_atual": 10250
+      "hodometro_anterior": "10250.00",
+      "distancia_percorrida": "9.50",
+      "hodometro_atual": "10259.50",
+      "usuario": 1
     }
   },
   {
@@ -1795,14 +1811,22 @@
     "pk": 3,
     "fields": {
       "data_hora": "2026-03-03T14:15:00Z",
+      "criado_em": "2026-03-03T14:15:00Z",
+      "atualizado_em": "2026-03-03T14:15:00Z",
       "pessoa": 3,
       "veiculo": 3,
       "secretaria": 1,
       "rota": 3,
+      "instituicao": 1,
       "tipo_servico": 3,
+      "tipo_veiculo": 2,
+      "tipo_combustivel": 1,
       "quantidade_combustivel": "35.25",
       "quantidade_oleo": "2.00",
-      "hodometro_atual": 10375
+      "hodometro_anterior": "10375.00",
+      "distancia_percorrida": "11.75",
+      "hodometro_atual": "10386.75",
+      "usuario": 1
     }
   },
   {
@@ -1810,14 +1834,22 @@
     "pk": 4,
     "fields": {
       "data_hora": "2026-03-04T07:45:00Z",
+      "criado_em": "2026-03-04T07:45:00Z",
+      "atualizado_em": "2026-03-04T07:45:00Z",
       "pessoa": 4,
       "veiculo": 4,
       "secretaria": 1,
       "rota": 4,
+      "instituicao": 1,
       "tipo_servico": 4,
+      "tipo_veiculo": 2,
+      "tipo_combustivel": 4,
       "quantidade_combustivel": "37.00",
       "quantidade_oleo": "0.00",
-      "hodometro_atual": 10500
+      "hodometro_anterior": "10500.00",
+      "distancia_percorrida": "14.00",
+      "hodometro_atual": "10514.00",
+      "usuario": 1
     }
   },
   {
@@ -1825,14 +1857,22 @@
     "pk": 5,
     "fields": {
       "data_hora": "2026-03-05T10:00:00Z",
+      "criado_em": "2026-03-05T10:00:00Z",
+      "atualizado_em": "2026-03-05T10:00:00Z",
       "pessoa": 5,
       "veiculo": 21,
       "secretaria": 1,
       "rota": 21,
+      "instituicao": 1,
       "tipo_servico": 5,
+      "tipo_veiculo": 7,
+      "tipo_combustivel": 1,
       "quantidade_combustivel": "38.75",
       "quantidade_oleo": "0.00",
-      "hodometro_atual": 450
+      "hodometro_anterior": "450.00",
+      "distancia_percorrida": "12.50",
+      "hodometro_atual": "462.50",
+      "usuario": 1
     }
   },
   {
@@ -1840,14 +1880,22 @@
     "pk": 6,
     "fields": {
       "data_hora": "2026-03-06T07:20:00Z",
+      "criado_em": "2026-03-06T07:20:00Z",
+      "atualizado_em": "2026-03-06T07:20:00Z",
       "pessoa": 6,
       "veiculo": 6,
       "secretaria": 1,
       "rota": 6,
+      "instituicao": 1,
       "tipo_servico": 1,
+      "tipo_veiculo": 9,
+      "tipo_combustivel": 2,
       "quantidade_combustivel": "45.50",
       "quantidade_oleo": "0.00",
-      "hodometro_atual": 10750
+      "hodometro_anterior": "10750.00",
+      "distancia_percorrida": "18.50",
+      "hodometro_atual": "10768.50",
+      "usuario": 1
     }
   },
   {
@@ -1855,14 +1903,22 @@
     "pk": 7,
     "fields": {
       "data_hora": "2026-03-07T08:15:00Z",
+      "criado_em": "2026-03-07T08:15:00Z",
+      "atualizado_em": "2026-03-07T08:15:00Z",
       "pessoa": 7,
       "veiculo": 7,
       "secretaria": 1,
       "rota": 7,
+      "instituicao": 1,
       "tipo_servico": 2,
+      "tipo_veiculo": 4,
+      "tipo_combustivel": 3,
       "quantidade_combustivel": "42.25",
       "quantidade_oleo": "0.00",
-      "hodometro_atual": 10875
+      "hodometro_anterior": "10875.00",
+      "distancia_percorrida": "20.75",
+      "hodometro_atual": "10895.75",
+      "usuario": 1
     }
   },
   {
@@ -1870,14 +1926,22 @@
     "pk": 8,
     "fields": {
       "data_hora": "2026-03-08T09:00:00Z",
+      "criado_em": "2026-03-08T09:00:00Z",
+      "atualizado_em": "2026-03-08T09:00:00Z",
       "pessoa": 8,
       "veiculo": 8,
       "secretaria": 2,
       "rota": 8,
+      "instituicao": 1,
       "tipo_servico": 3,
+      "tipo_veiculo": 5,
+      "tipo_combustivel": 3,
       "quantidade_combustivel": "38.80",
       "quantidade_oleo": "0.50",
-      "hodometro_atual": 58950
+      "hodometro_anterior": "58950.00",
+      "distancia_percorrida": "23.00",
+      "hodometro_atual": "58973.00",
+      "usuario": 1
     }
   },
   {
@@ -1885,14 +1949,22 @@
     "pk": 9,
     "fields": {
       "data_hora": "2026-03-09T10:30:00Z",
+      "criado_em": "2026-03-09T10:30:00Z",
+      "atualizado_em": "2026-03-09T10:30:00Z",
       "pessoa": 9,
       "veiculo": 4,
       "secretaria": 2,
       "rota": 9,
+      "instituicao": 1,
       "tipo_servico": 4,
+      "tipo_veiculo": 2,
+      "tipo_combustivel": 4,
       "quantidade_combustivel": "25.00",
       "quantidade_oleo": "0.00",
-      "hodometro_atual": 32150
+      "hodometro_anterior": "32150.00",
+      "distancia_percorrida": "25.25",
+      "hodometro_atual": "32175.25",
+      "usuario": 1
     }
   },
   {
@@ -1900,14 +1972,22 @@
     "pk": 10,
     "fields": {
       "data_hora": "2026-03-10T14:45:00Z",
+      "criado_em": "2026-03-10T14:45:00Z",
+      "atualizado_em": "2026-03-10T14:45:00Z",
       "pessoa": 10,
       "veiculo": 23,
       "secretaria": 2,
       "rota": 23,
+      "instituicao": 1,
       "tipo_servico": 5,
+      "tipo_veiculo": 7,
+      "tipo_combustivel": 1,
       "quantidade_combustivel": "22.00",
       "quantidade_oleo": "0.80",
-      "hodometro_atual": 910
+      "hodometro_anterior": "910.00",
+      "distancia_percorrida": "45.00",
+      "hodometro_atual": "955.00",
+      "usuario": 1
     }
   },
   {
@@ -1915,14 +1995,22 @@
     "pk": 11,
     "fields": {
       "data_hora": "2026-03-11T07:00:00Z",
+      "criado_em": "2026-03-11T07:00:00Z",
+      "atualizado_em": "2026-03-11T07:00:00Z",
       "pessoa": 11,
       "veiculo": 11,
       "secretaria": 2,
       "rota": 11,
+      "instituicao": 1,
       "tipo_servico": 1,
+      "tipo_veiculo": 4,
+      "tipo_combustivel": 2,
       "quantidade_combustivel": "150.00",
       "quantidade_oleo": "2.00",
-      "hodometro_atual": 210650
+      "hodometro_anterior": "210650.00",
+      "distancia_percorrida": "29.75",
+      "hodometro_atual": "210679.75",
+      "usuario": 1
     }
   },
   {
@@ -1930,14 +2018,22 @@
     "pk": 12,
     "fields": {
       "data_hora": "2026-03-12T11:20:00Z",
+      "criado_em": "2026-03-12T11:20:00Z",
+      "atualizado_em": "2026-03-12T11:20:00Z",
       "pessoa": 12,
       "veiculo": 12,
       "secretaria": 2,
       "rota": 12,
+      "instituicao": 1,
       "tipo_servico": 2,
+      "tipo_veiculo": 9,
+      "tipo_combustivel": 3,
       "quantidade_combustivel": "55.00",
       "quantidade_oleo": "0.00",
-      "hodometro_atual": 11500
+      "hodometro_anterior": "11500.00",
+      "distancia_percorrida": "32.00",
+      "hodometro_atual": "11532.00",
+      "usuario": 1
     }
   },
   {
@@ -1945,14 +2041,22 @@
     "pk": 13,
     "fields": {
       "data_hora": "2026-03-13T16:00:00Z",
+      "criado_em": "2026-03-13T16:00:00Z",
+      "atualizado_em": "2026-03-13T16:00:00Z",
       "pessoa": 13,
       "veiculo": 13,
       "secretaria": 2,
       "rota": 13,
+      "instituicao": 1,
       "tipo_servico": 3,
+      "tipo_veiculo": 3,
+      "tipo_combustivel": 1,
       "quantidade_combustivel": "12.50",
       "quantidade_oleo": "0.50",
-      "hodometro_atual": 10250
+      "hodometro_anterior": "10250.00",
+      "distancia_percorrida": "34.25",
+      "hodometro_atual": "10284.25",
+      "usuario": 1
     }
   },
   {
@@ -1960,14 +2064,22 @@
     "pk": 14,
     "fields": {
       "data_hora": "2026-03-14T08:30:00Z",
+      "criado_em": "2026-03-14T08:30:00Z",
+      "atualizado_em": "2026-03-14T08:30:00Z",
       "pessoa": 14,
       "veiculo": 14,
       "secretaria": 2,
       "rota": 14,
+      "instituicao": 1,
       "tipo_servico": 4,
+      "tipo_veiculo": 3,
+      "tipo_combustivel": 4,
       "quantidade_combustivel": "18.00",
       "quantidade_oleo": "0.00",
-      "hodometro_atual": 11750
+      "hodometro_anterior": "11750.00",
+      "distancia_percorrida": "36.50",
+      "hodometro_atual": "11786.50",
+      "usuario": 1
     }
   },
   {
@@ -1975,14 +2087,22 @@
     "pk": 15,
     "fields": {
       "data_hora": "2026-03-15T09:15:00Z",
+      "criado_em": "2026-03-15T09:15:00Z",
+      "atualizado_em": "2026-03-15T09:15:00Z",
       "pessoa": 15,
       "veiculo": 15,
       "secretaria": 3,
       "rota": 15,
+      "instituicao": 1,
       "tipo_servico": 5,
+      "tipo_veiculo": 3,
+      "tipo_combustivel": 5,
       "quantidade_combustivel": "30.00",
       "quantidade_oleo": "0.00",
-      "hodometro_atual": 11875
+      "hodometro_anterior": "11875.00",
+      "distancia_percorrida": "38.75",
+      "hodometro_atual": "11913.75",
+      "usuario": 1
     }
   },
   {
@@ -1990,14 +2110,22 @@
     "pk": 16,
     "fields": {
       "data_hora": "2026-03-16T10:00:00Z",
+      "criado_em": "2026-03-16T10:00:00Z",
+      "atualizado_em": "2026-03-16T10:00:00Z",
       "pessoa": 16,
       "veiculo": 16,
       "secretaria": 3,
       "rota": 16,
+      "instituicao": 1,
       "tipo_servico": 1,
+      "tipo_veiculo": 10,
+      "tipo_combustivel": 3,
       "quantidade_combustivel": "60.00",
       "quantidade_oleo": "0.00",
-      "hodometro_atual": 94350
+      "hodometro_anterior": "94350.00",
+      "distancia_percorrida": "41.00",
+      "hodometro_atual": "94391.00",
+      "usuario": 1
     }
   },
   {
@@ -2005,14 +2133,22 @@
     "pk": 17,
     "fields": {
       "data_hora": "2026-03-17T07:45:00Z",
+      "criado_em": "2026-03-17T07:45:00Z",
+      "atualizado_em": "2026-03-17T07:45:00Z",
       "pessoa": 17,
       "veiculo": 23,
       "secretaria": 3,
       "rota": 26,
+      "instituicao": 1,
       "tipo_servico": 5,
+      "tipo_veiculo": 7,
+      "tipo_combustivel": 1,
       "quantidade_combustivel": "45.00",
       "quantidade_oleo": "1.200",
-      "hodometro_atual": 950
+      "hodometro_anterior": "950.00",
+      "distancia_percorrida": "18.00",
+      "hodometro_atual": "968.00",
+      "usuario": 1
     }
   },
   {
@@ -2020,14 +2156,22 @@
     "pk": 18,
     "fields": {
       "data_hora": "2026-03-18T13:20:00Z",
+      "criado_em": "2026-03-18T13:20:00Z",
+      "atualizado_em": "2026-03-18T13:20:00Z",
       "pessoa": 18,
       "veiculo": 23,
       "secretaria": 3,
       "rota": 27,
+      "instituicao": 1,
       "tipo_servico": 5,
+      "tipo_veiculo": 7,
+      "tipo_combustivel": 1,
       "quantidade_combustivel": "32.00",
       "quantidade_oleo": "1.00",
-      "hodometro_atual": 1010
+      "distancia_percorrida": "40.00",
+      "hodometro_anterior": "1010.00",
+      "hodometro_atual": "1050.00",
+      "usuario": 1
     }
   },
   {
@@ -2035,14 +2179,22 @@
     "pk": 19,
     "fields": {
       "data_hora": "2026-03-19T09:50:00Z",
+      "criado_em": "2026-03-19T09:50:00Z",
+      "atualizado_em": "2026-03-19T09:50:00Z",
       "pessoa": 19,
       "veiculo": 19,
       "secretaria": 3,
       "rota": 19,
+      "instituicao": 1,
       "tipo_servico": 4,
+      "tipo_veiculo": 2,
+      "tipo_combustivel": 4,
       "quantidade_combustivel": "40.00",
       "quantidade_oleo": "0.00",
-      "hodometro_atual": 12375
+      "distancia_percorrida": "47.75",
+      "hodometro_anterior": "12375.00",
+      "hodometro_atual": "12422.75",
+      "usuario": 1
     }
   },
   {
@@ -2050,14 +2202,22 @@
     "pk": 20,
     "fields": {
       "data_hora": "2026-03-20T15:30:00Z",
+      "criado_em": "2026-03-20T15:30:00Z",
+      "atualizado_em": "2026-03-20T15:30:00Z",
       "pessoa": 20,
       "veiculo": 23,
       "secretaria": 3,
       "rota": 20,
+      "instituicao": 1,
       "tipo_servico": 5,
+      "tipo_veiculo": 7,
+      "tipo_combustivel": 5,
       "quantidade_combustivel": "50.00",
       "quantidade_oleo": "1.50",
-      "hodometro_atual": 12500
+      "distancia_percorrida": "50.00",
+      "hodometro_anterior": "12500.00",
+      "hodometro_atual": "12550.00",
+      "usuario": 1
     }
   },
   {
@@ -2065,14 +2225,22 @@
     "pk": 21,
     "fields": {
       "data_hora": "2026-03-21T08:00:00Z",
+      "criado_em": "2026-03-21T08:00:00Z",
+      "atualizado_em": "2026-03-21T08:00:00Z",
       "pessoa": 1,
       "veiculo": 21,
       "secretaria": 1,
       "rota": 21,
+      "instituicao": 1,
       "tipo_servico": 5,
+      "tipo_veiculo": 7,
+      "tipo_combustivel": 1,
       "quantidade_combustivel": "15.00",
       "quantidade_oleo": "0.50",
-      "hodometro_atual": 480
+      "distancia_percorrida": "12.50",
+      "hodometro_anterior": "480.00",
+      "hodometro_atual": "492.50",
+      "usuario": 1
     }
   },
   {
@@ -2080,14 +2248,22 @@
     "pk": 22,
     "fields": {
       "data_hora": "2026-03-22T07:15:00Z",
+      "criado_em": "2026-03-22T07:15:00Z",
+      "atualizado_em": "2026-03-22T07:15:00Z",
       "pessoa": 2,
       "veiculo": 22,
       "secretaria": 1,
       "rota": 22,
+      "instituicao": 1,
       "tipo_servico": 5,
+      "tipo_veiculo": 7,
+      "tipo_combustivel": 1,
       "quantidade_combustivel": "35.00",
       "quantidade_oleo": "1.00",
-      "hodometro_atual": 1250
+      "distancia_percorrida": "25.00",
+      "hodometro_anterior": "1250.00",
+      "hodometro_atual": "1275.00",
+      "usuario": 1
     }
   },
   {
@@ -2095,14 +2271,22 @@
     "pk": 23,
     "fields": {
       "data_hora": "2026-03-23T10:45:00Z",
+      "criado_em": "2026-03-23T10:45:00Z",
+      "atualizado_em": "2026-03-23T10:45:00Z",
       "pessoa": 8,
       "veiculo": 8,
       "secretaria": 2,
       "rota": 28,
+      "instituicao": 1,
       "tipo_servico": 3,
+      "tipo_veiculo": 5,
+      "tipo_combustivel": 3,
       "quantidade_combustivel": "28.50",
       "quantidade_oleo": "0.00",
-      "hodometro_atual": 59100
+      "distancia_percorrida": "10.00",
+      "hodometro_anterior": "59100.00",
+      "hodometro_atual": "59110.00",
+      "usuario": 1
     }
   },
   {
@@ -2110,14 +2294,22 @@
     "pk": 24,
     "fields": {
       "data_hora": "2026-03-24T14:00:00Z",
+      "criado_em": "2026-03-24T14:00:00Z",
+      "atualizado_em": "2026-03-24T14:00:00Z",
       "pessoa": 11,
       "veiculo": 24,
       "secretaria": 2,
       "rota": 29,
+      "instituicao": 1,
       "tipo_servico": 5,
+      "tipo_veiculo": 8,
+      "tipo_combustivel": 2,
       "quantidade_combustivel": "42.00",
       "quantidade_oleo": "2.00",
-      "hodometro_atual": 3450
+      "distancia_percorrida": "15.00",
+      "hodometro_anterior": "3450.00",
+      "hodometro_atual": "3465.00",
+      "usuario": 1
     }
   },
   {
@@ -2125,14 +2317,22 @@
     "pk": 25,
     "fields": {
       "data_hora": "2026-03-25T08:30:00Z",
+      "criado_em": "2026-03-25T08:30:00Z",
+      "atualizado_em": "2026-03-25T08:30:00Z",
       "pessoa": 17,
       "veiculo": 23,
       "secretaria": 3,
       "rota": 25,
+      "instituicao": 1,
       "tipo_servico": 5,
+      "tipo_veiculo": 7,
+      "tipo_combustivel": 1,
       "quantidade_combustivel": "38.00",
       "quantidade_oleo": "1.00",
-      "hodometro_atual": 1050
+      "distancia_percorrida": "55.00",
+      "hodometro_anterior": "1050.00",
+      "hodometro_atual": "1105.00",
+      "usuario": 1
     }
   },
   {
@@ -2140,14 +2340,22 @@
     "pk": 26,
     "fields": {
       "data_hora": "2026-03-26T09:15:00Z",
+      "criado_em": "2026-03-26T09:15:00Z",
+      "atualizado_em": "2026-03-26T09:15:00Z",
       "pessoa": 3,
       "veiculo": 3,
       "secretaria": 1,
       "rota": 3,
+      "instituicao": 1,
       "tipo_servico": 3,
+      "tipo_veiculo": 2,
+      "tipo_combustivel": 1,
       "quantidade_combustivel": "10.00",
       "quantidade_oleo": "1.00",
-      "hodometro_atual": 45700
+      "distancia_percorrida": "11.75",
+      "hodometro_anterior": "45700.00",
+      "hodometro_atual": "45711.75",
+      "usuario": 1
     }
   },
   {
@@ -2155,14 +2363,22 @@
     "pk": 27,
     "fields": {
       "data_hora": "2026-03-27T11:00:00Z",
+      "criado_em": "2026-03-27T11:00:00Z",
+      "atualizado_em": "2026-03-27T11:00:00Z",
       "pessoa": 4,
       "veiculo": 4,
       "secretaria": 1,
       "rota": 4,
+      "instituicao": 1,
       "tipo_servico": 4,
+      "tipo_veiculo": 2,
+      "tipo_combustivel": 4,
       "quantidade_combustivel": "30.00",
       "quantidade_oleo": "0.00",
-      "hodometro_atual": 32300
+      "distancia_percorrida": "14.00",
+      "hodometro_anterior": "32300.00",
+      "hodometro_atual": "32314.00",
+      "usuario": 1
     }
   },
   {
@@ -2170,14 +2386,22 @@
     "pk": 28,
     "fields": {
       "data_hora": "2026-03-28T07:45:00Z",
+      "criado_em": "2026-03-28T07:45:00Z",
+      "atualizado_em": "2026-03-28T07:45:00Z",
       "pessoa": 12,
       "veiculo": 12,
       "secretaria": 2,
       "rota": 12,
+      "instituicao": 1,
       "tipo_servico": 2,
+      "tipo_veiculo": 9,
+      "tipo_combustivel": 3,
       "quantidade_combustivel": "48.00",
       "quantidade_oleo": "0.00",
-      "hodometro_atual": 120500
+      "distancia_percorrida": "32.00",
+      "hodometro_anterior": "120500.00",
+      "hodometro_atual": "120532.00",
+      "usuario": 1
     }
   },
   {
@@ -2185,14 +2409,22 @@
     "pk": 29,
     "fields": {
       "data_hora": "2026-03-29T13:30:00Z",
+      "criado_em": "2026-03-29T13:30:00Z",
+      "atualizado_em": "2026-03-29T13:30:00Z",
       "pessoa": 14,
       "veiculo": 14,
       "secretaria": 2,
       "rota": 14,
+      "instituicao": 1,
       "tipo_servico": 4,
+      "tipo_veiculo": 3,
+      "tipo_combustivel": 4,
       "quantidade_combustivel": "15.00",
       "quantidade_oleo": "0.00",
-      "hodometro_atual": 11900
+      "distancia_percorrida": "36.50",
+      "hodometro_anterior": "11900.00",
+      "hodometro_atual": "11936.50",
+      "usuario": 1
     }
   },
   {
@@ -2200,14 +2432,22 @@
     "pk": 30,
     "fields": {
       "data_hora": "2026-03-30T10:15:00Z",
+      "criado_em": "2026-03-30T10:15:00Z",
+      "atualizado_em": "2026-03-30T10:15:00Z",
       "pessoa": 19,
       "veiculo": 19,
       "secretaria": 3,
       "rota": 19,
+      "instituicao": 1,
       "tipo_servico": 4,
+      "tipo_veiculo": 2,
+      "tipo_combustivel": 4,
       "quantidade_combustivel": "45.00",
       "quantidade_oleo": "0.00",
-      "hodometro_atual": 12600
+      "distancia_percorrida": "47.75",
+      "hodometro_anterior": "12600.00",
+      "hodometro_atual": "12647.75",
+      "usuario": 1
     }
   },
   {
@@ -2215,14 +2455,22 @@
     "pk": 31,
     "fields": {
       "data_hora": "2026-03-31T08:00:00Z",
+      "criado_em": "2026-03-31T08:00:00Z",
+      "atualizado_em": "2026-03-31T08:00:00Z",
       "pessoa": 1,
       "veiculo": 1,
       "secretaria": 1,
       "rota": 1,
+      "instituicao": 1,
       "tipo_servico": 1,
+      "tipo_veiculo": 1,
+      "tipo_combustivel": 1,
       "quantidade_combustivel": "80.00",
       "quantidade_oleo": "1.00",
-      "hodometro_atual": 85600
+      "distancia_percorrida": "7.25",
+      "hodometro_anterior": "85600.00",
+      "hodometro_atual": "85607.25",
+      "usuario": 1
     }
   },
   {
@@ -2230,14 +2478,22 @@
     "pk": 32,
     "fields": {
       "data_hora": "2026-04-01T09:30:00Z",
+      "criado_em": "2026-04-01T09:30:00Z",
+      "atualizado_em": "2026-04-01T09:30:00Z",
       "pessoa": 2,
       "veiculo": 2,
       "secretaria": 1,
       "rota": 2,
+      "instituicao": 1,
       "tipo_servico": 2,
+      "tipo_veiculo": 4,
+      "tipo_combustivel": 2,
       "quantidade_combustivel": "120.00",
       "quantidade_oleo": "2.00",
-      "hodometro_atual": 120600
+      "distancia_percorrida": "9.50",
+      "hodometro_anterior": "120600.00",
+      "hodometro_atual": "120609.50",
+      "usuario": 1
     }
   },
   {
@@ -2245,14 +2501,22 @@
     "pk": 33,
     "fields": {
       "data_hora": "2026-04-02T14:45:00Z",
+      "criado_em": "2026-04-02T14:45:00Z",
+      "atualizado_em": "2026-04-02T14:45:00Z",
       "pessoa": 16,
       "veiculo": 16,
       "secretaria": 3,
       "rota": 16,
+      "instituicao": 1,
       "tipo_servico": 1,
+      "tipo_veiculo": 10,
+      "tipo_combustivel": 3,
       "quantidade_combustivel": "55.00",
       "quantidade_oleo": "0.00",
-      "hodometro_atual": 94500
+      "distancia_percorrida": "41.00",
+      "hodometro_anterior": "94500.00",
+      "hodometro_atual": "94541.00",
+      "usuario": 1
     }
   },
   {
@@ -2260,14 +2524,22 @@
     "pk": 34,
     "fields": {
       "data_hora": "2026-04-03T11:00:00Z",
+      "criado_em": "2026-04-03T11:00:00Z",
+      "atualizado_em": "2026-04-03T11:00:00Z",
       "pessoa": 20,
       "veiculo": 23,
       "secretaria": 3,
       "rota": 30,
+      "instituicao": 1,
       "tipo_servico": 5,
+      "tipo_veiculo": 7,
+      "tipo_combustivel": 1,
       "quantidade_combustivel": "40.00",
       "quantidade_oleo": "0.50",
-      "hodometro_atual": 12750
+      "distancia_percorrida": "22.00",
+      "hodometro_anterior": "12750.00",
+      "hodometro_atual": "12772.00",
+      "usuario": 1
     }
   },
   {
@@ -2275,14 +2547,22 @@
     "pk": 35,
     "fields": {
       "data_hora": "2026-04-04T07:30:00Z",
+      "criado_em": "2026-04-04T07:30:00Z",
+      "atualizado_em": "2026-04-04T07:30:00Z",
       "pessoa": 13,
       "veiculo": 24,
       "secretaria": 2,
       "rota": 13,
+      "instituicao": 1,
       "tipo_servico": 3,
+      "tipo_veiculo": 8,
+      "tipo_combustivel": 2,
       "quantidade_combustivel": "25.00",
       "quantidade_oleo": "1.00",
-      "hodometro_atual": 3600
+      "distancia_percorrida": "34.25",
+      "hodometro_anterior": "3600.00",
+      "hodometro_atual": "3634.25",
+      "usuario": 1
     }
   }
 ]
