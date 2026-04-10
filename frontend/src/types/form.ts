@@ -15,7 +15,7 @@ export interface TableSchema {
 
 export type FieldType = 
   | 'text' | 'number' | 'date' | 'datetime-local' | 'checkbox' | 'textarea' 
-  | 'select' | 'datalist' | 'hidden' | 'email' | 'tel';
+  | 'select' | 'datalist' | 'hidden' | 'email' | 'tel' | 'password';
 
 // Interface para os botões de ação
 export interface QuickAction {
