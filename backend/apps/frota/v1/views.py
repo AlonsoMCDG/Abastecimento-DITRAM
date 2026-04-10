@@ -87,13 +87,19 @@ class RotaViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
 
     # Filtros Exatos (?secretaria_id=3&instituicao_id=1)
     filterset_fields = ['id', 'secretaria_id', 'instituicao_id', 'tipo_locomocao', 'ativa']
-
+    
     # Busca Textual: Busca no próprio nome e nos nomes das entidades relacionadas
-    search_fields = ['nome', 'secretaria__nome', 'instituicao__nome', 'detalhes']
+    search_fields = ['nome', 'secretaria__nome', 'instituicao__nome', 'detalhes', 'secretaria__sigla']
 
     # Ordenação
-    ordering_fields = ['nome', 'distancia_km', 'id']
-    ordering = ['nome'] 
+    ordering_fields = [
+        'id', 'nome', 'distancia_km', 
+        'secretaria__nome', 'secretaria__sigla',
+        'instituicao__nome', 'tipo_locomocao', 
+        'ativa'
+    ]
+    
+    ordering = ['-ativa', 'nome'] 
 
     def get_serializer_class(self):
         if self.request.method in ['GET', 'HEAD', 'OPTIONS']:

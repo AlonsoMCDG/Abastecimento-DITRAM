@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import DataTable, { type DataTableParams } from "../../../components/DataTable";
@@ -9,7 +9,7 @@ import { Can } from "../../../components/auth/Can";
 import { getApiErrorMessage } from "../../../api/config/errorHandlers";
 
 import type { Rota } from "../../../types/models";
-import { rotaFormSchema } from "../../../schemas/rota.schema";
+import { rotaListSchema } from "../../../schemas/rota.schema";
 
 import "../../../assets/css/ListPage.css";
 
@@ -17,53 +17,58 @@ export default function RotaListPage() {
   const navigate = useNavigate();
   const { user: me } = useAuth();
 
-  // Estados dedicados à paginação Server-side
   const [rotas, setRotas] = useState<Rota[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Controle de atraso para não sobrecarregar a API durante a digitação
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Permissão genérica para as ações das linhas da tabela
-  const hasWritePermission = Boolean(me?.is_staff || me?.can_write_cadastros);
+  // Limpa o timer se o componente for desmontado (Prevenção de Memory Leak)
+  useEffect(() => {
+    return () => {
+      if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    };
+  }, []);
 
-  // Motor de busca paginado
+  // Padronizado para separar as permissões de edição e exclusão (mesmo que na sua regra atual sejam a mesma)
+  const canEdit = Boolean(me?.is_staff || me?.can_write_cadastros);
+  const canDelete = Boolean(me?.is_staff || me?.can_write_cadastros);
+
   const fetchRotas = useCallback(async (params: DataTableParams) => {
     if (debounceTimer.current) clearTimeout(debounceTimer.current);
 
     debounceTimer.current = setTimeout(async () => {
       setLoading(true);
+      setErrorMessage(null);
       try {
         const res = await rotaApi.listar({
           page: params.page,
           page_size: params.pageSize,
           search: params.search,
           ordering: params.ordering ?? undefined,
-          ativa: "", // Permite trazer rotas inativas também
+          ativa: "", // Traz ativas e inativas
         });
 
         setRotas(res.data.results || []);
         setTotal(res.data.count || 0);
       } catch (err) {
-        console.error("Erro ao buscar rotas:", err);
+        setErrorMessage("Erro ao buscar rotas de transporte.");
+        console.error(err);
       } finally {
         setLoading(false);
       }
     }, 500);
   }, []);
 
-  // Exclusão segura com refresh silencioso
   async function handleDelete(item: Rota) {
     if (!item.id) return;
-
     try {
       await rotaApi.deletar(item.id);
-      
-      // Retorna à primeira página após a exclusão para atualizar a tabela
+      setErrorMessage(null);
       fetchRotas({ page: 1, pageSize: 10, search: "", ordering: null });
     } catch (err: unknown) {
-      alert(getApiErrorMessage(err, "Falha ao excluir rota."));
+      setErrorMessage(getApiErrorMessage(err, "Falha ao excluir rota."));
     }
   }
 
@@ -71,8 +76,8 @@ export default function RotaListPage() {
     <div className="list-page">
       <div className="list-header">
         <div>
-          <h2 className="list-title">Rotas</h2>
-          <p className="list-subtitle">Rotas ativas e inativas cadastradas.</p>
+          <h2 className="list-title">Rotas de Transporte</h2>
+          <p className="list-subtitle">Gerencie os percursos, distâncias e consumos estimados.</p>
         </div>
 
         <div className="list-actions">
@@ -88,10 +93,11 @@ export default function RotaListPage() {
         data={rotas}
         total={total}
         loading={loading}
-        schema={rotaFormSchema}
+        error={errorMessage}
+        schema={rotaListSchema}
         onParamsChange={fetchRotas}
-        canEdit={hasWritePermission}
-        canDelete={hasWritePermission}
+        canEdit={canEdit}
+        canDelete={canDelete}
         onEdit={(item) => navigate(ROUTES.frota.rotas.edit(item.id!))}
         onDelete={handleDelete}
       />

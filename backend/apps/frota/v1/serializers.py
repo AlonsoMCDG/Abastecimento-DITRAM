@@ -118,21 +118,22 @@ class RotaReadSerializer(serializers.ModelSerializer):
     # Relacionamento: Secretaria
     secretaria_id = serializers.IntegerField(read_only=True)
     secretaria_nome = serializers.CharField(source='secretaria.nome', read_only=True)
+    secretaria_sigla = serializers.CharField(source='secretaria.sigla', read_only=True)
     
     # Relacionamento: Instituição
     instituicao_id = serializers.IntegerField(read_only=True)
     instituicao_nome = serializers.CharField(source='instituicao.nome', read_only=True)
     
     # Displays
-    tipo_locomocao_display = serializers.CharField(source='get_tipo_locomocao_display', read_only=True)
+    tipo_locomocao_nome = serializers.CharField(source='get_tipo_locomocao_display', read_only=True)
 
     class Meta:
         model = Rota
         fields = [
             'id', 'nome', 'distancia_km', 'ativa',
-            'tipo_locomocao', 'tipo_locomocao_display',
+            'tipo_locomocao', 'tipo_locomocao_nome',
             'consumo_estimado_combustivel', 'consumo_estimado_oleo', 
-            'secretaria_id', 'secretaria_nome',
+            'secretaria_id', 'secretaria_nome', 'secretaria_sigla',
             'instituicao_id', 'instituicao_nome',
             'detalhes'
         ]

@@ -31,7 +31,7 @@ export interface Pessoa {
 // ==========================================
 
 export interface Veiculo {
-  id?: number;
+  id: number;
   placa: string;
   modelo: string;
   tipo_locomocao: string; // "TERRESTRE" | "FLUVIAL"
@@ -54,18 +54,21 @@ export interface Veiculo {
 export interface Rota {
   id: number;
   nome: string;
+  tipo_locomocao: string;
+  tipo_locomocao_nome?: string;
 
   // IDs para referências
   secretaria_id?: number | null;
   instituicao_id?: number | null;
   
-  // Campos de Leitura (Vindos do ReadSerializer para facilitar a UI)
+  // Campos de Leitura (Displays)
   secretaria_nome?: string;
-  instituicao_nome: string;
+  secretaria_sigla?: string;
+  instituicao_nome?: string;
 
-  distancia_km?: string | number;  // Usa string|number pois recebe/retorna um valor do tipo Decimal
-  consumo_estimado_combustivel: string | number;
-  consumo_estimado_oleo: string | number;
+  distancia_km?: string | number;
+  consumo_estimado_combustivel?: string | number;
+  consumo_estimado_oleo?: string | number;
 
   detalhes?: string;
   ativa: boolean;
