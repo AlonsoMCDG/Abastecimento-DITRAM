@@ -82,6 +82,7 @@ class Guia(models.Model):
     # ==========================================
     quantidade_combustivel = models.DecimalField(max_digits=10, decimal_places=3, verbose_name="Qtd Combustível (L)")
     quantidade_oleo = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, verbose_name="Qtd Óleo (L)")
+    periodo_uso_dias = models.PositiveIntegerField(null=True, blank=True, verbose_name="Período de Uso (dias)")
 
     # ==========================================
     # HODÔMETROS (Alterado para DecimalField)

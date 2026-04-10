@@ -125,7 +125,7 @@ def _draw_guia_impressao_copy(pdf: canvas.Canvas, guia: Guia, y_bottom: float, y
     
     # Novo formato de Hodômetro
     hodometro = f"{guia.hodometro_atual} km" if guia.hodometro_atual else "-"
-    periodo = "30" if tipo_servico_raw in {"CAMINHONETE", "ONIBUS"} else ""
+    periodo = f"{guia.periodo_uso_dias} dias" if guia.periodo_uso_dias is not None else ""
     
     def draw_field_with_line(pdf, x, y, label, value, font_name="Helvetica", font_size=11, line_width_extra=0):
         pdf.setFont(f"{font_name}-Bold", font_size)
@@ -166,9 +166,8 @@ def _draw_guia_impressao_copy(pdf: canvas.Canvas, guia: Guia, y_bottom: float, y
     litros_val = f"{litros} L ({tipo_combustivel_display})"
     draw_field_with_line(pdf, x_left, y, "Quantidade de Litros: ", litros_val, line_width_extra=60 * mm)
 
-    if tipo_servico_raw != "ROCAGEM":
-        y -= 8 * mm
-        draw_field_with_line(pdf, x_left, y, "Período de uso (em dias): ", periodo, line_width_extra=50 * mm)
+    y -= 8 * mm
+    draw_field_with_line(pdf, x_left, y, "Período de uso: ", periodo, line_width_extra=50 * mm)
 
     if tipo_servico_raw in vehicle_services or not tipo_servico_raw:
         y -= 8 * mm

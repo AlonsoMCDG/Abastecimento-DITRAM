@@ -126,8 +126,8 @@ class GuiaReadSerializer(serializers.ModelSerializer):
         model = Guia
         fields = [
             'id', 'data_hora', 'quantidade_combustivel', 'quantidade_oleo', 
-            'hodometro_atual', 'hodometro_anterior', 'distancia_percorrida', 
-            'observacao', 'rota_texto', 'tipo_servico_texto',
+            'hodometro_atual', 'hodometro_anterior', 'distancia_percorrida',
+            'periodo_uso_dias', 'observacao', 'rota_texto', 'tipo_servico_texto',
             
             # Relacionamentos Mapeados
             'pessoa_id', 'pessoa_nome',
@@ -164,7 +164,7 @@ class GuiaWriteSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'data_hora', 'quantidade_combustivel', 'quantidade_oleo', 
             'hodometro_atual', 'hodometro_anterior', 'distancia_percorrida', 
-            'observacao', 'rota_texto', 'tipo_servico_texto',
+            'periodo_uso_dias', 'observacao', 'rota_texto', 'tipo_servico_texto',
             
             # FKs
             'pessoa_id', 'veiculo_id', 'rota_id', 'tipo_servico_id', 

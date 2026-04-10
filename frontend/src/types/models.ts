@@ -146,6 +146,8 @@ export interface GuiaAbastecimento {
   hodometro_anterior?: number | string | null;
   hodometro_atual?: number | string | null;
 
+  periodo_uso_dias?: number | null;
+
   // ==========================================
   // CAMPOS VIRTUAIS (Controle de Tela / Frontend)
   // ==========================================

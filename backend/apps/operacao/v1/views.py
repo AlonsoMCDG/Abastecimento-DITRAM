@@ -127,9 +127,11 @@ class GuiaViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
         'pessoa__cpf', 
         'secretaria__sigla',
         'instituicao__nome',
+        'tipo_servico__nome',
+        'tipo_servico_texto',
     ]
 
-    ordering_fields = ['data_hora', 'id', 'hodometro_atual', 'secretaria__nome', 'pessoa__nome']
+    ordering_fields = ['data_hora', 'id', 'tipo_servico__nome', 'secretaria__nome', 'pessoa__nome', 'quantidade_combustivel']
     ordering = ['-data_hora']
 
     def get_serializer_class(self):
