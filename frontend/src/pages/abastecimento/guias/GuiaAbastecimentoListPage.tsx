@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import DataTable, { type DataTableParams } from "../../../components/DataTable";
@@ -17,25 +17,26 @@ export default function GuiaAbastecimentoListPage() {
   const navigate = useNavigate();
   const { user: me } = useAuth();
 
-  // Estados da Listagem e Paginação
   const [guiasAbastecimento, setGuiasAbastecimento] = useState<GuiaAbastecimento[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [pdfLoading, setPdfLoading] = useState<number | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Permissões calculadas para as ações da linha (DataTable)
+  // Limpa o timer se o componente for desmontado (Prevenção de Memory Leak)
+  useEffect(() => {
+    return () => {
+      if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    };
+  }, []);
+
   const canEdit = Boolean(me?.is_staff || me?.can_edit_guia_abastecimento);
   const canDelete = Boolean(me?.is_staff || me?.can_delete_guia_abastecimento);
 
-  // Motor de busca paginado
   const fetchGuias = useCallback(async (params: DataTableParams) => {
-    // Se o usuário ainda estiver digitando na barra de pesquisa, zera o cronômetro
     if (debounceTimer.current) clearTimeout(debounceTimer.current);
 
-    // Espera 500ms de inatividade antes de bater no banco de dados do Django
     debounceTimer.current = setTimeout(async () => {
       setLoading(true);
       setErrorMessage(null);
@@ -58,25 +59,19 @@ export default function GuiaAbastecimentoListPage() {
     }, 500);
   }, []);
 
-  // Tratamento de Exclusão Paginada
   async function handleDelete(item: GuiaAbastecimento) {
     if (!item.id) return;
-    
     try {
       await guiasApi.deletar(item.id);
       setErrorMessage(null);
-      // Força recarregamento retornando à primeira página
       fetchGuias({ page: 1, pageSize: 10, search: "", ordering: null });
     } catch (err: unknown) {
       setErrorMessage(getApiErrorMessage(err, "Falha ao excluir guia de abastecimento."));
     }
   }
 
-  // Tratamento de PDF Otimizado
   async function handlePdfAction(id: number, action: 'open' | 'print') {
-    setPdfLoading(id);
     setErrorMessage(null);
-
     try {
       if (action === 'open') {
         await guiasApi.abrirPdfEmNovaAba(id);
@@ -85,8 +80,6 @@ export default function GuiaAbastecimentoListPage() {
       }
     } catch (err: unknown) {
       setErrorMessage(getApiErrorMessage(err, "Erro ao processar PDF."));
-    } finally {
-      setPdfLoading(null);
     }
   }
 
