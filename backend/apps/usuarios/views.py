@@ -3,6 +3,9 @@ from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.viewsets import ModelViewSet
+from rest_framework import filters
+from django_filters.rest_framework import DjangoFilterBackend
+
 from .models import Usuario
 from .serializers import (
     UsuarioSerializer,
@@ -12,9 +15,14 @@ from .serializers import (
 )
 
 class UsuarioViewSet(ModelViewSet):
-    queryset = Usuario.objects.all()
+    queryset = Usuario.objects.all().order_by("id")
     serializer_class = UsuarioSerializer
     permission_classes = [IsAdminUser]
+    
+    # Filtros e Busca para o DataTable
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['first_name', 'last_name', 'cpf', 'email']
+    ordering_fields = ['id', 'first_name', 'cpf', 'is_staff', 'is_superuser']
 
     def get_permissions(self):
         if getattr(self, "action", None) == "me":
@@ -36,15 +44,24 @@ class UsuarioViewSet(ModelViewSet):
 
     @action(detail=False, methods=["get"], url_path="permissions")
     def permissions_list(self, request):
-        users = Usuario.objects.all().order_by("id")
-        serializer = UsuarioPermissionsSerializer(users, many=True)
+        # Filtros e paginação
+        queryset = self.filter_queryset(self.get_queryset())
+        page = self.paginate_queryset(queryset)
+        
+        if page is not None:
+            serializer = UsuarioPermissionsSerializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        # Fallback caso a paginação esteja desativada globalmente
+        serializer = UsuarioPermissionsSerializer(queryset, many=True)
         return Response(serializer.data)
 
     @action(detail=True, methods=["patch"], url_path="permissions")
     def permissions_update(self, request, pk=None):
         target = self.get_object()
-
         acting = request.user
+        
+        # Proteções de hierarquia
         if target.is_staff and not acting.is_superuser:
             return Response(
                 {"detail": "Apenas o superadmin pode alterar permissões de usuários admin."},

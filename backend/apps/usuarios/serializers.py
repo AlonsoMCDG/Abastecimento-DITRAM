@@ -114,7 +114,6 @@ class UsuarioPermissionsSerializer(serializers.ModelSerializer):
         )
         read_only_fields = ("id", "cpf", "is_superuser")
 
-
 class UsuarioSelfUpdateSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=False, allow_blank=True)
 
@@ -127,6 +126,8 @@ class UsuarioSelfUpdateSerializer(serializers.ModelSerializer):
             "cpf",
             "password",
         )
+        # O usuário não pode mudar o próprio CPF (Username) sozinho
+        read_only_fields = ("cpf",)
 
     def update(self, instance, validated_data):
         password = validated_data.pop("password", None)
