@@ -89,7 +89,14 @@ class RotaViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
     filterset_fields = ['id', 'secretaria_id', 'instituicao_id', 'tipo_locomocao', 'ativa']
     
     # Busca Textual: Busca no próprio nome e nos nomes das entidades relacionadas
-    search_fields = ['nome', 'secretaria__nome', 'instituicao__nome', 'detalhes', 'secretaria__sigla']
+    search_fields = [
+        'nome', 
+        'detalhes',
+        'tipo_locomocao',
+        'secretaria__nome', 
+        'secretaria__sigla',
+        'instituicao__nome', 
+    ]
 
     # Ordenação
     ordering_fields = [
