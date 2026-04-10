@@ -1,10 +1,63 @@
+/* ========================================================
+   1. VARIÁVEIS DE TEMA (Design Tokens)
+   Facilita a manutenção e padroniza as cores do sistema
+   ======================================================== */
+.layoutContainer {
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --secondary: #475569;
+  --secondary-hover: #334155;
+  
+  --text-main: #111827;
+  --text-label: #374151;
+  --text-muted: #6b7280;
+  
+  --bg-main: #ffffff;
+  --bg-disabled: #f3f4f6;
+  
+  --border-color: #d1d5db;
+  --border-focus: rgba(59, 130, 246, 0.2);
+  
+  --error: #ef4444;
+  --warning: #d97706;
+
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0.5rem 2rem 2rem; 
+}
+
+/* ========================================================
+   2. CABEÇALHO
+   ======================================================== */
+.layoutHeader {
+  margin-bottom: 1rem; 
+  margin-top: 0;
+}
+
+.layoutTitle {
+  font-size: 1.5rem;
+  color: var(--text-main);
+  margin: 0 0 0.25rem 0; 
+  line-height: 1.2; 
+}
+
+.layoutSubtitle {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* ========================================================
+   3. SISTEMA DE GRID
+   ======================================================== */
 .formContainer {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1.25rem; /* Espaçamento confortável entre os campos */
+  gap: 1.25rem;
   align-items: start;
   width: 100%;
-  background: #ffffff;
+  background: var(--bg-main);
   padding: 1.5rem;
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
@@ -14,44 +67,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
-  /* Lê a variável do React. Se não existir, o padrão é 1 */
   grid-column: span var(--col-span, 1); 
-}
-
-.label {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: #374151;
-}
-
-.input {
-  width: 100%;
-  padding: 0.5rem 0.75rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.375rem;
-  font-size: 0.875rem;
-  color: #111827;
-  background-color: #ffffff;
-  transition: border-color 0.15s ease-in-out;
-}
-
-.input:disabled {
-  background-color: #f3f4f6;
-  color: #9ca3af;
-  cursor: not-allowed;
-  border-color: #e5e7eb;
-}
-
-.input:focus {
-  outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
-}
-
-.input[readonly] {
-  background-color: #f3f4f6;
-  color: #6b7280;
-  cursor: not-allowed;
 }
 
 .checkboxWrapper {
@@ -59,83 +75,93 @@
   align-items: center;
   gap: 0.5rem;
   height: 100%;
-  padding-top: 1.25rem; /* Alinha com os outros inputs que têm label acima */
+  padding-top: 1.25rem;
 }
 
-.error {
-  font-size: 0.75rem;
-  color: #ef4444;
-  margin-top: 0.25rem;
+/* ========================================================
+   4. INPUTS E CONTROLES
+   ======================================================== */
+.label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-label);
 }
 
-.warning {
-  color: #d97706; /* Laranja/Âmbar para avisos */
-  font-size: 0.8rem;
-  margin-top: 0.25rem;
-  display: block;
+.input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  color: var(--text-main);
+  background-color: var(--bg-main);
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease;
 }
 
-.required {
-  color: #ef4444;
+.input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px var(--border-focus);
 }
 
-/* CONTAINER DE AÇÕES */
-.formActions {
+.input:disabled {
+  background-color: var(--bg-disabled);
+  color: #9ca3af;
+  cursor: not-allowed;
+  border-color: #e5e7eb;
+}
+
+.input[readonly] {
+  background-color: var(--bg-disabled);
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
+
+/* Grupos de Input (Prefix/Suffix) */
+.inputGroup {
   display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  margin-top: 2rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid #e2e8f0;
   align-items: center;
+  width: 100%;
+  border: 1px solid var(--border-color);
+  border-radius: 0.375rem;
+  background-color: var(--bg-main);
+  transition: all 0.15s ease-in-out;
+  overflow: hidden;
 }
 
-/* BOTÃO PRIMÁRIO (Salvar Padrão) */
-.submitButton {
-  padding: 0.75rem 1.5rem;
-  background-color: #2563eb; 
-  color: white;
+.inputGroup:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px var(--border-focus);
+}
+
+.inputGroup .input {
   border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: background-color 0.2s;
+  box-shadow: none;
+  border-radius: 0;
+  flex: 1;
+  min-width: 0;
 }
-.submitButton:hover:not(:disabled) { background-color: #1d4ed8; }
 
-/* BOTÃO SECUNDÁRIO (Salvar e Imprimir) */
-.btnSecondary {
-  padding: 0.75rem 1.5rem;
-  background-color: #475569; 
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: background-color 0.2s;
+.inputGroup:has(.input[readonly]):focus-within {
+  border-color: var(--border-color);
+  box-shadow: none;
 }
-.btnSecondary:hover:not(:disabled) { background-color: #334155; }
-.btnSecondary:disabled { opacity: 0.6; cursor: not-allowed; }
 
-/* BOTÃO OUTLINE (Apenas Imprimir) */
-.btnOutline {
-  padding: 0.75rem 1.5rem;
-  background-color: transparent;
-  color: #475569;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: all 0.2s;
+.prefix, .suffix {
+  padding: 0.5rem 0.75rem;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  background-color: #fafafa;
 }
-.btnOutline:hover:not(:disabled) {
-  background-color: #f8fafc;
-  border-color: #94a3b8;
-}
-.btnOutline:disabled { opacity: 0.6; cursor: not-allowed; }
 
-/* INPUTS COM QUICK-ACTIONS */
+.prefix { border-right: 1px solid var(--bg-disabled); }
+.suffix { border-left: 1px solid var(--bg-disabled); }
 
+/* Inputs com Botões Rápidos */
 .inputWithActions {
   display: flex;
   align-items: center;
@@ -143,20 +169,19 @@
   width: 100%;
 }
 
-/* Garante que o input (ou select/datalist) ocupe todo o espaço restante */
 .inputWithActions > :first-child {
   flex: 1;
-  min-width: 0; /* Evita estouro de flexbox em inputs muito longos */
+  min-width: 0;
 }
 
 .quickActionButton {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 2.375rem; /* Mesma altura aproximada dos inputs */
+  height: 2.375rem;
   min-width: 2.375rem;
-  background-color: #f3f4f6;
-  border: 1px solid #d1d5db;
+  background-color: var(--bg-disabled);
+  border: 1px solid var(--border-color);
   border-radius: 0.375rem;
   cursor: pointer;
   font-size: 1rem;
@@ -166,114 +191,108 @@
 
 .quickActionButton:hover {
   background-color: #e5e7eb;
-  color: #111827;
+  color: var(--text-main);
   border-color: #9ca3af;
 }
 
-.quickActionButton:focus {
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(156, 163, 175, 0.5);
+/* ========================================================
+   5. MENSAGENS E ALERTAS
+   ======================================================== */
+.error {
+  font-size: 0.75rem;
+  color: var(--error);
+  margin-top: 0.25rem;
 }
 
-.inputGroup {
+.warning {
+  color: var(--warning);
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+  display: block;
+}
+
+.required {
+  color: var(--error);
+}
+
+/* ========================================================
+   6. RODAPÉ E BOTÕES DE AÇÃO
+   ======================================================== */
+.formActions {
+  grid-column: 1 / -1; /* CORREÇÃO CRÍTICA: Ocupa toda a largura do form */
   display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e2e8f0;
   align-items: center;
-  width: 100%;
-  border: 1px solid #d1d5db;
-  border-radius: 0.375rem;
-  background-color: #ffffff;
-  transition: all 0.15s ease-in-out;
-  overflow: hidden; /* Garante que o input interno não vaze as bordas arredondadas */
 }
 
-/* O "segredo": Quando o input for focado, a div inteira brilha */
-.inputGroup:focus-within {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
-}
-
-/* Removemos a borda e o brilho nativo do input quando ele está dentro do grupo */
-.inputGroup .input {
-  border: none;
-  box-shadow: none;
-  border-radius: 0;
-  flex: 1; /* Faz o input ocupar todo o espaço central */
-  min-width: 0;
-}
-
-/* Se o input readonly estiver dentro do wrapper de sufixo, removemos o brilho azul no clique */
-.inputGroup:has(.input[readonly]):focus-within {
-  border-color: #d1d5db;
-  box-shadow: none;
-}
-
-.prefix, .suffix {
-  padding: 0.5rem 0.75rem;
-  color: #6b7280;
+/* Base comum para todos os botões do rodapé para evitar código duplicado */
+.submitButton, .btnSecondary, .btnOutline {
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
   font-size: 0.875rem;
-  display: flex;
+  transition: all 0.2s ease;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  white-space: nowrap; /* Evita que o texto "m²" quebre em duas linhas */
-  background-color: #fafafa; /* Fundo ligeiramente acinzentado opcional */
 }
 
-/* Cria a linha divisória sutil idêntica à sua imagem */
-.prefix {
-  border-right: 1px solid #f3f4f6;
+.submitButton:disabled, .btnSecondary:disabled, .btnOutline:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
-.suffix {
-  border-left: 1px solid #f3f4f6;
+/* Botão 1: Salvar Padrão */
+.submitButton {
+  background-color: var(--primary); 
+  color: white;
+  border: none;
+}
+.submitButton:hover:not(:disabled) { background-color: var(--primary-hover); }
+
+/* Botão 2: Salvar e Imprimir */
+.btnSecondary {
+  background-color: var(--secondary); 
+  color: white;
+  border: none;
+}
+.btnSecondary:hover:not(:disabled) { background-color: var(--secondary-hover); }
+
+/* Botão 3: Apenas Imprimir */
+.btnOutline {
+  background-color: transparent;
+  color: var(--secondary);
+  border: 1px solid var(--border-color);
+}
+.btnOutline:hover:not(:disabled) {
+  background-color: #f8fafc;
+  border-color: #94a3b8;
 }
 
-.layoutContainer {
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 0.5rem 2rem 2rem; 
-}
-
-.layoutHeader {
-  margin-bottom: 1rem; 
-  margin-top: 0;
-}
-
-.layoutTitle {
-  font-size: 1.5rem;
-  color: #111827;
-  margin: 0 0 0.25rem 0; 
-  line-height: 1.2; 
-}
-
-.layoutSubtitle {
-  color: #6b7280;
-  font-size: 0.875rem;
-  margin: 0;
-  line-height: 1.4;
-}
-
-@media (max-width: 768px) {
-  .layoutContainer {
-    padding: 1rem;
-  }
-
-  .formContainer {
-    grid-template-columns: 1fr;
-  }
-  
-  .fieldWrapper {
-    /* No celular, não importa o colSpan, todo campo ocupa a linha inteira (100%) */
-    grid-column: 1 / -1 !important; 
-  }
-}
-
+/* ========================================================
+   7. RESPONSIVIDADE
+   ======================================================== */
 @media (max-width: 1024px) {
   .formContainer {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   
   .fieldWrapper {
-    /* Impede que um campo configurado como "colSpan: 3" quebre um grid de 2 colunas */
     grid-column: span min(var(--col-span, 1), 2);
+  }
+}
+
+@media (max-width: 768px) {
+  .layoutContainer { padding: 1rem; }
+  
+  .formContainer { grid-template-columns: 1fr; }
+  
+  .fieldWrapper {
+    grid-column: 1 / -1 !important; 
   }
 }
