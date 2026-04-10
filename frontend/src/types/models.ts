@@ -112,7 +112,9 @@ export interface GuiaAbastecimento {
   id: number;
   data_hora: string;
   
-  // Referências atualizadas para a nova arquitetura
+  // ==========================================
+  // REFERÊNCIAS (Chaves Estrangeiras)
+  // ==========================================
   tipo_servico_id: number; 
   pessoa_id: number;
   veiculo_id: number;
@@ -122,26 +124,40 @@ export interface GuiaAbastecimento {
   tipo_combustivel_id: number;
   tipo_veiculo_id: number;
   
-  // Dados extras para visualização (Read)
+  // ==========================================
+  // DADOS EXTRAS PARA VISUALIZAÇÃO (Read / Display)
+  // ==========================================
   pessoa_nome?: string;
   veiculo_placa?: string;
-  instituicao_display: string;
+  instituicao_display?: string;
   tipo_servico_nome?: string;
   usuario_nome?: string;
-  tipo_combustivel_nome: string;
-  tipo_veiculo_id_display: string;
+  tipo_combustivel_nome?: string;
+  tipo_veiculo_id_display?: string;
   
-  // Combustível e Regras
-  quantidade_combustivel: number;
-  quantidade_oleo?: number | null;
+  // ==========================================
+  // COMBUSTÍVEL E HODÔMETRO
+  // ==========================================
+  // Dica: Aceitar 'string' junto com 'number' aqui evita erros no TypeScript 
+  // se o IMask devolver uma string não convertida ou a API do Django enviar um Decimal como string.
+  quantidade_combustivel: number | string;
+  quantidade_oleo?: number | string | null;
 
-  // Hodômetro
-  hodometro_anterior?: number | null;
-  hodometro_atual?: number | null;
+  hodometro_anterior?: number | string | null;
+  hodometro_atual?: number | string | null;
+
+  // ==========================================
+  // CAMPOS VIRTUAIS (Controle de Tela / Frontend)
+  // ==========================================
   distancia_percorrida?: number | null;
+  rota_distancia_km?: number | null; // <--- O campo oculto que guarda o padrão da rota
+  rota_consumo_combustivel?: number | null;
+  rota_consumo_oleo?: number | null;
   
+  // ==========================================
+  // OUTROS
+  // ==========================================
   observacao?: string;
-  
   usuario_id?: number;
 }
 
