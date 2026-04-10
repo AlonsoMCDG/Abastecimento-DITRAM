@@ -21,8 +21,9 @@ export default function GuiaAbastecimentoListPage() {
   const [guiasAbastecimento, setGuiasAbastecimento] = useState<GuiaAbastecimento[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [pdfLoading, setPdfLoading] = useState<number | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
+  
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Permissões calculadas para as ações da linha (DataTable)
@@ -72,18 +73,20 @@ export default function GuiaAbastecimentoListPage() {
   }
 
   // Tratamento de PDF Otimizado
-  async function handlePdf(item: GuiaAbastecimento) {
-    if (!item.id) {
-      setErrorMessage("Não foi possível gerar o PDF: guia sem ID válido.");
-      return;
-    }
-
+  async function handlePdfAction(id: number, action: 'open' | 'print') {
+    setPdfLoading(id);
     setErrorMessage(null);
 
     try {
-      await guiasApi.abrirPdfEmNovaAba(item.id);
+      if (action === 'open') {
+        await guiasApi.abrirPdfEmNovaAba(id);
+      } else {
+        await guiasApi.imprimirPdfDireto(id);
+      }
     } catch (err: unknown) {
-      setErrorMessage(getApiErrorMessage(err, "Não foi possível gerar o PDF agora. Tente novamente."));
+      setErrorMessage(getApiErrorMessage(err, "Erro ao processar PDF."));
+    } finally {
+      setPdfLoading(null);
     }
   }
 
@@ -116,7 +119,7 @@ export default function GuiaAbastecimentoListPage() {
         loading={loading}
         schema={guiaAbastecimentoListSchema}
         onParamsChange={fetchGuias}
-        onPdf={handlePdf}
+        onPdf={(item, action) => handlePdfAction(item.id!, action)}
         canEdit={canEdit}
         canDelete={canDelete}
         onEdit={(item) => navigate(ROUTES.operacao.guias.edit(item.id!))}

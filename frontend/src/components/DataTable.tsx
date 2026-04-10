@@ -3,7 +3,6 @@ import type { TableSchema } from "../types/form";
 import { getApiErrorMessage } from "../api/config/errorHandlers";
 import "../assets/css/DataTable.css";
 
-// Interface para os parâmetros que a API espera
 export interface DataTableParams {
   page: number;
   pageSize: number;
@@ -15,11 +14,11 @@ interface Props<T> {
   data: T[];
   total: number;
   loading?: boolean;
-  schema: TableSchema; // Agora usamos o TableSchema, focado apenas em exibição
+  schema: TableSchema;
   onParamsChange: (params: DataTableParams) => void;
   onEdit: (item: T) => void;
   onDelete: (item: T) => void | Promise<void>;
-  onPdf?: (item: T) => void | Promise<void>;
+  onPdf?: (item: T, action: 'open' | 'print') => void | Promise<void>;
   canEdit?: boolean;
   canDelete?: boolean;
   pageSizeOptions?: number[];
@@ -39,7 +38,6 @@ export default function DataTable<T extends { id: number }>({
   pageSizeOptions = [10, 20, 50, 100],
 }: Props<T>) {
   
-  // 1. ESTADOS DE CONTROLE DA CONSULTA
   const [params, setParams] = useState<DataTableParams>({
     page: 1,
     pageSize: pageSizeOptions[0],
@@ -47,19 +45,31 @@ export default function DataTable<T extends { id: number }>({
     ordering: null,
   });
 
+  // MELHORIA: Estado local para a barra de pesquisa (Debounce)
+  const [searchTerm, setSearchTerm] = useState("");
+
   const [deleteTarget, setDeleteTarget] = useState<T | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteError, setDeleteError] = useState("");
 
-  // 2. COMUNICAÇÃO COM O PAI
+  // MELHORIA: Estado para controlar o loading de ações assíncronas (PDF, etc) por linha
+  const [actionLoading, setActionLoading] = useState<{ id: number, action: string } | null>(null);
+
+  // Efeito do Debounce da Pesquisa (Espera 500ms após o usuário parar de digitar)
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      setParams((prev) => {
+        if (prev.search === searchTerm) return prev;
+        return { ...prev, search: searchTerm, page: 1 };
+      });
+    }, 500);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchTerm]);
+
   useEffect(() => {
     onParamsChange(params);
   }, [params, onParamsChange]);
-
-  // 3. HANDLERS DE INTERAÇÃO
-  const handleSearchChange = (value: string) => {
-    setParams((prev) => ({ ...prev, search: value, page: 1 }));
-  };
 
   const handlePageChange = (newPage: number) => {
     setParams((prev) => ({ ...prev, page: newPage }));
@@ -73,7 +83,6 @@ export default function DataTable<T extends { id: number }>({
     });
   };
 
-  // 4. CÁLCULOS DE PAGINAÇÃO E AÇÕES
   const totalPages = Math.ceil(total / params.pageSize) || 1;
 
   async function confirmDelete() {
@@ -90,7 +99,17 @@ export default function DataTable<T extends { id: number }>({
     }
   }
 
-  // 5. RENDERIZAÇÃO DE CÉLULA COM FALLBACKS DE SEGURANÇA
+  // Wrapper para ações de PDF com Loading State individual
+  const handlePdfClick = async (item: T, action: 'open' | 'print') => {
+    if (!onPdf) return;
+    setActionLoading({ id: item.id, action });
+    try {
+      await Promise.resolve(onPdf(item, action));
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
   function renderCell(value: any, col: any, item: T) {
     if (col.format) {
       return col.format(value, item);
@@ -110,21 +129,19 @@ export default function DataTable<T extends { id: number }>({
 
   return (
     <div className={`datatable-container ${loading ? "is-loading" : ""}`}>
-      {/* TOOLBAR */}
       <div className="datatable-toolbar">
         <div className="search-wrapper">
           <input
             type="text"
             className="datatable-search"
             placeholder="Pesquisar no banco de dados..."
-            value={params.search}
-            onChange={(e) => handleSearchChange(e.target.value)}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
           />
           {loading && <div className="inner-spinner"></div>}
         </div>
       </div>
 
-      {/* TABELA */}
       <div className="datatable-tablewrap">
         <table className="datatable-table">
           <thead>
@@ -157,13 +174,30 @@ export default function DataTable<T extends { id: number }>({
                   <td className="dt-actions-cell">
                     <div className="dt-actions">
                       {onPdf && (
-                        <button className="dt-btn pdf" onClick={() => onPdf(item)} title="PDF">📄</button>
+                        <>
+                          <button 
+                            className="dt-btn pdf" 
+                            onClick={() => handlePdfClick(item, 'open')} 
+                            title="Visualizar PDF"
+                            disabled={actionLoading?.id === item.id}
+                          >
+                            {actionLoading?.id === item.id && actionLoading.action === 'open' ? '⏳' : '👁️'}
+                          </button>
+                          <button 
+                            className="dt-btn pdf" 
+                            onClick={() => handlePdfClick(item, 'print')} 
+                            title="Imprimir PDF"
+                            disabled={actionLoading?.id === item.id}
+                          >
+                            {actionLoading?.id === item.id && actionLoading.action === 'print' ? '⏳' : '🖨️'}
+                          </button>
+                        </>
                       )}
                       {canEdit && (
-                        <button className="dt-btn edit" onClick={() => onEdit(item)} title="Editar">✏️</button>
+                        <button className="dt-btn edit" onClick={() => onEdit(item)} title="Editar" disabled={actionLoading?.id === item.id}>✏️</button>
                       )}
                       {canDelete && (
-                        <button className="dt-btn delete" onClick={() => setDeleteTarget(item)} title="Excluir">🗑️</button>
+                        <button className="dt-btn delete" onClick={() => setDeleteTarget(item)} title="Excluir" disabled={actionLoading?.id === item.id}>🗑️</button>
                       )}
                     </div>
                   </td>
@@ -180,7 +214,7 @@ export default function DataTable<T extends { id: number }>({
         </table>
       </div>
 
-      {/* RODAPÉ / PAGINAÇÃO */}
+      {/* RODAPÉ E MODAL CONTINUAM IGUAIS... */}
       <div className="datatable-footer">
         <div className="footer-info">
           Total: <strong>{total}</strong> registros
@@ -207,7 +241,6 @@ export default function DataTable<T extends { id: number }>({
         </div>
       </div>
 
-      {/* MODAL DE EXCLUSÃO */}
       {deleteTarget && (
         <div className="dt-modal-overlay">
           <div className="dt-modal">
