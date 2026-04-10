@@ -73,3 +73,13 @@
   font-weight: 900;
 }
 
+/* Caixa de informação de regras e avisos */
+.info-message-box {
+  margin-top: 1.5rem;
+  font-size: 0.875rem;
+  color: #64748b;
+  background-color: #f8fafc;
+  padding: 1rem;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}

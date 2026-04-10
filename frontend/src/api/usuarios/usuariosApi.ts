@@ -68,8 +68,8 @@ export const usuarioApi = {
   // CONTROLE DE ACESSO E PERMISSÕES
   // ==========================================
   
-  listarPermissoes() {
-    return client.get<Usuario[]>(`${ENDPOINTS.usuarios.base}permissions/`);
+  listarPermissoes(params?: UsuarioListParams) {
+    return client.get<PaginatedResponse<Usuario>>(`${ENDPOINTS.usuarios.base}permissions/`, { params });
   },
 
   atualizarPermissoes(id: number, data: Partial<PermissoesPayload>) {

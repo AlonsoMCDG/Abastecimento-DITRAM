@@ -17,12 +17,13 @@ interface Props<T> {
   error?: string | null;
   schema: TableSchema;
   onParamsChange: (params: DataTableParams) => void;
-  onEdit: (item: T) => void;
-  onDelete: (item: T) => void | Promise<void>;
+  onEdit?: (item: T) => void;
+  onDelete?: (item: T) => void | Promise<void>;
   onPdf?: (item: T, action: 'open' | 'print') => void | Promise<void>;
   canEdit?: boolean;
   canDelete?: boolean;
   pageSizeOptions?: number[];
+  rowClassName?: (item: T) => string; // Permite injetar classes customizadas por linha
 }
 
 export default function DataTable<T extends { id: number }>({
@@ -38,6 +39,7 @@ export default function DataTable<T extends { id: number }>({
   canEdit = true,
   canDelete = true,
   pageSizeOptions = [10, 20, 50, 100],
+  rowClassName,
 }: Props<T>) {
 
   const [params, setParams] = useState<DataTableParams>({
@@ -52,6 +54,9 @@ export default function DataTable<T extends { id: number }>({
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteError, setDeleteError] = useState("");
   const [actionLoading, setActionLoading] = useState<{ id: number, action: string } | null>(null);
+
+  // Verifica se a tabela precisa renderizar a coluna de Ações nativa
+  const hasActions = Boolean(onPdf || canEdit || canDelete);
 
   // Efeito do Debounce da Pesquisa
   useEffect(() => {
@@ -74,7 +79,7 @@ export default function DataTable<T extends { id: number }>({
 
   const handleSort = (col: any) => {
     if (col.sortable === false) return;
-    
+
     // Usa o sortKey do Django, se existir. Se não, usa a chave normal do frontend.
     const columnKey = col.sortKey || col.key;
     setParams((prev) => {
@@ -96,7 +101,7 @@ export default function DataTable<T extends { id: number }>({
   const totalPages = Math.ceil(total / params.pageSize) || 1;
 
   async function confirmDelete() {
-    if (!deleteTarget) return;
+    if (!deleteTarget || !onDelete) return;
     setDeleteError("");
     setDeleteLoading(true);
     try {
@@ -120,9 +125,7 @@ export default function DataTable<T extends { id: number }>({
   };
 
   function renderCell(value: any, col: any, item: T) {
-    if (col.format) {
-      return col.format(value, item);
-    }
+    if (col.format) return col.format(value, item);
     if (typeof value === "boolean") {
       return (
         <span className={`dt-badge ${value ? "dt-badge-yes" : "dt-badge-no"}`}>
@@ -130,20 +133,13 @@ export default function DataTable<T extends { id: number }>({
         </span>
       );
     }
-    if (value === null || value === undefined) {
-      return "";
-    }
+    if (value === null || value === undefined) return "";
     return String(value);
   }
 
   return (
     <div className={`datatable-container ${loading ? "is-loading" : ""}`}>
-      
-      {error && (
-        <div className="dt-global-error">
-          {error}
-        </div>
-      )}
+      {error && (<div className="dt-global-error">{error}</div>)}
 
       <div className="datatable-toolbar">
         <div className="search-wrapper">
@@ -163,7 +159,6 @@ export default function DataTable<T extends { id: number }>({
           <thead>
             <tr>
               <th style={{ width: '50px', textAlign: 'center', cursor: 'default' }}>#</th>
-              
               {schema.columns.map((col) => {
                 const targetKey = col.sortKey || col.key;
                 const isSorted = params.ordering?.replace("-", "") === targetKey;
@@ -178,14 +173,13 @@ export default function DataTable<T extends { id: number }>({
                   >
                     {col.label}
                     {isSorted && (
-                      <span className="sort-icon">
-                        {isDescending ? " ▼" : " ▲"}
-                      </span>
+                      <span className="sort-icon">{isDescending ? " ▼" : " ▲"}</span>
                     )}
                   </th>
                 );
               })}
-              <th className="actions-th">Ações</th>
+              {/* Oculta o cabeçalho de ações se não houver botões nativos */}
+              {hasActions && <th className="actions-th">Ações</th>}
             </tr>
           </thead>
           <tbody>
@@ -193,9 +187,12 @@ export default function DataTable<T extends { id: number }>({
               data.map((item, index) => {
                 // Cálculo para manter a numeração correta mesmo em outras páginas
                 const rowNumber = (params.page - 1) * params.pageSize + index + 1;
-                
+
+                // Aplica a classe customizada na linha se a prop existir
+                const customClass = rowClassName ? rowClassName(item) : "";
+
                 return (
-                  <tr key={item.id}>
+                  <tr key={item.id} className={customClass}>
                     {/* CÉLULA DO NÚMERO DA LINHA */}
                     <td style={{ textAlign: 'center', fontWeight: '500', color: '#6b7280' }}>
                       {rowNumber}
@@ -209,36 +206,39 @@ export default function DataTable<T extends { id: number }>({
                         </td>
                       );
                     })}
-                    <td className="dt-actions-cell">
-                      <div className="dt-actions">
-                        {onPdf && (
-                          <>
-                            <button
-                              className="dt-btn pdf"
-                              onClick={() => handlePdfClick(item, 'open')}
-                              title="Visualizar PDF"
-                              disabled={actionLoading?.id === item.id}
-                            >
-                              {actionLoading?.id === item.id && actionLoading.action === 'open' ? '⏳' : '👁️'}
-                            </button>
-                            <button
-                              className="dt-btn pdf"
-                              onClick={() => handlePdfClick(item, 'print')}
-                              title="Imprimir PDF"
-                              disabled={actionLoading?.id === item.id}
-                            >
-                              {actionLoading?.id === item.id && actionLoading.action === 'print' ? '⏳' : '🖨️'}
-                            </button>
-                          </>
-                        )}
-                        {canEdit && (
-                          <button className="dt-btn edit" onClick={() => onEdit(item)} title="Editar" disabled={actionLoading?.id === item.id}>✏️</button>
-                        )}
-                        {canDelete && (
-                          <button className="dt-btn delete" onClick={() => setDeleteTarget(item)} title="Excluir" disabled={actionLoading?.id === item.id}>🗑️</button>
-                        )}
-                      </div>
-                    </td>
+                    {/* Oculta a célula de ações se não houver botões nativos */}
+                    {hasActions && (
+                      <td className="dt-actions-cell">
+                        <div className="dt-actions">
+                          {onPdf && (
+                            <>
+                              <button
+                                className="dt-btn pdf"
+                                onClick={() => handlePdfClick(item, 'open')}
+                                title="Visualizar PDF"
+                                disabled={actionLoading?.id === item.id}
+                              >
+                                {actionLoading?.id === item.id && actionLoading.action === 'open' ? '⏳' : '👁️'}
+                              </button>
+                              <button
+                                className="dt-btn pdf"
+                                onClick={() => handlePdfClick(item, 'print')}
+                                title="Imprimir PDF"
+                                disabled={actionLoading?.id === item.id}
+                              >
+                                {actionLoading?.id === item.id && actionLoading.action === 'print' ? '⏳' : '🖨️'}
+                              </button>
+                            </>
+                          )}
+                          {canEdit && onEdit && (
+                            <button className="dt-btn edit" onClick={() => onEdit(item)} title="Editar" disabled={actionLoading?.id === item.id}>✏️</button>
+                          )}
+                          {canDelete && onDelete && (
+                            <button className="dt-btn delete" onClick={() => setDeleteTarget(item)} title="Excluir" disabled={actionLoading?.id === item.id}>🗑️</button>
+                          )}
+                        </div>
+                      </td>
+                    )}
                   </tr>
                 );
               })

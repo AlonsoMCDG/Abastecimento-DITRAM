@@ -1,39 +1,45 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
-import DataTable, { type DataTableParams } from "../../components/DataTable";
+import DataTable, {type DataTableParams } from "../../components/DataTable";
+
 import { usuarioApi } from "../../api/usuarios/usuariosApi";
+
 import { ROUTES } from "../../routes/routes";
 import { useAuth } from "../../auth/AuthContext";
 import { Can } from "../../components/auth/Can";
 import { getApiErrorMessage } from "../../api/config/errorHandlers";
 
 import type { Usuario } from "../../types/models";
-import { usuarioFormSchema } from "../../schemas/usuario.schema";
+import { usuarioListSchema } from "../../schemas/usuario.schema"; // Importando o schema correto!
 
-import "../../assets/css/ListPage.css";
+import "../../assets/css/ListPage.css"
 
 export default function UsuarioListPage() {
   const navigate = useNavigate();
   const { user: me } = useAuth();
 
-  // Estados da Listagem e Paginação
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Controle de atraso para não sobrecarregar a API durante a busca
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  // Permissão estrita: Apenas administradores (staff) gerenciam usuários
   const isAdmin = Boolean(me?.is_staff);
 
-  // Motor de busca paginado
+  // Limpa o timer se o componente for desmontado (Prevenção de Memory Leak)
+  useEffect(() => {
+    return () => {
+      if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    };
+  }, []);
+
   const fetchUsuarios = useCallback(async (params: DataTableParams) => {
     if (debounceTimer.current) clearTimeout(debounceTimer.current);
 
     debounceTimer.current = setTimeout(async () => {
       setLoading(true);
+      setErrorMessage(null);
       try {
         const res = await usuarioApi.listar({
           page: params.page,
@@ -45,6 +51,7 @@ export default function UsuarioListPage() {
         setUsuarios(res.data.results || []);
         setTotal(res.data.count || 0);
       } catch (err) {
+        setErrorMessage("Erro ao buscar usuários do sistema.");
         console.error("Erro ao buscar usuários:", err);
       } finally {
         setLoading(false);
@@ -52,17 +59,14 @@ export default function UsuarioListPage() {
     }, 500);
   }, []);
 
-  // Exclusão segura com atualização em tempo real
   async function handleDelete(item: Usuario) {
     if (!item.id) return;
-
     try {
       await usuarioApi.deletar(item.id);
-      
-      // Retorna para a página 1 após excluir, atualizando a tabela suavemente
+      setErrorMessage(null);
       fetchUsuarios({ page: 1, pageSize: 10, search: "", ordering: null });
     } catch (err: unknown) {
-      alert(getApiErrorMessage(err, "Falha ao excluir usuário. Verifique dependências."));
+      setErrorMessage(getApiErrorMessage(err, "Falha ao excluir usuário. Verifique dependências."));
     }
   }
 
@@ -83,11 +87,13 @@ export default function UsuarioListPage() {
         </div>
       </div>
 
+      {/* O erro agora é passado elegantemente para o DataTable */}
       <DataTable
         data={usuarios}
         total={total}
         loading={loading}
-        schema={usuarioFormSchema}
+        error={errorMessage} 
+        schema={usuarioListSchema} 
         onParamsChange={fetchUsuarios}
         canEdit={isAdmin}
         canDelete={isAdmin}

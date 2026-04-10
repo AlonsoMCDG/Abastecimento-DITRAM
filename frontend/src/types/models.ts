@@ -187,4 +187,3 @@ export interface Usuario {
   can_edit_guia_abastecimento: boolean;
   can_delete_guia_abastecimento: boolean;
 }
-

@@ -1,7 +1,13 @@
-import { useEffect, useMemo, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useState, useCallback } from "react";
 import { usuarioApi } from "../../api/usuarios/usuariosApi";
 import type { Usuario } from "../../types/models";
+import { useAuth } from "../../auth/AuthContext";
+
+import DataTable, { type DataTableParams } from "../../components/DataTable";
+import type { TableSchema } from "../../types/form";
+
+import "../../assets/css/ListPage.css";
+import "../../assets/css/DataTable.css";
 
 type EditedMap = Record<number, Partial<Usuario>>;
 type PermissionKey =
@@ -13,12 +19,13 @@ type PermissionKey =
   | "can_delete_guia_abastecimento";
 
 export default function UsuariosPermissoesPage() {
-  const location = useLocation();
-  const [me, setMe] = useState<Usuario | null>(null);
+  const { user: me } = useAuth();
+
   const [users, setUsers] = useState<Usuario[]>([]);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [edited, setEdited] = useState<EditedMap>({});
-  const [loading, setLoading] = useState(true);
-  const [errorMsg, setErrorMsg] = useState("");
 
   const canEditAdmins = Boolean(me?.is_superuser);
 
@@ -28,26 +35,24 @@ export default function UsuariosPermissoesPage() {
     return true;
   };
 
-  useEffect(() => {
+  const fetchPermissions = useCallback(async (params: DataTableParams) => {
     setLoading(true);
-    setErrorMsg("");
-
-    Promise.all([usuarioApi.me(), usuarioApi.listarPermissoes()])
-      .then(([meRes, listRes]) => {
-        setMe(meRes.data);
-        setUsers(listRes.data);
-      })
-      .catch((err: unknown) => {
-        const message =
-          err instanceof Error ? err.message : "Falha ao carregar permissões.";
-        setErrorMsg(message);
-      })
-      .finally(() => setLoading(false));
-  }, [location.key]);
-
-  const sorted = useMemo(() => {
-    return [...users].sort((a, b) => (a.id || 0) - (b.id || 0));
-  }, [users]);
+    setErrorMsg(null);
+    try {
+      const listRes = await usuarioApi.listarPermissoes({
+        page: params.page,
+        page_size: params.pageSize,
+        search: params.search,
+        ordering: params.ordering ?? undefined,
+      });
+      setUsers(listRes.data.results || []);
+      setTotal(listRes.data.count || 0);
+    } catch (err: unknown) {
+      setErrorMsg(err instanceof Error ? err.message : "Falha ao carregar permissões.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   const toggle = (id: number, field: PermissionKey) => {
     setEdited((prev) => {
@@ -55,10 +60,7 @@ export default function UsuariosPermissoesPage() {
       const base = users.find((u) => u.id === id);
       const baseValue = base?.[field] as boolean | undefined;
       const currentValue = (current[field] ?? baseValue) as boolean | undefined;
-      return {
-        ...prev,
-        [id]: { ...current, [field]: !currentValue },
-      };
+      return { ...prev, [id]: { ...current, [field]: !currentValue } };
     });
   };
 
@@ -67,145 +69,106 @@ export default function UsuariosPermissoesPage() {
     const patch = edited[u.id];
     if (!patch || Object.keys(patch).length === 0) return;
 
-    await usuarioApi.atualizarPermissoes(u.id, patch);
-    const refreshed = await usuarioApi.listarPermissoes();
-    setUsers(refreshed.data);
-    setEdited((prev) => {
-      const next = { ...prev };
-      delete next[u.id as number];
-      return next;
-    });
+    try {
+      await usuarioApi.atualizarPermissoes(u.id, patch);
+      setEdited((prev) => {
+        const next = { ...prev };
+        delete next[u.id as number];
+        return next;
+      });
+      // Recarrega os dados com os parâmetros atuais (força refresh via nova referência, 
+      // ou o usuário clica num botão de refresh. Aqui, remover a edição já limpa o estado visual).
+    } catch (err) {
+      setErrorMsg("Erro ao salvar permissões. Tente novamente.");
+    }
   };
 
-  if (loading) return <div style={{ padding: 16 }}>Carregando...</div>;
+  // Helper para renderizar os checkboxes centralizados e com a lógica amarrada
+  const renderCheckbox = (u: Usuario, field: PermissionKey, superOnly = false) => {
+    const patch = u.id ? edited[u.id] : undefined;
+    const isChecked = Boolean((patch?.[field] ?? u[field]) as boolean | undefined);
+    const disabled = !canEditUser(u) || (superOnly && !canEditAdmins);
+
+    return (
+      <div className="text-center">
+        <input
+          type="checkbox"
+          className="dt-checkbox"
+          checked={isChecked}
+          disabled={disabled}
+          onChange={() => u.id && toggle(u.id, field)}
+        />
+      </div>
+    );
+  };
+
+  // Esquema Dinâmico da Tabela (Fica dentro do componente para enxergar as funções locais de toggle/save)
+  const permissionSchema: TableSchema = {
+    columns: [
+      { key: "cpf", label: "CPF", sortKey: "cpf" },
+      {
+        key: "first_name",
+        label: "Nome Completo",
+        sortKey: "first_name",
+        format: (_, u: Usuario) => `${u.first_name || ""} ${u.last_name || ""}`.trim()
+      },
+      { key: "is_staff", label: "👑 Admin", sortable: false, format: (_, u: Usuario) => renderCheckbox(u, "is_staff", true) },
+      { key: "can_write_cadastros", label: "📝 Cadastros", sortable: false, format: (_, u: Usuario) => renderCheckbox(u, "can_write_cadastros") },
+      { key: "can_write_frota", label: "🚗 Frota", sortable: false, format: (_, u: Usuario) => renderCheckbox(u, "can_write_frota") },
+      { key: "can_create_guia_abastecimento", label: "⛽ Criar Guia", sortable: false, format: (_, u: Usuario) => renderCheckbox(u, "can_create_guia_abastecimento") },
+      { key: "can_edit_guia_abastecimento", label: "✏️ Editar Guia", sortable: false, format: (_, u: Usuario) => renderCheckbox(u, "can_edit_guia_abastecimento") },
+      { key: "can_delete_guia_abastecimento", label: "🗑️ Excluir Guia", sortable: false, format: (_, u: Usuario) => renderCheckbox(u, "can_delete_guia_abastecimento") },
+      {
+        key: "custom_actions", // Nossa coluna customizada de ação que substitui a nativa
+        label: "Ação",
+        sortable: false,
+        format: (_, u: Usuario) => {
+          const patch = u.id ? edited[u.id] : undefined;
+          const dirty = Boolean(patch && Object.keys(patch).length > 0);
+          
+          if (u.is_superuser) {
+            return <span className="dt-badge dt-badge-superadmin">Superadmin</span>;
+          }
+          return (
+            <button
+              className={`dt-btn-save ${dirty ? "is-dirty" : ""}`}
+              disabled={!canEditUser(u) || !dirty}
+              onClick={() => save(u)}
+            >
+              Salvar
+            </button>
+          );
+        }
+      }
+    ]
+  };
 
   return (
-    <div style={{ padding: 16 }}>
-      <h2>Permissões de usuários</h2>
-
-      {errorMsg && <p style={{ color: "red" }}>{errorMsg}</p>}
-
-      <div style={{ overflowX: "auto" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead>
-            <tr>
-              <th style={th}>CPF</th>
-              <th style={th}>Nome</th>
-              <th style={th}>Admin</th>
-              <th style={th}>Cadastros (write)</th>
-              <th style={th}>Frota (write)</th>
-              <th style={th}>Guia (create)</th>
-              <th style={th}>Guia (edit)</th>
-              <th style={th}>Guia (delete)</th>
-              <th style={th}></th>
-            </tr>
-          </thead>
-          <tbody>
-            {sorted.map((u) => {
-              const disabled = !canEditUser(u);
-              const patch = u.id ? edited[u.id] : undefined;
-              const dirty = Boolean(patch && Object.keys(patch).length > 0);
-
-              const getBool = (field: PermissionKey) =>
-                Boolean((patch?.[field] ?? u[field]) as boolean | undefined);
-
-              return (
-                <tr key={u.id}>
-                  <td style={td}>{u.cpf}</td>
-                  <td style={td}>{`${u.first_name || ""} ${u.last_name || ""}`.trim()}</td>
-                  <td style={tdCenter}>
-                    <input
-                      type="checkbox"
-                      checked={getBool("is_staff")}
-                      disabled={disabled || !canEditAdmins}
-                      onChange={() => u.id && toggle(u.id, "is_staff")}
-                    />
-                  </td>
-                  <td style={tdCenter}>
-                    <input
-                      type="checkbox"
-                      checked={getBool("can_write_cadastros")}
-                      disabled={disabled}
-                      onChange={() => u.id && toggle(u.id, "can_write_cadastros")}
-                    />
-                  </td>
-                  <td style={tdCenter}>
-                    <input
-                      type="checkbox"
-                      checked={getBool("can_write_frota")}
-                      disabled={disabled}
-                      onChange={() => u.id && toggle(u.id, "can_write_frota")}
-                    />
-                  </td>
-                  <td style={tdCenter}>
-                    <input
-                      type="checkbox"
-                      checked={getBool("can_create_guia_abastecimento")}
-                      disabled={disabled}
-                      onChange={() =>
-                        u.id && toggle(u.id, "can_create_guia_abastecimento")
-                      }
-                    />
-                  </td>
-                  <td style={tdCenter}>
-                    <input
-                      type="checkbox"
-                      checked={getBool("can_edit_guia_abastecimento")}
-                      disabled={disabled}
-                      onChange={() =>
-                        u.id && toggle(u.id, "can_edit_guia_abastecimento")
-                      }
-                    />
-                  </td>
-                  <td style={tdCenter}>
-                    <input
-                      type="checkbox"
-                      checked={getBool("can_delete_guia_abastecimento")}
-                      disabled={disabled}
-                      onChange={() =>
-                        u.id && toggle(u.id, "can_delete_guia_abastecimento")
-                      }
-                    />
-                  </td>
-                  <td style={td}>
-                    {u.is_superuser ? (
-                      <span>superadmin</span>
-                    ) : (
-                      <button
-                        disabled={disabled || !dirty}
-                        onClick={() => save(u)}
-                      >
-                        Salvar
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+    <div className="list-page">
+      <div className="list-header">
+        <div>
+          <h2 className="list-title">Matriz de Permissões</h2>
+          <p className="list-subtitle">Controle granular de acesso aos módulos do sistema.</p>
+        </div>
       </div>
 
-      <p style={{ marginTop: 12, fontSize: 12, color: "#555" }}>
-        Observação: apenas o superadmin pode promover usuários para admin e alterar
-        permissões de usuários admin.
+      <DataTable
+        data={users}
+        total={total}
+        loading={loading}
+        error={errorMsg}
+        schema={permissionSchema}
+        onParamsChange={fetchPermissions}
+        // Desativamos as ações nativas do DataTable para usar a nossa coluna custom_actions!
+        canEdit={false} 
+        canDelete={false}
+        // Colore a linha de verde caso haja edições não salvas
+        rowClassName={(u) => u.id && edited[u.id] && Object.keys(edited[u.id]).length > 0 ? "dt-row-dirty" : ""}
+      />
+
+      <p className="info-message-box">
+        <strong>ℹ️ Regras de Hierarquia:</strong> Apenas o Superadmin pode promover usuários para Admin (Staff) e alterar permissões de usuários que já são Admins. Administradores normais só podem gerenciar acessos de usuários comuns.
       </p>
     </div>
   );
 }
-
-const th: React.CSSProperties = {
-  borderBottom: "1px solid #ddd",
-  textAlign: "left",
-  padding: 8,
-  whiteSpace: "nowrap",
-};
-
-const td: React.CSSProperties = {
-  borderBottom: "1px solid #eee",
-  padding: 8,
-  whiteSpace: "nowrap",
-};
-
-const tdCenter: React.CSSProperties = { ...td, textAlign: "center" };
-

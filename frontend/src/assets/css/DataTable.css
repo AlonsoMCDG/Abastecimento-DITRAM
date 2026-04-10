@@ -276,3 +276,59 @@
   font-size: 0.95rem;
   box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }
+
+/* ========================================================
+   ESTILOS ESPECÍFICOS: MATRIZ DE PERMISSÕES
+   ======================================================== */
+.text-center {
+  text-align: center !important;
+}
+
+/* Destaca a linha que possui alterações não salvas */
+.dt-row-dirty {
+  background-color: #f0fdf4 !important; /* Fundo levemente verde */
+  transition: background-color 0.3s ease;
+}
+
+/* Checkboxes da tabela */
+.dt-checkbox {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: var(--primary, #2563eb);
+}
+
+.dt-checkbox:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Badge específica para Superadmin */
+.dt-badge-superadmin {
+  background-color: #475569;
+  color: #ffffff;
+}
+
+/* Botão de salvar da linha */
+.dt-btn-save {
+  background-color: #e2e8f0;
+  color: #94a3b8;
+  padding: 0.4rem 1rem;
+  width: 100%;
+  font-weight: 600;
+  border: none;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  cursor: not-allowed;
+}
+
+/* Estado ativado (quando há edições na linha) */
+.dt-btn-save.is-dirty {
+  background-color: #2563eb;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.dt-btn-save.is-dirty:hover {
+  background-color: #1d4ed8;
+}
