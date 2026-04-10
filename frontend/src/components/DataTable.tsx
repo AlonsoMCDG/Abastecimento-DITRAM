@@ -53,7 +53,7 @@ export default function DataTable<T extends { id: number }>({
   const [deleteError, setDeleteError] = useState("");
   const [actionLoading, setActionLoading] = useState<{ id: number, action: string } | null>(null);
 
-  // Efeito do Debounce da Pesquisa (Espera 500ms após o usuário parar de digitar)
+  // Efeito do Debounce da Pesquisa
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
       setParams((prev) => {
@@ -139,7 +139,6 @@ export default function DataTable<T extends { id: number }>({
   return (
     <div className={`datatable-container ${loading ? "is-loading" : ""}`}>
       
-      {/* RENDERIZAÇÃO DO ERRO */}
       {error && (
         <div className="dt-global-error">
           {error}
@@ -163,6 +162,8 @@ export default function DataTable<T extends { id: number }>({
         <table className="datatable-table">
           <thead>
             <tr>
+              <th style={{ width: '50px', textAlign: 'center', cursor: 'default' }}>#</th>
+              
               {schema.columns.map((col) => {
                 const targetKey = col.sortKey || col.key;
                 const isSorted = params.ordering?.replace("-", "") === targetKey;
@@ -189,51 +190,62 @@ export default function DataTable<T extends { id: number }>({
           </thead>
           <tbody>
             {data.length > 0 ? (
-              data.map((item) => (
-                <tr key={item.id}>
-                  {schema.columns.map((col) => {
-                    const value = (item as any)[col.key];
-                    return (
-                      <td key={col.key}>
-                        {renderCell(value, col, item)}
-                      </td>
-                    );
-                  })}
-                  <td className="dt-actions-cell">
-                    <div className="dt-actions">
-                      {onPdf && (
-                        <>
-                          <button
-                            className="dt-btn pdf"
-                            onClick={() => handlePdfClick(item, 'open')}
-                            title="Visualizar PDF"
-                            disabled={actionLoading?.id === item.id}
-                          >
-                            {actionLoading?.id === item.id && actionLoading.action === 'open' ? '⏳' : '👁️'}
-                          </button>
-                          <button
-                            className="dt-btn pdf"
-                            onClick={() => handlePdfClick(item, 'print')}
-                            title="Imprimir PDF"
-                            disabled={actionLoading?.id === item.id}
-                          >
-                            {actionLoading?.id === item.id && actionLoading.action === 'print' ? '⏳' : '🖨️'}
-                          </button>
-                        </>
-                      )}
-                      {canEdit && (
-                        <button className="dt-btn edit" onClick={() => onEdit(item)} title="Editar" disabled={actionLoading?.id === item.id}>✏️</button>
-                      )}
-                      {canDelete && (
-                        <button className="dt-btn delete" onClick={() => setDeleteTarget(item)} title="Excluir" disabled={actionLoading?.id === item.id}>🗑️</button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))
+              data.map((item, index) => {
+                // Cálculo para manter a numeração correta mesmo em outras páginas
+                const rowNumber = (params.page - 1) * params.pageSize + index + 1;
+                
+                return (
+                  <tr key={item.id}>
+                    {/* CÉLULA DO NÚMERO DA LINHA */}
+                    <td style={{ textAlign: 'center', fontWeight: '500', color: '#6b7280' }}>
+                      {rowNumber}
+                    </td>
+
+                    {schema.columns.map((col) => {
+                      const value = (item as any)[col.key];
+                      return (
+                        <td key={col.key}>
+                          {renderCell(value, col, item)}
+                        </td>
+                      );
+                    })}
+                    <td className="dt-actions-cell">
+                      <div className="dt-actions">
+                        {onPdf && (
+                          <>
+                            <button
+                              className="dt-btn pdf"
+                              onClick={() => handlePdfClick(item, 'open')}
+                              title="Visualizar PDF"
+                              disabled={actionLoading?.id === item.id}
+                            >
+                              {actionLoading?.id === item.id && actionLoading.action === 'open' ? '⏳' : '👁️'}
+                            </button>
+                            <button
+                              className="dt-btn pdf"
+                              onClick={() => handlePdfClick(item, 'print')}
+                              title="Imprimir PDF"
+                              disabled={actionLoading?.id === item.id}
+                            >
+                              {actionLoading?.id === item.id && actionLoading.action === 'print' ? '⏳' : '🖨️'}
+                            </button>
+                          </>
+                        )}
+                        {canEdit && (
+                          <button className="dt-btn edit" onClick={() => onEdit(item)} title="Editar" disabled={actionLoading?.id === item.id}>✏️</button>
+                        )}
+                        {canDelete && (
+                          <button className="dt-btn delete" onClick={() => setDeleteTarget(item)} title="Excluir" disabled={actionLoading?.id === item.id}>🗑️</button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })
             ) : (
               <tr>
-                <td colSpan={schema.columns.length + 1} className="td-empty">
+                {/* Atualizado o colSpan para incluir a coluna '#' (+2) */}
+                <td colSpan={schema.columns.length + 2} className="td-empty">
                   {loading ? "Carregando dados..." : "Nenhum registro encontrado."}
                 </td>
               </tr>
