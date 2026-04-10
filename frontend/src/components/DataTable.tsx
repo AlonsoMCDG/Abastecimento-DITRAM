@@ -14,6 +14,7 @@ interface Props<T> {
   data: T[];
   total: number;
   loading?: boolean;
+  error?: string | null;
   schema: TableSchema;
   onParamsChange: (params: DataTableParams) => void;
   onEdit: (item: T) => void;
@@ -28,6 +29,7 @@ export default function DataTable<T extends { id: number }>({
   data,
   total,
   loading = false,
+  error = null,
   schema,
   onParamsChange,
   onEdit,
@@ -45,14 +47,10 @@ export default function DataTable<T extends { id: number }>({
     ordering: null,
   });
 
-  // MELHORIA: Estado local para a barra de pesquisa (Debounce)
   const [searchTerm, setSearchTerm] = useState("");
-
   const [deleteTarget, setDeleteTarget] = useState<T | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteError, setDeleteError] = useState("");
-
-  // MELHORIA: Estado para controlar o loading de ações assíncronas (PDF, etc) por linha
   const [actionLoading, setActionLoading] = useState<{ id: number, action: string } | null>(null);
 
   // Efeito do Debounce da Pesquisa (Espera 500ms após o usuário parar de digitar)
@@ -63,7 +61,6 @@ export default function DataTable<T extends { id: number }>({
         return { ...prev, search: searchTerm, page: 1 };
       });
     }, 500);
-
     return () => clearTimeout(delayDebounceFn);
   }, [searchTerm]);
 
@@ -76,12 +73,10 @@ export default function DataTable<T extends { id: number }>({
   };
 
   const handleSort = (col: any) => {
-    // Ignora o clique se a coluna foi marcada explicitamente como não-ordenável
     if (col.sortable === false) return;
-
+    
     // Usa o sortKey do Django, se existir. Se não, usa a chave normal do frontend.
     const columnKey = col.sortKey || col.key;
-
     setParams((prev) => {
       // Remove o sinal de "-" para descobrir qual é o campo base atual
       const currentOrderField = prev.ordering?.replace("-", "");
@@ -94,7 +89,6 @@ export default function DataTable<T extends { id: number }>({
       // Se ele clicou na MESMA coluna, inverte a ordem
       const isDescending = prev.ordering?.startsWith("-");
       const newOrdering = isDescending ? columnKey : `-${columnKey}`;
-
       return { ...prev, ordering: newOrdering, page: 1 };
     });
   };
@@ -115,7 +109,6 @@ export default function DataTable<T extends { id: number }>({
     }
   }
 
-  // Wrapper para ações de PDF com Loading State individual
   const handlePdfClick = async (item: T, action: 'open' | 'print') => {
     if (!onPdf) return;
     setActionLoading({ id: item.id, action });
@@ -145,6 +138,14 @@ export default function DataTable<T extends { id: number }>({
 
   return (
     <div className={`datatable-container ${loading ? "is-loading" : ""}`}>
+      
+      {/* RENDERIZAÇÃO DO ERRO */}
+      {error && (
+        <div className="dt-global-error">
+          {error}
+        </div>
+      )}
+
       <div className="datatable-toolbar">
         <div className="search-wrapper">
           <input
@@ -163,7 +164,6 @@ export default function DataTable<T extends { id: number }>({
           <thead>
             <tr>
               {schema.columns.map((col) => {
-                // Verifica qual chave está ativa no momento
                 const targetKey = col.sortKey || col.key;
                 const isSorted = params.ordering?.replace("-", "") === targetKey;
                 const isDescending = params.ordering?.startsWith("-");
@@ -242,7 +242,6 @@ export default function DataTable<T extends { id: number }>({
         </table>
       </div>
 
-      {/* RODAPÉ E MODAL CONTINUAM IGUAIS... */}
       <div className="datatable-footer">
         <div className="footer-info">
           Total: <strong>{total}</strong> registros
