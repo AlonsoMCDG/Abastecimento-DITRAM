@@ -1,5 +1,4 @@
-// pages/GuiaAbastecimentoFormPage.tsx
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { UseFormSetValue } from 'react-hook-form';
 import { DynamicForm } from '../../../components/DynamicForm/DynamicForm'; 
 import { guiaAbastecimentoFormSchema } from '../../../schemas/guiaAbastecimento.schema';
@@ -9,6 +8,7 @@ import type { GuiaAbastecimento } from '../../../types/models';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { ROUTES } from '../../../routes/routes';
 import { veiculosApi } from '../../../api/frota/veiculosApi';
+import styles from '../../../components/DynamicForm/DynamicForm.module.css'
 
 export const GuiaAbastecimentoFormPage: React.FC = () => {
   const navigate = useNavigate();
@@ -19,6 +19,11 @@ export const GuiaAbastecimentoFormPage: React.FC = () => {
 
   const [initialValues, setInitialValues] = useState<Partial<GuiaAbastecimento> | undefined>(undefined);
   const [loading, setLoading] = useState(!!id);
+
+  const [isPrinting, setIsPrinting] = useState(false);
+
+  // Referência silenciosa para saber qual botão disparou o formulário
+  const submitIntent = useRef<'save' | 'save_print'>('save');
 
   const getLocalISOString = () => {
     const tzoffset = (new Date()).getTimezoneOffset() * 60000; // offset em milissegundos
@@ -55,17 +60,80 @@ export const GuiaAbastecimentoFormPage: React.FC = () => {
   
   const handleSubmit = async (formData: GuiaAbastecimento) => {
     try {
-      if (id) {
-        await guiasApi.atualizar(Number(id), formData);
+      let currentId = id ? Number(id) : null;
+      
+      if (currentId) {
+        await guiasApi.atualizar(currentId, formData);
       } else {
-        await guiasApi.criar(formData);
+        const res = await guiasApi.criar(formData);
+        currentId = res.data.id; // Captura o ID da guia que acabou de nascer no banco!
       }
-      alert('Guia salva com sucesso!');
+      
+      // Se o usuário clicou no botão "Salvar e Imprimir"
+      if (submitIntent.current === 'save_print' && currentId) {
+        setIsPrinting(true);
+        try {
+          await guiasApi.imprimirPdfDireto(currentId);
+        } catch(err) {
+          alert("A guia foi salva, mas ocorreu um erro de conexão ao gerar o PDF.");
+        } finally {
+          setIsPrinting(false);
+        }
+      } else {
+        // Fluxo normal
+        alert('Guia salva com sucesso!');
+      }
+
+      // Por padrão, terminada a ação, volta para a listagem
       navigate(ROUTES.operacao.guias.list);
     } catch (error) {
       console.error('Erro ao salvar guia', error);
+      alert('Erro ao salvar. Verifique os dados e tente novamente.');
     }
   };
+
+  // Botão 3: Imprimir a versão que já está no banco sem alterar nada
+  const handlePrintOnly = async () => {
+    if (!id) return;
+    setIsPrinting(true);
+    try {
+      await guiasApi.imprimirPdfDireto(Number(id));
+    } catch (err) {
+      alert("Erro ao imprimir PDF.");
+    } finally {
+      setIsPrinting(false);
+    }
+  };
+  
+  // Construção dos botões Extras
+  const extraActions = useMemo(() => {
+    return (
+      <>
+        {/* BOTÃO 2: É um botão de "submit" que altera a intenção de salvar antes de disparar */}
+        <button
+          type="submit"
+          className={styles.btnSecondary}
+          onClick={() => { submitIntent.current = 'save_print'; }}
+          disabled={isPrinting || loading}
+        >
+          {isPrinting ? "Gerando PDF..." : "💾 Salvar e Imprimir"}
+        </button>
+
+        {/* BOTÃO 3: type="button" é crucial para NÃO acionar a validação e salvamento do form */}
+        {id && (
+          <button
+            type="button" 
+            className={styles.btnOutline}
+            onClick={handlePrintOnly}
+            disabled={isPrinting || loading}
+            title="Imprime a versão que já está salva no banco de dados."
+          >
+            🖨️ Imprimir Versão Salva
+          </button>
+        )}
+      </>
+    );
+  }, [id, isPrinting, loading]);
 
   // Escuta as mudanças do DynamicForm
   const handleValuesChange = async (
@@ -238,9 +306,11 @@ export const GuiaAbastecimentoFormPage: React.FC = () => {
       subtitle={id ? `Editando registro #${id}` : "Preencha os dados para gerar uma nova guia."}
       schema={guiaAbastecimentoFormSchema}
       initialValues={initialValues}
-      onSubmit={handleSubmit}
-      onValuesChange={handleValuesChange}
       warnings={warnings}
+      onValuesChange={handleValuesChange}
+      onSubmit={handleSubmit}
+      submitLabel="💾 Salvar Guia"
+      extraActions={extraActions}
     />
   );
 };

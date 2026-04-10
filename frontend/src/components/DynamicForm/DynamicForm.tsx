@@ -19,6 +19,7 @@ interface DynamicFormProps<T extends FieldValues> {
     setValue: UseFormSetValue<T>
   ) => void;
   warnings?: Record<string, string>;
+  submitLabel?: string;
   extraActions?: React.ReactNode;
 }
 
@@ -30,6 +31,7 @@ export const DynamicForm = <T extends FieldValues>({
   onSubmit,
   onValuesChange,
   warnings = {},
+  submitLabel = "Salvar", // Valor padrão
   extraActions
 }: DynamicFormProps<T>) => {
   const { 
@@ -234,78 +236,79 @@ export const DynamicForm = <T extends FieldValues>({
         onKeyDown={handleFormKeyDown}
         className={styles.formContainer}
       >
-      {schema.fields.map((field) => {
-        // ==========================================
-        // EARLY RETURN PARA CAMPOS HIDDEN
-        // Se for oculto, joga só o input na DOM e pula todo o layout!
-        // ==========================================
-        if (field.type === 'hidden') {
-          return <input key={field.name} type="hidden" {...register(field.name as any)} />;
-        }
+        {schema.fields.map((field) => {
+          // ==========================================
+          // EARLY RETURN PARA CAMPOS HIDDEN
+          // Se for oculto, joga só o input na DOM e pula todo o layout!
+          // ==========================================
+          if (field.type === 'hidden') {
+            return <input key={field.name} type="hidden" {...register(field.name as any)} />;
+          }
 
-        // CAPTURA O AVISO ESPECÍFICO PARA ESTE CAMPO
-        const warningMessage = warnings[field.name];
-        const hasError = !!errors[field.name];
+          // CAPTURA O AVISO ESPECÍFICO PARA ESTE CAMPO
+          const warningMessage = warnings[field.name];
+          const hasError = !!errors[field.name];
 
-        return (
-          <div 
-            key={field.name} 
-            className={`${styles.fieldWrapper} ${field.type === 'checkbox' ? styles.checkboxWrapper : ''}`}
-            style={{ '--col-span': field.colSpan || 1 } as React.CSSProperties}
-          >
-            {field.type !== 'checkbox' && (
-              <label htmlFor={field.name} className={styles.label}>
-                {field.label} {field.required && (
-                  <span className={styles.required}>*</span>
-                )}
-              </label>
-            )}
+          return (
+            <div 
+              key={field.name} 
+              className={`${styles.fieldWrapper} ${field.type === 'checkbox' ? styles.checkboxWrapper : ''}`}
+              style={{ '--col-span': field.colSpan || 1 } as React.CSSProperties}
+            >
+              {field.type !== 'checkbox' && (
+                <label htmlFor={field.name} className={styles.label}>
+                  {field.label} {field.required && (
+                    <span className={styles.required}>*</span>
+                  )}
+                </label>
+              )}
 
-            {/* A MÁGICA DO QUICK ADD ACONTECE AQUI */}
-            <div className={field.quickActions?.length ? styles.inputWithActions : ''}>
-              {renderField(field)}
+              {/* A MÁGICA DO QUICK ADD ACONTECE AQUI */}
+              <div className={field.quickActions?.length ? styles.inputWithActions : ''}>
+                {renderField(field)}
+                
+                {field.quickActions?.map((action, index) => (
+                  <button
+                    key={index}
+                    type="button" // CRÍTICO: Evita que o botão submeta o formulário sem querer
+                    className={styles.quickActionButton}
+                    title={action.tooltip}
+                    onClick={(e) => {
+                      e.preventDefault(); // Garante que a ação padrão seja bloqueada
+                      action.onClick();
+                    }}
+                  >
+                    {action.icon}
+                  </button>
+                ))}
+              </div>
               
-              {field.quickActions?.map((action, index) => (
-                <button
-                  key={index}
-                  type="button" // CRÍTICO: Evita que o botão submeta o formulário sem querer
-                  className={styles.quickActionButton}
-                  title={action.tooltip}
-                  onClick={(e) => {
-                    e.preventDefault(); // Garante que a ação padrão seja bloqueada
-                    action.onClick();
-                  }}
-                >
-                  {action.icon}
-                </button>
-              ))}
+              {field.type === 'checkbox' && (
+                <label htmlFor={field.name} className={styles.label}>
+                  {field.label} {field.required && '*'}
+                </label>
+              )}
+
+              {/* RENDERIZAÇÃO CONDICIONAL DE MENSAGENS (ERRO VS AVISO) */}
+              {hasError ? (
+                <span className={styles.error}>Este campo é obrigatório</span>
+              ) : (
+                warningMessage && (
+                  <span className={styles.warning}>{warningMessage}</span>
+                )
+              )}
             </div>
-            
-            {field.type === 'checkbox' && (
-              <label htmlFor={field.name} className={styles.label}>
-                {field.label} {field.required && '*'}
-              </label>
-            )}
+          );
+        })}
 
-            {/* RENDERIZAÇÃO CONDICIONAL DE MENSAGENS (ERRO VS AVISO) */}
-            {hasError ? (
-              <span className={styles.error}>Este campo é obrigatório</span>
-            ) : (
-              warningMessage && (
-                <span className={styles.warning}>{warningMessage}</span>
-              )
-            )}
-          </div>
-        );
-      })}
-
-      <div className={styles.formActions}>
-        <button type="submit" className={styles.submitButton}>
-          Salvar
-        </button>
-        {extraActions}
-      </div>
-    </form>
+        <div className={styles.formActions}>
+          <button type="submit" className={styles.submitButton}>
+            {submitLabel}
+          </button>
+          
+          {extraActions}
+        </div>
+      </form>
     </div>
   );
 };
