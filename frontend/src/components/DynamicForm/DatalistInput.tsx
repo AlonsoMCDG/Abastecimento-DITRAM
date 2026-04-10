@@ -30,9 +30,16 @@ export const DatalistInput = <T extends FieldValues>({
   const fieldPath = field.name as Path<T>;
   const dependsOnPath = (field.dependsOn || '_none_') as Path<T>;
 
+  // Escuta o valor do PAI (para filtro em cascata)
   const parentValue = useWatch({
     control,
     name: dependsOnPath,
+  });
+
+  // Escuta o valor DESTE PRÓPRIO CAMPO (para auto-preenchimento)
+  const currentValue = useWatch({
+    control,
+    name: fieldPath,
   });
 
   // 1. EFEITO DE BUSCA (Fetch API)
@@ -56,7 +63,31 @@ export const DatalistInput = <T extends FieldValues>({
     fetchOptions();
   }, [parentValue, field.endpoint, field.dependsOnParam, field.name]);
 
-  // 2. EFEITO DE LIMPEZA (Reset visual e interno quando o pai muda)
+  // 2. SINCRONIA VISUAL
+  // Se o valor real mudar de fora (ex: via setValue na página), atualiza o que aparece na tela
+  useEffect(() => {
+    if (currentValue === undefined || currentValue === null || currentValue === '') {
+      setInputValue('');
+      return;
+    }
+
+    // Procura se o valor atual é o ID de alguma opção carregada
+    const matchedOption = options.find(opt => String(opt.value) === String(currentValue));
+
+    if (matchedOption) {
+      // É um ID válido, exibe o nome (Label)
+      if (inputValue !== matchedOption.label) {
+        setInputValue(matchedOption.label);
+      }
+    } else {
+      // Pode ser um texto livre digitado OU as opções ainda não terminaram de carregar da API
+      if (inputValue !== String(currentValue)) {
+        setInputValue(String(currentValue));
+      }
+    }
+  }, [currentValue, options]); // Depender de 'options' garante que o nome atualize assim que a API responder
+
+  // 3. EFEITO DE LIMPEZA (Reset visual e interno quando o pai muda)
   useEffect(() => {
     if (!mounted.current) {
       mounted.current = true;
@@ -74,7 +105,8 @@ export const DatalistInput = <T extends FieldValues>({
     setInputValue(val);
     
     // Verifica se o texto digitado bate com o label de alguma opção
-    const matchedOption = options.find(opt => opt.label === val);
+    // Usa toLowerCase para evitar que diferenças de maiúsculas/minúsculas quebrem a seleção
+    const matchedOption = options.find(opt => String(opt.label).toLowerCase() === val.toLowerCase());
     
     if (matchedOption) {
       // Se bateu, salva o ID real no react-hook-form

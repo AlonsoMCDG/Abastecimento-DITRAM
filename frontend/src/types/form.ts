@@ -14,7 +14,7 @@ export interface TableSchema {
 
 export type FieldType = 
   | 'text' | 'number' | 'date' | 'datetime-local' 
-  | 'checkbox' | 'textarea' | 'select' | 'datalist';
+  | 'checkbox' | 'textarea' | 'select' | 'datalist' | 'hidden';
 
 // Interface para os botões de ação
 export interface QuickAction {
@@ -44,7 +44,7 @@ export interface FormField {
   quickActions?: QuickAction[];
   prefix?: string | React.ReactNode;  // (Ex: R$, Kg, m²) 
   suffix?: string | React.ReactNode;  // (Ex: R$, Kg, m²)
-  mask?: string | Record<string, any>;
+  mask?: any;
 }
 
 export interface FormSchema {

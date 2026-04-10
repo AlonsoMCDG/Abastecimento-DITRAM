@@ -68,6 +68,17 @@
   margin-top: 0.25rem;
 }
 
+.warning {
+  color: #d97706; /* Laranja/Âmbar para avisos */
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+  display: block;
+}
+
+.required {
+  color: #ef4444;
+}
+
 .submitButton {
   grid-column: 1 / -1; /* Ocupa a linha inteira */
   padding: 0.5rem 1rem;

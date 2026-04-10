@@ -18,6 +18,7 @@ interface DynamicFormProps<T extends FieldValues> {
     currentValues: Partial<T>,
     setValue: UseFormSetValue<T>
   ) => void;
+  warnings?: Record<string, string>;
 }
 
 export const DynamicForm = <T extends FieldValues>({
@@ -26,9 +27,18 @@ export const DynamicForm = <T extends FieldValues>({
   schema, 
   initialValues, 
   onSubmit,
-  onValuesChange
+  onValuesChange,
+  warnings = {}
 }: DynamicFormProps<T>) => {
-  const { register, handleSubmit, control, setValue, watch, reset, formState: { errors } } = useForm<T>({
+  const { 
+    register, 
+    handleSubmit, 
+    control, 
+    setValue, 
+    watch, 
+    reset, 
+    formState: { errors }
+  } = useForm<T>({
     defaultValues: initialValues,
   });
 
@@ -40,7 +50,7 @@ export const DynamicForm = <T extends FieldValues>({
 
   // Motor de observação que dispara o callback para o Pai
   useEffect(() => {
-    const subscription = watch((value, { name, type }) => {
+    const subscription = watch((value, { name }) => {
       // name garante que não dispare na inicialização do form (onde name é undefined)
       // Removemi a trava do type === 'change' para aceitar os setValues dos custom components
       if (name && onValuesChange) {
@@ -58,6 +68,10 @@ export const DynamicForm = <T extends FieldValues>({
 
     // 1. EARLY RETURN: Campos com Máscara (Controlados)
     if (fieldConfig.mask) {
+      const maskProps: any = typeof fieldConfig.mask === 'object' 
+        ? fieldConfig.mask 
+        : { mask: fieldConfig.mask };
+      
       return (
         <Controller
           key={fieldConfig.name}
@@ -66,8 +80,8 @@ export const DynamicForm = <T extends FieldValues>({
           rules={{ required: fieldConfig.required }}
           render={({ field: { onChange, onBlur, value, ref } }) => (
             <IMaskInput
-              mask={fieldConfig.mask!}
-              value={(value as string) || ''}
+              {...maskProps}
+              value={value === null || value === undefined ? '' : String(value)}
               unmask={true} 
               onAccept={(unmaskedValue) => onChange(unmaskedValue)}
               onBlur={onBlur}
@@ -76,6 +90,7 @@ export const DynamicForm = <T extends FieldValues>({
               className={`${styles.input} ${hasError ? styles.inputError : ''}`}
               placeholder={fieldConfig.placeholder || ''}
               disabled={fieldConfig.disabled}
+              readOnly={fieldConfig.readOnly}
             />
           )}
         />
@@ -217,49 +232,70 @@ export const DynamicForm = <T extends FieldValues>({
         onKeyDown={handleFormKeyDown}
         className={styles.formContainer}
       >
-      {schema.fields.map((field) => (
-        <div 
-          key={field.name} 
-          className={`${styles.fieldWrapper} ${field.type === 'checkbox' ? styles.checkboxWrapper : ''}`}
-          style={{ '--col-span': field.colSpan || 1 } as React.CSSProperties}
-        >
-          {field.type !== 'checkbox' && (
-            <label htmlFor={field.name} className={styles.label}>
-              {field.label} {field.required && '*'}
-            </label>
-          )}
+      {schema.fields.map((field) => {
+        // ==========================================
+        // EARLY RETURN PARA CAMPOS HIDDEN
+        // Se for oculto, joga só o input na DOM e pula todo o layout!
+        // ==========================================
+        if (field.type === 'hidden') {
+          return <input key={field.name} type="hidden" {...register(field.name as any)} />;
+        }
 
-          {/* A MÁGICA DO QUICK ADD ACONTECE AQUI */}
-          <div className={field.quickActions?.length ? styles.inputWithActions : ''}>
-            {renderField(field)}
+        // CAPTURA O AVISO ESPECÍFICO PARA ESTE CAMPO
+        const warningMessage = warnings[field.name];
+        const hasError = !!errors[field.name];
+
+        return (
+          <div 
+            key={field.name} 
+            className={`${styles.fieldWrapper} ${field.type === 'checkbox' ? styles.checkboxWrapper : ''}`}
+            style={{ '--col-span': field.colSpan || 1 } as React.CSSProperties}
+          >
+            {field.type !== 'checkbox' && (
+              <label htmlFor={field.name} className={styles.label}>
+                {field.label} {field.required && (
+                  <span className={styles.required}>*</span>
+                )}
+              </label>
+            )}
+
+            {/* A MÁGICA DO QUICK ADD ACONTECE AQUI */}
+            <div className={field.quickActions?.length ? styles.inputWithActions : ''}>
+              {renderField(field)}
+              
+              {field.quickActions?.map((action, index) => (
+                <button
+                  key={index}
+                  type="button" // CRÍTICO: Evita que o botão submeta o formulário sem querer
+                  className={styles.quickActionButton}
+                  title={action.tooltip}
+                  onClick={(e) => {
+                    e.preventDefault(); // Garante que a ação padrão seja bloqueada
+                    action.onClick();
+                  }}
+                >
+                  {action.icon}
+                </button>
+              ))}
+            </div>
             
-            {field.quickActions?.map((action, index) => (
-              <button
-                key={index}
-                type="button" // CRÍTICO: Evita que o botão submeta o formulário sem querer
-                className={styles.quickActionButton}
-                title={action.tooltip}
-                onClick={(e) => {
-                  e.preventDefault(); // Garante que a ação padrão seja bloqueada
-                  action.onClick();
-                }}
-              >
-                {action.icon}
-              </button>
-            ))}
-          </div>
-          
-          {field.type === 'checkbox' && (
-            <label htmlFor={field.name} className={styles.label}>
-              {field.label} {field.required && '*'}
-            </label>
-          )}
+            {field.type === 'checkbox' && (
+              <label htmlFor={field.name} className={styles.label}>
+                {field.label} {field.required && '*'}
+              </label>
+            )}
 
-          {errors[field.name] && (
-            <span className={styles.error}>Este campo é obrigatório</span>
-          )}
-        </div>
-      ))}
+            {/* RENDERIZAÇÃO CONDICIONAL DE MENSAGENS (ERRO VS AVISO) */}
+            {hasError ? (
+              <span className={styles.error}>Este campo é obrigatório</span>
+            ) : (
+              warningMessage && (
+                <span className={styles.warning}>{warningMessage}</span>
+              )
+            )}
+          </div>
+        );
+      })}
 
       <button type="submit" className={styles.submitButton}>
         Salvar

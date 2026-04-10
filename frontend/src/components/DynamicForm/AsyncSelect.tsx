@@ -1,5 +1,13 @@
 import { useEffect, useState, useRef } from 'react';
-import { useWatch, type Control, type UseFormSetValue, type UseFormRegister, type FieldValues, type Path, type PathValue } from 'react-hook-form';
+import { 
+  useWatch, 
+  type Control, 
+  type UseFormSetValue, 
+  type UseFormRegister, 
+  type FieldValues, 
+  type Path, 
+  type PathValue 
+} from 'react-hook-form';
 import { client } from '../../api/config/apiClient';
 import styles from './DynamicForm.module.css';
 import type { FormField } from '../../types/form';
@@ -17,73 +25,96 @@ export const AsyncSelect = <T extends FieldValues>({
 }: AsyncSelectProps<T>) => {
   const [options, setOptions] = useState<{ value: any; label: string }[]>([]);
   const [loading, setLoading] = useState(false);
-  const mounted = useRef(false); // Ref para evitar reset no primeiro render
+  const mounted = useRef(false);
 
   const fieldPath = field.name as Path<T>;
   const dependsOnPath = (field.dependsOn || '_none_') as Path<T>;
 
-  // Observa o valor do campo pai
+  // ESCUTA O VALOR DO PAI (Para o filtro em cascata)
   const parentValue = useWatch({
     control,
     name: dependsOnPath,
   });
 
-  // 1. EFEITO DE BUSCA (Fetch API)
+  // ESCUTA O VALOR ATUAL DESTE PRÓPRIO CAMPO (Para sincronizar o Select na inicialização)
+  const currentValue = useWatch({
+    control,
+    name: fieldPath,
+  });
+
+  // EFEITO DE BUSCA (Fetch API)
   useEffect(() => {
     if (!field.endpoint) return;
+
+    let isSubscribed = true; // Proteção contra unmounted components
 
     const fetchOptions = async () => {
       setLoading(true);
       try {
-        // Se tem dependência E o pai tem valor, filtra. Senão, busca tudo.
-        // const params = field.dependsOnParam && parentValue 
-        //   ? { [field.dependsOnParam]: parentValue } 
-        //   : {};
         const params = field.dependsOnParam && parentValue 
-          ? `?${field.dependsOnParam}=${parentValue}`
-          : ``;
+          ? { [field.dependsOnParam]: parentValue } 
+          : {};
         
-        console.log("Consulta para", field.endpoint+params);
-        // const response = await client.get(field.endpoint as string, { params });
-        const response = await client.get(`${field.endpoint}${ params }`);
-        setOptions(response.data);
+        const response = await client.get(field.endpoint as string, { params });
+        
+        if (isSubscribed) {
+          setOptions(response.data);
+        }
       } catch (err) {
-        console.error(`Erro ao carregar lookup de ${field.name}`, err);
+        if (isSubscribed) {
+          console.error(`Erro ao carregar lookup de ${field.name}`, err);
+          setOptions([]); // Limpa as opções em caso de erro
+        }
       } finally {
-        setLoading(false);
+        if (isSubscribed) {
+          setLoading(false);
+        }
       }
     };
 
     fetchOptions();
+
+    // Cleanup function
+    return () => {
+      isSubscribed = false;
+    };
   }, [parentValue, field.endpoint, field.dependsOnParam, field.name]);
 
-  // 2. EFEITO DE LIMPEZA (Reset quando o pai muda)
+  // EFEITO DE LIMPEZA (Reset quando o pai muda)
   useEffect(() => {
     if (!mounted.current) {
       mounted.current = true;
       return;
     }
 
-    // Só reseta se o campo tiver um pai definido
+    // Só reseta se o campo tiver um pai definido E se já estiver montado
     if (field.dependsOn) {
       setValue(fieldPath, "" as PathValue<T, Path<T>>); 
     }
   }, [parentValue, field.dependsOn, fieldPath, setValue]);
 
   return (
-    <>
-      <select 
-        {...register(fieldPath, { required: field.required })}
-        className={`${styles.input} ${error ? styles.inputError : ''}`}
-        disabled={loading || field.disabled} // Removemos a trava do parentValue
-      >
-        <option value="">{loading ? 'Carregando...' : 'Selecione...'}</option>
-        {options.map((opt) => (
-          <option key={opt.value} value={opt.value}>{opt.label}</option>
-        ))}
-      </select>
-
-      {/* Não é necessário duplicar a mensagem de erro aqui se o DynamicForm já renderiza */}
-    </>
+    <select 
+      id={field.name}
+      {...register(fieldPath, { required: field.required })}
+      className={`${styles.input} ${error ? styles.inputError : ''}`}
+      disabled={loading || field.disabled}
+      // Força o HTML a selecionar a option correta quando elas terminarem de carregar
+      value={currentValue ?? ""} 
+    >
+      <option value="">
+        {loading 
+          ? 'Carregando opções...' 
+          : options.length === 0 
+            ? 'Nenhuma opção disponível' 
+            : 'Selecione...'}
+      </option>
+      
+      {options.map((opt) => (
+        <option key={opt.value} value={opt.value}>
+          {opt.label}
+        </option>
+      ))}
+    </select>
   );
 };
