@@ -139,3 +139,24 @@
   background: #f8fafc;
 }
 
+/* Efeito de Skeleton */
+.loading-skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+  border: none;
+}
+
+@keyframes skeleton-loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Feedback de erro */
+.home-error {
+  text-align: center;
+  padding: 2rem;
+  background: #fff5f5;
+  border-radius: 8px;
+  color: #c53030;
+}
