@@ -19,6 +19,7 @@ interface DynamicFormProps<T extends FieldValues> {
     setValue: UseFormSetValue<T>
   ) => void;
   warnings?: Record<string, string>;
+  extraActions?: React.ReactNode;
 }
 
 export const DynamicForm = <T extends FieldValues>({
@@ -28,7 +29,8 @@ export const DynamicForm = <T extends FieldValues>({
   initialValues, 
   onSubmit,
   onValuesChange,
-  warnings = {}
+  warnings = {},
+  extraActions
 }: DynamicFormProps<T>) => {
   const { 
     register, 
@@ -297,9 +299,12 @@ export const DynamicForm = <T extends FieldValues>({
         );
       })}
 
-      <button type="submit" className={styles.submitButton}>
-        Salvar
-      </button>
+      <div className={styles.formActions}>
+        <button type="submit" className={styles.submitButton}>
+          Salvar
+        </button>
+        {extraActions}
+      </div>
     </form>
     </div>
   );
