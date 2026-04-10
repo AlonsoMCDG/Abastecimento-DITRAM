@@ -12,7 +12,6 @@ interface DynamicFormProps<T extends FieldValues> {
   subtitle?: string;
   schema: FormSchema;
   initialValues?: DefaultValues<T>;
-  onSubmit: SubmitHandler<T>;
   onValuesChange?: (
     changedField: { name: string; value: any },
     currentValues: Partial<T>,
@@ -20,6 +19,9 @@ interface DynamicFormProps<T extends FieldValues> {
   ) => void;
   warnings?: Record<string, string>;
   submitLabel?: string; 
+  onSubmit: SubmitHandler<T>;
+  cancelLabel?: string;
+  onCancel?: () => void;
   extraActions?: React.ReactNode; 
 }
 
@@ -32,6 +34,8 @@ export const DynamicForm = <T extends FieldValues>({
   onValuesChange,
   warnings = {},
   submitLabel = "Salvar",
+  cancelLabel = "Cancelar",
+  onCancel,
   extraActions
 }: DynamicFormProps<T>) => {
   const { 
@@ -229,6 +233,16 @@ export const DynamicForm = <T extends FieldValues>({
             {submitLabel}
           </button>
           {extraActions}
+          {/* Renderiza o botão de cancelar apenas se a função for passada */}
+          {onCancel && (
+            <button 
+              type="button" 
+              className={styles.btnCancel} 
+              onClick={onCancel}
+            >
+              {cancelLabel}
+            </button>
+          )}
         </div>
       </form>
     </div>

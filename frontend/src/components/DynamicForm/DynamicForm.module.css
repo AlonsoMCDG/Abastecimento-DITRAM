@@ -21,6 +21,11 @@
   --error: #ef4444;
   --warning: #d97706;
 
+  --bg-surface: #f8fafc;     /* Fundos muito claros (sufixos, hover de botões outline) */
+  --border-light: #e2e8f0;   /* Divisórias sutis e bordas de elementos desativados */
+  --border-hover: #94a3b8;   /* Bordas destacadas ao passar o mouse */
+  --text-disabled: #9ca3af;  /* Textos inativos */
+
   max-width: 1000px;
   margin: 0 auto;
   padding: 0.5rem 2rem 2rem; 
@@ -106,9 +111,9 @@
 
 .input:disabled {
   background-color: var(--bg-disabled);
-  color: #9ca3af;
+  color: var(--text-disabled);
   cursor: not-allowed;
-  border-color: #e5e7eb;
+  border-color: var(--border-light);
 }
 
 .input[readonly] {
@@ -155,7 +160,7 @@
   align-items: center;
   justify-content: center;
   white-space: nowrap;
-  background-color: #fafafa;
+  background-color: var(--bg-surface);
 }
 
 .prefix { border-right: 1px solid var(--bg-disabled); }
@@ -185,14 +190,14 @@
   border-radius: 0.375rem;
   cursor: pointer;
   font-size: 1rem;
-  color: #4b5563;
+  color: var(--text-muted);
   transition: all 0.2s ease-in-out;
 }
 
 .quickActionButton:hover {
-  background-color: #e5e7eb;
+  background-color: var(--border-light);
   color: var(--text-main);
-  border-color: #9ca3af;
+  border-color: var(--border-hover);
 }
 
 /* ========================================================
@@ -219,18 +224,18 @@
    6. RODAPÉ E BOTÕES DE AÇÃO
    ======================================================== */
 .formActions {
-  grid-column: 1 / -1; /* CORREÇÃO CRÍTICA: Ocupa toda a largura do form */
+  grid-column: 1 / -1; /* Ocupa toda a largura do form */
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
   margin-top: 2rem;
   padding-top: 1.5rem;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid var(--border-light);
   align-items: center;
 }
 
 /* Base comum para todos os botões do rodapé para evitar código duplicado */
-.submitButton, .btnSecondary, .btnOutline {
+.submitButton, .btnSecondary, .btnOutline, .btnCancel {
   padding: 0.75rem 1.5rem;
   border-radius: 6px;
   cursor: pointer;
@@ -270,8 +275,26 @@
   border: 1px solid var(--border-color);
 }
 .btnOutline:hover:not(:disabled) {
-  background-color: #f8fafc;
-  border-color: #94a3b8;
+  background-color: var(--bg-surface);
+  border-color: var(--border-hover);
+}
+
+/* Botão de Cancelar / Voltar */
+.btnCancel {
+  background-color: var(--bg-main);
+  color: var(--text-label);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.btnCancel:hover:not(:disabled) {
+  background-color: var(--bg-disabled);
+  color: var(--text-main);
+}
+
+.btnCancel:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 /* ========================================================
