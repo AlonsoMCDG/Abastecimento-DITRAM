@@ -37,6 +37,7 @@ export const GuiaAbastecimentoFormPage: React.FC = () => {
     return {
       data_hora: getLocalISOString(),
       secretaria_id: secretariaParam ? Number(secretariaParam) : undefined,
+      periodo_uso_dias: 30,
     } as Partial<GuiaAbastecimento>;
   }, [searchParams]);
   

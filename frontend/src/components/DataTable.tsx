@@ -37,7 +37,7 @@ export default function DataTable<T extends { id: number }>({
   canDelete = true,
   pageSizeOptions = [10, 20, 50, 100],
 }: Props<T>) {
-  
+
   const [params, setParams] = useState<DataTableParams>({
     page: 1,
     pageSize: pageSizeOptions[0],
@@ -75,10 +75,26 @@ export default function DataTable<T extends { id: number }>({
     setParams((prev) => ({ ...prev, page: newPage }));
   };
 
-  const handleSort = (columnKey: string) => {
+  const handleSort = (col: any) => {
+    // Ignora o clique se a coluna foi marcada explicitamente como não-ordenável
+    if (col.sortable === false) return;
+
+    // Usa o sortKey do Django, se existir. Se não, usa a chave normal do frontend.
+    const columnKey = col.sortKey || col.key;
+
     setParams((prev) => {
-      const isSameField = prev.ordering === columnKey;
-      const newOrdering = isSameField ? `-${columnKey}` : columnKey;
+      // Remove o sinal de "-" para descobrir qual é o campo base atual
+      const currentOrderField = prev.ordering?.replace("-", "");
+
+      // Se o usuário clicou numa coluna NOVA, começa ordenando Crescente
+      if (currentOrderField !== columnKey) {
+        return { ...prev, ordering: columnKey, page: 1 };
+      }
+
+      // Se ele clicou na MESMA coluna, inverte a ordem
+      const isDescending = prev.ordering?.startsWith("-");
+      const newOrdering = isDescending ? columnKey : `-${columnKey}`;
+
       return { ...prev, ordering: newOrdering, page: 1 };
     });
   };
@@ -146,16 +162,28 @@ export default function DataTable<T extends { id: number }>({
         <table className="datatable-table">
           <thead>
             <tr>
-              {schema.columns.map((col) => (
-                <th key={col.key} onClick={() => handleSort(col.key)} className="sortable-th">
-                  {col.label}
-                  {params.ordering?.replace("-", "") === col.key && (
-                    <span className="sort-icon">
-                      {params.ordering.startsWith("-") ? " ▼" : " ▲"}
-                    </span>
-                  )}
-                </th>
-              ))}
+              {schema.columns.map((col) => {
+                // Verifica qual chave está ativa no momento
+                const targetKey = col.sortKey || col.key;
+                const isSorted = params.ordering?.replace("-", "") === targetKey;
+                const isDescending = params.ordering?.startsWith("-");
+
+                return (
+                  <th
+                    key={col.key}
+                    onClick={() => handleSort(col)}
+                    className={col.sortable !== false ? "sortable-th" : ""}
+                    style={{ cursor: col.sortable !== false ? 'pointer' : 'default' }}
+                  >
+                    {col.label}
+                    {isSorted && (
+                      <span className="sort-icon">
+                        {isDescending ? " ▼" : " ▲"}
+                      </span>
+                    )}
+                  </th>
+                );
+              })}
               <th className="actions-th">Ações</th>
             </tr>
           </thead>
@@ -175,17 +203,17 @@ export default function DataTable<T extends { id: number }>({
                     <div className="dt-actions">
                       {onPdf && (
                         <>
-                          <button 
-                            className="dt-btn pdf" 
-                            onClick={() => handlePdfClick(item, 'open')} 
+                          <button
+                            className="dt-btn pdf"
+                            onClick={() => handlePdfClick(item, 'open')}
                             title="Visualizar PDF"
                             disabled={actionLoading?.id === item.id}
                           >
                             {actionLoading?.id === item.id && actionLoading.action === 'open' ? '⏳' : '👁️'}
                           </button>
-                          <button 
-                            className="dt-btn pdf" 
-                            onClick={() => handlePdfClick(item, 'print')} 
+                          <button
+                            className="dt-btn pdf"
+                            onClick={() => handlePdfClick(item, 'print')}
                             title="Imprimir PDF"
                             disabled={actionLoading?.id === item.id}
                           >

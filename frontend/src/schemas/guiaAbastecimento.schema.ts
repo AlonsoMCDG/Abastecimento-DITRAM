@@ -159,6 +159,15 @@ export const guiaAbastecimentoFormSchema: FormSchema = {
       mask: MASKS.DECIMAL,
     },
     {
+      name: 'periodo_uso_dias',
+      label: 'Período de Uso',
+      type: 'number',
+      suffix: 'dias',
+      placeholder: 'Ex: 30',
+      colSpan: 1,
+      required: false,
+    },
+    {
       name: 'observacao',
       label: 'Observação',
       type: 'textarea',
@@ -175,28 +184,34 @@ export const guiaAbastecimentoFormSchema: FormSchema = {
 export const guiaAbastecimentoListSchema: TableSchema = {
   columns: [
     {
-      key: "data_hora",
-      label: "Data",
-      // Função nativa do TableSchema para formatar o valor na tela
-      format: (val) => val ? new Date(val).toLocaleDateString("pt-BR") : "-",
+      key: 'id',
+      label: 'ID',
     },
     {
-      // O backend deve enviar esse campo preenchido (ou você pode mapear caso ele venha aninhado)
-      key: "veiculo_placa", 
-      label: "Veículo",
+      key: 'data_hora',
+      label: 'Data',
+      format: (val) => val ? new Date(val).toLocaleDateString('pt-BR') : '-',
     },
     {
-      key: "pessoa_nome",
-      label: "Motorista",
+      key: 'tipo_servico_nome', 
+      label: 'Serviço',
+      sortKey: 'tipo_servico__nome',
     },
     {
-      key: "secretaria_sigla",
-      label: "Secretaria",
+      key: 'pessoa_nome',
+      label: 'Motorista',
+      sortKey: 'pessoa__nome',
     },
     {
-      key: "quantidade_combustivel",
-      label: "Combustível (L)",
-      format: (val) => val ? `${val} L` : "-",
+      key: 'secretaria_sigla',
+      label: 'Secretaria',
+      sortKey: 'secretaria__sigla'
+    },
+    {
+      key: 'quantidade_combustivel',
+      label: 'Combustível (L)',
+      format: (val) => val ? `${val} L` : '-',
+      sortKey: 'quantidade_combustivel',
     }
   ],
 }

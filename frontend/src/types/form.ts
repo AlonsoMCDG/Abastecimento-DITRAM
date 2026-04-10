@@ -1,9 +1,10 @@
 // 1. TIPO PARA A TABELA (Simples, focado em exibição)
 export interface TableColumn {
-  key: string;       // O nome do campo no JSON da API
-  label: string;     // O título da coluna
-  // Função opcional para formatar o dado antes de exibir (ex: datas, booleanos)
-  format?: (value: any, row: any) => React.ReactNode; 
+  key: string;
+  label: string;
+  format?: (value: any, item?: any) => React.ReactNode;
+  sortable?: boolean; // Permite desativar o clique em colunas específicas (ex: Observação)
+  sortKey?: string;   // O nome REAL do campo lá no banco de dados do Django
 }
 
 export interface TableSchema {
