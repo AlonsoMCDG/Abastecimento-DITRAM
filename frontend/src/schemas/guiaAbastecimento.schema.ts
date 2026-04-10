@@ -184,10 +184,6 @@ export const guiaAbastecimentoFormSchema: FormSchema = {
 export const guiaAbastecimentoListSchema: TableSchema = {
   columns: [
     {
-      key: 'id',
-      label: 'ID',
-    },
-    {
       key: 'data_hora',
       label: 'Data',
       format: (val) => val ? new Date(val).toLocaleDateString('pt-BR') : '-',

@@ -96,10 +96,6 @@ export const rotaFormSchema: FormSchema = {
 export const rotaListSchema: TableSchema = {
   columns: [
     {
-      key: 'id',
-      label: 'ID',
-    },
-    {
       key: 'nome',
       label: 'Nome',
       sortKey: 'nome',
@@ -107,7 +103,7 @@ export const rotaListSchema: TableSchema = {
     {
       key: 'tipo_locomocao_nome', 
       label: 'Locomoção',
-      sortKey: 'tipo_locomocao', // Choice fields usam a própria chave
+      sortKey: 'tipo_locomocao',
     },
     {
       key: 'secretaria_sigla', 
