@@ -44,7 +44,7 @@ export interface FormField {
   quickActions?: QuickAction[];
   prefix?: string | React.ReactNode;  // (Ex: R$, Kg, m²) 
   suffix?: string | React.ReactNode;  // (Ex: R$, Kg, m²)
-  mask?: string;
+  mask?: string | Record<string, any>;
 }
 
 export interface FormSchema {

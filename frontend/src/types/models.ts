@@ -37,7 +37,13 @@ export interface Veiculo {
   tipo_locomocao: string; // "TERRESTRE" | "FLUVIAL"
   capacidade_carga_kg: number;
   capacidade_pessoas: number;
-  tipo_combustivel: string;
+
+  tipo_veiculo_id: number;
+  tipo_veiculo_nome: string;
+  
+  tipo_combustivel_id: number;
+  tipo_combustivel_nome: string;
+  
   consumo_estimado_combustivel: number;
   consumo_estimado_oleo?: number | null;
   hodometro_atual: number;
@@ -47,11 +53,20 @@ export interface Veiculo {
 
 export interface Rota {
   id: number;
-  descricao: string;
-  secretaria?: number | null;
-  instituicao?: number | null;
-  distancia_km?: number | string;
-  consumo_medio?: number | string;
+  nome: string;
+
+  // IDs para referências
+  secretaria_id?: number | null;
+  instituicao_id?: number | null;
+  
+  // Campos de Leitura (Vindos do ReadSerializer para facilitar a UI)
+  secretaria_nome?: string;
+  instituicao_nome: string;
+
+  distancia_km?: string | number;  // Usa string|number pois recebe/retorna um valor do tipo Decimal
+  consumo_estimado_combustivel: string | number;
+  consumo_estimado_oleo: string | number;
+
   detalhes?: string;
   ativa: boolean;
 }
@@ -104,18 +119,27 @@ export interface GuiaAbastecimento {
   secretaria_id: number;
   instituicao_id: number;
   rota_id?: number | null;
+  tipo_combustivel_id: number;
+  tipo_veiculo_id: number;
   
   // Dados extras para visualização (Read)
   pessoa_nome?: string;
   veiculo_placa?: string;
+  instituicao_display: string;
   tipo_servico_nome?: string;
   usuario_nome?: string;
+  tipo_combustivel_nome: string;
+  tipo_veiculo_id_display: string;
   
   // Combustível e Regras
-  tipo_combustivel: string;
   quantidade_combustivel: number;
   quantidade_oleo?: number | null;
+
+  // Hodômetro
+  hodometro_anterior?: number | null;
   hodometro_atual?: number | null;
+  distancia_percorrida?: number | null;
+  
   observacao?: string;
   
   usuario_id?: number;
