@@ -19,8 +19,8 @@ interface DynamicFormProps<T extends FieldValues> {
     setValue: UseFormSetValue<T>
   ) => void;
   warnings?: Record<string, string>;
-  submitLabel?: string;
-  extraActions?: React.ReactNode;
+  submitLabel?: string; 
+  extraActions?: React.ReactNode; 
 }
 
 export const DynamicForm = <T extends FieldValues>({
@@ -31,7 +31,7 @@ export const DynamicForm = <T extends FieldValues>({
   onSubmit,
   onValuesChange,
   warnings = {},
-  submitLabel = "Salvar", // Valor padrão
+  submitLabel = "Salvar",
   extraActions
 }: DynamicFormProps<T>) => {
   const { 
@@ -52,30 +52,23 @@ export const DynamicForm = <T extends FieldValues>({
     }
   }, [initialValues, reset]);
 
-  // Motor de observação que dispara o callback para o Pai
   useEffect(() => {
     const subscription = watch((value, { name }) => {
-      // name garante que não dispare na inicialização do form (onde name é undefined)
-      // Removemi a trava do type === 'change' para aceitar os setValues dos custom components
+      // Não usar type === 'change', para aceitar os setValues dos custom components
       if (name && onValuesChange) {
         onValuesChange({ name, value: (value as any)[name] }, value as Partial<T>, setValue);
       }
     });
-    
     return () => subscription.unsubscribe();
   }, [watch, onValuesChange, setValue]);
 
-  // Renomeado de 'field' para 'fieldConfig' para evitar colisão com o 'field' do Controller
   const renderField = (fieldConfig: FormField) => {
     const fieldPath = fieldConfig.name as Path<T>;
     const hasError = !!errors[fieldPath];
 
     // 1. EARLY RETURN: Campos com Máscara (Controlados)
     if (fieldConfig.mask) {
-      const maskProps: any = typeof fieldConfig.mask === 'object' 
-        ? fieldConfig.mask 
-        : { mask: fieldConfig.mask };
-      
+      const maskProps: any = typeof fieldConfig.mask === 'object' ? fieldConfig.mask : { mask: fieldConfig.mask };
       return (
         <Controller
           key={fieldConfig.name}
@@ -101,7 +94,7 @@ export const DynamicForm = <T extends FieldValues>({
       );
     }
     
-    // 2. CASO PADRÃO: Campos Nativos (Não Controlados)
+    // CASO PADRÃO: Campos Nativos (Não Controlados)
     const commonProps = {
       ...register(fieldPath, { required: fieldConfig.required }),
       id: fieldConfig.name,
@@ -111,64 +104,24 @@ export const DynamicForm = <T extends FieldValues>({
     };
 
     switch (fieldConfig.type) {
-      case 'textarea':
-        return <textarea {...commonProps} rows={4} />;
-      
-      case 'checkbox':
-        return (
-          <input 
-            type="checkbox" 
-            {...commonProps}
-            id={fieldConfig.name} 
-          />
-        );
-      
+      case 'textarea': return <textarea {...commonProps} rows={4} />;
+      case 'checkbox': return <input type="checkbox" {...commonProps} id={fieldConfig.name} />;
       case 'select':
         if (fieldConfig.endpoint) {
-          return (
-            <AsyncSelect 
-              field={fieldConfig} 
-              control={control} 
-              setValue={setValue} 
-              register={register}
-              error={errors[fieldConfig.name]}
-            />
-          );
-        }
-        else {
+          return <AsyncSelect field={fieldConfig} control={control} setValue={setValue} register={register} error={errors[fieldConfig.name]} />;
+        } else {
           return (
             <select {...commonProps}>
               <option value="">Selecione...</option>
-              {fieldConfig.options?.map(opt => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
+              {fieldConfig.options?.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
             </select>
           );
         }
-
       case 'datalist':
-        return (
-          <DatalistInput
-            field={fieldConfig}
-            control={control}
-            setValue={setValue}
-            register={register}
-            error={errors[fieldConfig.name]}
-          />
-        );
-
-      default: // text, number, date, datetime-local
+        return <DatalistInput field={fieldConfig} control={control} setValue={setValue} register={register} error={errors[fieldConfig.name]} />;
+      default:
         // Renderiza o input normal
-        const baseInput = (
-          <input 
-            type={fieldConfig.type} 
-            readOnly={fieldConfig.readOnly}
-            {...commonProps} 
-          />
-        );
-
+        const baseInput = <input type={fieldConfig.type} readOnly={fieldConfig.readOnly} {...commonProps} />;
         // Se tiver prefixo ou sufixo, envelopa numa estrutura
         if (fieldConfig.prefix || fieldConfig.suffix) {
           return (
@@ -179,42 +132,29 @@ export const DynamicForm = <T extends FieldValues>({
             </div>
           );
         }
-      
         // Se não tiver, retorna o input puro normalmente
         return baseInput;
     }
   };
 
-  // Vai para o próximo campo ao apertar Enter
+  // Lógica para ir par o próximo campo ao apertar Enter
   const handleFormKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
     const target = e.target as HTMLElement;
-
-    // Se a tecla for Enter e não estivermos segurando Shift
     if (e.key === 'Enter' && !e.shiftKey) {
-      
       // EXCEÇÕES: Não queremos bloquear o Enter nesses casos:
       // 1. Textarea (onde o Enter serve para quebrar linha)
       // 2. Botões (onde o Enter serve para clicar, como no botão Salvar ou no Quick Add)
-      if (target.tagName === 'TEXTAREA' || target.tagName === 'BUTTON') {
-        return;
-      }
-
-      e.preventDefault(); // Bloqueia o submit automático do form
-
-      // Pega o formulário inteiro
+      if (target.tagName === 'TEXTAREA' || target.tagName === 'BUTTON') return;
+      e.preventDefault(); 
       const form = e.currentTarget;
       
       // Cria uma lista com todos os campos que podem receber foco (ignorando os desativados/hidden/readOnly)
       const focusableElements = Array.from(
-        form.querySelectorAll(
-          'input:not([type="hidden"]):not([disabled]):not([readonly]), select:not([disabled]), textarea:not([disabled]):not([readonly]), button[type="submit"]:not([disabled])'
-        )
+        form.querySelectorAll('input:not([type="hidden"]):not([disabled]):not([readonly]), select:not([disabled]), textarea:not([disabled]):not([readonly]), button[type="submit"]:not([disabled])')
       ) as HTMLElement[];
 
       // Descobre em qual posição da lista nós estamos agora
       const currentIndex = focusableElements.indexOf(target);
-
-      // Se achou o elemento atual e ele não for o último da lista
       if (currentIndex > -1 && currentIndex < focusableElements.length - 1) {
         // Joga o foco para o próximo elemento!
         focusableElements[currentIndex + 1].focus();
@@ -231,21 +171,12 @@ export const DynamicForm = <T extends FieldValues>({
         </header>
       )}
 
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        onKeyDown={handleFormKeyDown}
-        className={styles.formContainer}
-      >
+      <form onSubmit={handleSubmit(onSubmit)} onKeyDown={handleFormKeyDown} className={styles.formContainer}>
         {schema.fields.map((field) => {
-          // ==========================================
-          // EARLY RETURN PARA CAMPOS HIDDEN
-          // Se for oculto, joga só o input na DOM e pula todo o layout!
-          // ==========================================
           if (field.type === 'hidden') {
             return <input key={field.name} type="hidden" {...register(field.name as any)} />;
           }
 
-          // CAPTURA O AVISO ESPECÍFICO PARA ESTE CAMPO
           const warningMessage = warnings[field.name];
           const hasError = !!errors[field.name];
 
@@ -257,26 +188,19 @@ export const DynamicForm = <T extends FieldValues>({
             >
               {field.type !== 'checkbox' && (
                 <label htmlFor={field.name} className={styles.label}>
-                  {field.label} {field.required && (
-                    <span className={styles.required}>*</span>
-                  )}
+                  {field.label} {field.required && '*'}
                 </label>
               )}
 
-              {/* A MÁGICA DO QUICK ADD ACONTECE AQUI */}
               <div className={field.quickActions?.length ? styles.inputWithActions : ''}>
                 {renderField(field)}
-                
                 {field.quickActions?.map((action, index) => (
                   <button
                     key={index}
-                    type="button" // CRÍTICO: Evita que o botão submeta o formulário sem querer
+                    type="button" 
                     className={styles.quickActionButton}
                     title={action.tooltip}
-                    onClick={(e) => {
-                      e.preventDefault(); // Garante que a ação padrão seja bloqueada
-                      action.onClick();
-                    }}
+                    onClick={(e) => { e.preventDefault(); action.onClick(); }}
                   >
                     {action.icon}
                   </button>
@@ -289,23 +213,21 @@ export const DynamicForm = <T extends FieldValues>({
                 </label>
               )}
 
-              {/* RENDERIZAÇÃO CONDICIONAL DE MENSAGENS (ERRO VS AVISO) */}
+              {/* RENDERIZAÇÃO DE ERROS OU AVISOS */}
               {hasError ? (
                 <span className={styles.error}>Este campo é obrigatório</span>
               ) : (
-                warningMessage && (
-                  <span className={styles.warning}>{warningMessage}</span>
-                )
+                warningMessage && <span className={styles.warningMessage}>{warningMessage}</span>
               )}
             </div>
           );
         })}
 
+        {/* CONTAINER DE AÇÕES (Botões) */}
         <div className={styles.formActions}>
           <button type="submit" className={styles.submitButton}>
             {submitLabel}
           </button>
-          
           {extraActions}
         </div>
       </form>
