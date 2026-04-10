@@ -70,10 +70,25 @@ export const DynamicForm = <T extends FieldValues>({
     const fieldPath = fieldConfig.name as Path<T>;
     const hasError = !!errors[fieldPath];
 
-    // 1. EARLY RETURN: Campos com Máscara (Controlados)
+    // Empacotador de Prefixo/Sufixo para todos os campos pertinentes
+    const wrapWithAddons = (inputElement: React.ReactNode) => {
+      if (fieldConfig.prefix || fieldConfig.suffix) {
+        return (
+          <div className={styles.inputGroup}>
+            {fieldConfig.prefix && <span className={styles.prefix}>{fieldConfig.prefix}</span>}
+            {inputElement}
+            {fieldConfig.suffix && <span className={styles.suffix}>{fieldConfig.suffix}</span>}
+          </div>
+        );
+      }
+      return inputElement;
+    };
+
+    // 1. Campos com Máscara (Controlados)
     if (fieldConfig.mask) {
       const maskProps: any = typeof fieldConfig.mask === 'object' ? fieldConfig.mask : { mask: fieldConfig.mask };
-      return (
+      
+      const maskedInput = (
         <Controller
           key={fieldConfig.name}
           name={fieldPath}
@@ -96,9 +111,12 @@ export const DynamicForm = <T extends FieldValues>({
           )}
         />
       );
+      
+      // Retorna o input com máscara já passado pelo empacotador!
+      return wrapWithAddons(maskedInput); 
     }
     
-    // CASO PADRÃO: Campos Nativos (Não Controlados)
+    // 2. CASO PADRÃO: Campos Nativos (Não Controlados)
     const commonProps = {
       ...register(fieldPath, { required: fieldConfig.required }),
       id: fieldConfig.name,
@@ -124,20 +142,10 @@ export const DynamicForm = <T extends FieldValues>({
       case 'datalist':
         return <DatalistInput field={fieldConfig} control={control} setValue={setValue} register={register} error={errors[fieldConfig.name]} />;
       default:
-        // Renderiza o input normal
         const baseInput = <input type={fieldConfig.type} readOnly={fieldConfig.readOnly} {...commonProps} />;
-        // Se tiver prefixo ou sufixo, envelopa numa estrutura
-        if (fieldConfig.prefix || fieldConfig.suffix) {
-          return (
-            <div className={styles.inputGroup}>
-              {fieldConfig.prefix && <span className={styles.prefix}>{fieldConfig.prefix}</span>}
-              {baseInput}
-              {fieldConfig.suffix && <span className={styles.suffix}>{fieldConfig.suffix}</span>}
-            </div>
-          );
-        }
-        // Se não tiver, retorna o input puro normalmente
-        return baseInput;
+        
+        // Retorna o input normal já passado pelo empacotador!
+        return wrapWithAddons(baseInput);
     }
   };
 
