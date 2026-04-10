@@ -311,6 +311,7 @@ export const GuiaAbastecimentoFormPage: React.FC = () => {
       onValuesChange={handleValuesChange}
       onSubmit={handleSubmit}
       submitLabel="💾 Salvar Guia"
+      onCancel={() => navigate(ROUTES.frota.rotas.list)}
       extraActions={extraActions}
     />
   );

@@ -56,7 +56,7 @@ export default function RotaFormPage() {
       initialValues={initialValues}
       onSubmit={handleSubmit}
       submitLabel="💾 Salvar Rota"
-      
+      onCancel={() => navigate(ROUTES.frota.rotas.list)}
       // Se no futuro você quiser adicionar um botão extra aqui (ex: "Ver no Mapa"), 
       // basta passar a prop extraActions={...} assim como fizemos na Guia!
     />
