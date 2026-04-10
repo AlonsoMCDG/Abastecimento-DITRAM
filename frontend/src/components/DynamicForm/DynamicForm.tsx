@@ -200,7 +200,9 @@ export const DynamicForm = <T extends FieldValues>({
             >
               {field.type !== 'checkbox' && (
                 <label htmlFor={field.name} className={styles.label}>
-                  {field.label} {field.required && '*'}
+                  {field.label} {field.required && (
+                    <span className={styles.required}>*</span>
+                  )}
                 </label>
               )}
 
