@@ -1,5 +1,5 @@
-import type { FormSchema, TableSchema } from "../types/form"
 import { ENDPOINTS } from "../api/config/endpoints"
+import type { FormSchema, TableSchema } from "../types/form"
 import { MASKS } from "../utils/masks"
 
 // --------------------------------------------------------

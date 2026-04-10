@@ -100,16 +100,11 @@ export default function GuiaAbastecimentoListPage() {
         </div>
       </div>
 
-      {errorMessage && (
-        <div className="error-message-box" style={{ color: "#b91c1c", fontWeight: 700, marginBottom: "1rem" }}>
-          {errorMessage}
-        </div>
-      )}
-
       <DataTable
         data={guiasAbastecimento}
         total={total}
         loading={loading}
+        error={errorMessage}
         schema={guiaAbastecimentoListSchema}
         onParamsChange={fetchGuias}
         onPdf={(item, action) => handlePdfAction(item.id!, action)}
