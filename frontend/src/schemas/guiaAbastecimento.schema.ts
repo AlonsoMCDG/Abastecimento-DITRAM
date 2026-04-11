@@ -60,7 +60,7 @@ export const guiaAbastecimentoFormSchema: FormSchema = {
       name: 'tipo_veiculo_id',
       label: 'Tipo de Veículo',
       type: 'datalist',
-      endpoint: ENDPOINTS.frota.tiposveiculoLookup,
+      endpoint: ENDPOINTS.frota.tiposVeiculoLookup,
       placeholder: 'Ex.: "Ônibus" ou "Moto"',
       colSpan: 1,
       required: true,
