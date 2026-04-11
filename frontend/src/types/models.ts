@@ -96,6 +96,7 @@ export interface Rota {
 export interface TipoServico {
   id: number;
   nome: string;
+  ativo: boolean;
 }
 
 export interface AlocacaoServico {

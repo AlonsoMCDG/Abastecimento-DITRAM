@@ -30,6 +30,8 @@ import PerfilEditPage from "./pages/perfil/PerfilEditPage";
 import DatabaseDangerPage from "./pages/sistema/DatabaseDangerPage";
 import OperadorListPage from "./pages/operacao/operadores/OperadorListPage";
 import OperadorFormPage from "./pages/operacao/operadores/OperadorFormPage";
+import TipoServicoListPage from "./pages/operacao/TipoServicoListPage";
+import TipoServicoFormPage from "./pages/operacao/TipoServicoFormPage";
 
 function FallbackRedirect() {
   return isAuthenticated() ? (
@@ -264,6 +266,25 @@ function App() {
                 element={
                   <RequirePermission allow={(me) => Boolean(me.is_staff || me.can_write_frota)}>
                     <OperadorFormPage />
+                  </RequirePermission>
+                }
+              />
+
+              {/* Tipos de Serviço */}
+              <Route path="tipos-servico" element={<TipoServicoListPage />} />
+              <Route
+                path="tipos-servico/criar"
+                element={
+                  <RequirePermission allow={(me) => Boolean(me.is_staff || me.can_write_cadastros)}>
+                    <TipoServicoFormPage />
+                  </RequirePermission>
+                }
+              />
+              <Route
+                path="tipos-servico/editar/:id"
+                element={
+                  <RequirePermission allow={(me) => Boolean(me.is_staff || me.can_write_cadastros)}>
+                    <TipoServicoFormPage />
                   </RequirePermission>
                 }
               />

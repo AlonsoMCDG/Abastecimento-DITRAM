@@ -5,6 +5,7 @@ import type { PaginatedResponse } from "../../types/api";
 
 interface TipoServicoListParams {
   nome?: string;
+  ativo?: boolean | string;
   search?: string;
   ordering?: string | null;
   page?: number;
