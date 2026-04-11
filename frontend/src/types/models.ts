@@ -94,13 +94,16 @@ export interface TipoServico {
 export interface AlocacaoServico {
   id: number;
   
-  // IDs para referências
+  // IDs para referências (Payload)
   pessoa_id: number;
   tipo_servico_id: number;
+  secretaria_id: number;
   
-  // Campos de Leitura (Vindos do ReadSerializer para facilitar a UI)
+  // Campos de Leitura (Displays vindos do DRF)
   pessoa_nome?: string;
   tipo_servico_nome?: string;
+  secretaria_nome?: string;
+  secretaria_sigla?: string;
   
   is_principal: boolean;
 }

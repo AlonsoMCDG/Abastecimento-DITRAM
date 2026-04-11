@@ -1,45 +1,70 @@
-import type { FormSchema } from "../types/form"
+import type { FormSchema, TableSchema } from "../types/form";
+import { ENDPOINTS } from "../api/config/endpoints";
 
+// --------------------------------------------------------
+// FORMULÁRIO DE CRIAÇÃO / EDIÇÃO
+// --------------------------------------------------------
 export const alocacaoFormSchema: FormSchema = {
   fields: [
     {
-      name: "data",
-      label: "Data",
-      type: "date",
+      name: "pessoa_id",
+      label: "Funcionário / Motorista",
+      type: "select",
+      endpoint: ENDPOINTS.pessoas.lookup,
+      colSpan: 3,
       required: true,
     },
     {
-      name: "condutor",
-      label: "Condutor",
+      name: "tipo_servico_id",
+      label: "Tipo de Serviço (Função)",
       type: "select",
+      endpoint: ENDPOINTS.operacao.tiposServicoLookup,
+      colSpan: 2,
       required: true,
-      endpoint: "frota/condutores/",
-      optionLabel: "nome_completo",
     },
     {
-      name: "rota",
-      label: "Rota",
+      name: "secretaria_id",
+      label: "Secretaria de Lotação",
       type: "select",
+      endpoint: ENDPOINTS.organizacao.secretariasLookup,
+      colSpan: 1,
       required: true,
-      endpoint: "cadastros/rotas/",
-      optionLabel: "descricao",
-      displayLabel: "id",
-      dependsOn: "condutor",
-      dependsOnParam: "condutor",
     },
     {
-      name: "veiculo",
-      label: "Veículo",
-      type: "select",
-      required: false,
-      endpoint: "frota/veiculos/",
-      optionLabel: "placa",
-    },
-    {
-      name: "ativa",
-      label: "Ativa",
+      name: "is_principal",
+      label: "⭐ É a função principal deste funcionário?",
       type: "checkbox",
+      colSpan: 3,
       required: false,
     },
   ],
-}
+};
+
+// --------------------------------------------------------
+// DATATABLE (LISTAGEM)
+// --------------------------------------------------------
+export const alocacaoListSchema: TableSchema = {
+  columns: [
+    {
+      key: "pessoa_nome",
+      label: "Funcionário",
+      sortKey: "pessoa__nome",
+    },
+    {
+      key: "tipo_servico_nome",
+      label: "Serviço Alocado",
+      sortKey: "tipo_servico__nome",
+    },
+    {
+      key: "secretaria_sigla",
+      label: "Secretaria",
+      sortKey: "secretaria__sigla",
+    },
+    {
+      key: "is_principal",
+      label: "Status",
+      sortKey: "is_principal",
+      format: (val: boolean) => val ? '⭐ Principal' : 'Secundário',
+    },
+  ],
+};

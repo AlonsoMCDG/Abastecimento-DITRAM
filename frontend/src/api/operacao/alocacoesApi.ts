@@ -3,10 +3,10 @@ import { ENDPOINTS } from "../config/endpoints";
 import type { AlocacaoServico } from "../../types/models";
 import type { PaginatedResponse } from "../../types/api";
 
-// Filtros excelentes para carregar apenas os serviços de uma pessoa específica
 interface AlocacaoListParams {
   pessoa_id?: number;
   tipo_servico_id?: number;
+  secretaria_id?: number;
   is_principal?: boolean;
   search?: string;
   ordering?: string | null;
@@ -14,10 +14,10 @@ interface AlocacaoListParams {
   page_size?: number;
 }
 
-// O Payload envia apenas os IDs esperados pelo WriteSerializer do DRF
 interface AlocacaoCreatePayload {
   pessoa_id: number;
   tipo_servico_id: number;
+  secretaria_id: number;
   is_principal?: boolean;
 }
 
