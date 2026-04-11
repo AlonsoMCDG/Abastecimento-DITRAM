@@ -1,68 +1,62 @@
-import { useEffect, useState } from "react"
-import { useNavigate, useParams } from "react-router-dom"
-
-import { DynamicForm } from "../../../components/DynamicForm/DynamicForm"
-
-import { secretariaFormSchema } from "../../../schemas/secretaria.schema"
-
-import { secretariaApi } from "../../../api/organizacao/secretariasApi"
-import "../../../assets/css/FormPage.css"
-
-import type { Secretaria } from "../../../types/models"
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { secretariaApi } from "../../../api/organizacao/secretariasApi"; // Ajuste o caminho se necessário
+import { ROUTES } from "../../../routes/routes";
+import { DynamicForm } from "../../../components/DynamicForm/DynamicForm";
+import { secretariaFormSchema } from "../../../schemas/secretaria.schema";
+import type { Secretaria } from "../../../types/models";
+import { getApiErrorMessage } from "../../../api/config/errorHandlers";
 
 export default function SecretariaFormPage() {
+  const navigate = useNavigate();
+  const { id } = useParams();
 
-  const navigate = useNavigate()
-  const { id } = useParams()
+  const [initialValues, setInitialValues] = useState<Partial<Secretaria> | undefined>(undefined);
+  const [loading, setLoading] = useState(!!id);
 
-  const [data, setData] =
-    useState<Secretaria | null>(null)
+  // Secretarias recém-criadas são ativas por padrão
+  const defaultValues: Partial<Secretaria> = {
+    ativo: true,
+  };
 
   useEffect(() => {
-
     if (id) {
       secretariaApi.buscar(Number(id))
-        .then(res => setData(res.data))
-    }
-
-  }, [id])
-
-  async function handleSubmit(form: Secretaria) {
-
-    if (id) {
-
-      await secretariaApi.atualizar(
-        Number(id),
-        form
-      )
-
+        .then(res => setInitialValues(res.data))
+        .catch(err => {
+          console.error(err);
+          alert("Erro ao carregar os dados da secretaria.");
+        })
+        .finally(() => setLoading(false));
     } else {
-
-      await secretariaApi.criar(form)
-
+      setInitialValues(defaultValues);
     }
+  }, [id]);
 
-    navigate("/cadastros/secretarias")
+  async function handleSubmit(form: any) {
+    try {
+      if (id) {
+        await secretariaApi.atualizar(Number(id), form);
+      } else {
+        await secretariaApi.criar(form);
+      }
+      navigate(ROUTES.organizacao.secretarias.list);
+    } catch (err: unknown) {
+      alert(getApiErrorMessage(err, "Erro ao salvar secretaria. Verifique os dados fornecidos."));
+    }
   }
 
+  if (loading) return <div>Carregando dados...</div>;
+
   return (
-
-    <div className="form-page">
-
-      <div className="form-header secretaria">
-        <h2>
-          {id ? "Editar" : "Nova"} Secretaria
-        </h2>
-      </div>
-
-      <div className="form-container">
-        <DynamicForm<Secretaria>
-          schema={secretariaFormSchema}
-          initialValues={(data || {}) as Partial<Secretaria>}
-          onSubmit={handleSubmit}
-        />
-      </div>
-
-    </div>
-  )
+    <DynamicForm<Secretaria>
+      title={id ? "Editar Secretaria" : "Cadastrar Secretaria"}
+      subtitle={id ? "Atualize as informações organizacionais." : "Registre uma nova secretaria ou autarquia no sistema."}
+      schema={secretariaFormSchema}
+      initialValues={initialValues}
+      onSubmit={handleSubmit}
+      submitLabel="💾 Salvar Secretaria"
+      onCancel={() => navigate(ROUTES.organizacao.secretarias.list)}
+    />
+  );
 }
