@@ -9,8 +9,8 @@ import RotaListPage from "./pages/cadastros/rota/RotaListPage";
 import RotaFormPage from "./pages/cadastros/rota/RotaFormPage";
 import InstituicaoListPage from "./pages/cadastros/instituicao/InstituicaoListPage";
 import InstituicaoFormPage from "./pages/cadastros/instituicao/InstituicaoFormPage";
-import CondutorListPage from "./pages/frota/condutor/CondutorListPage";
-import CondutorFormPage from "./pages/frota/condutor/CondutorFormPage";
+import PessoaListPage from "./pages/frota/pessoa/PessoaListPage";
+import PessoaFormPage from "./pages/frota/pessoa/PessoaFormPage";
 import VeiculoListPage from "./pages/frota/veiculo/VeiculoListPage";
 import VeiculoFormPage from "./pages/frota/veiculo/VeiculoFormPage";
 import AlocacaoListPage from "./pages/frota/AlocacaoListPage";
@@ -104,12 +104,12 @@ function App() {
                 1. PESSOAS
                 ========================================== */}
             <Route path="pessoas">
-              <Route index element={<CondutorListPage />} />
+              <Route index element={<PessoaListPage />} />
               <Route
                 path="criar"
                 element={
                   <RequirePermission allow={(me) => Boolean(me.is_staff || me.can_write_frota)}>
-                    <CondutorFormPage />
+                    <PessoaFormPage />
                   </RequirePermission>
                 }
               />
@@ -117,7 +117,7 @@ function App() {
                 path="editar/:id"
                 element={
                   <RequirePermission allow={(me) => Boolean(me.is_staff || me.can_write_frota)}>
-                    <CondutorFormPage />
+                    <PessoaFormPage />
                   </RequirePermission>
                 }
               />
