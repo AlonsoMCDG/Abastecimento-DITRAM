@@ -1,9 +1,6 @@
 from rest_framework import serializers
 from apps.pessoas.models import Pessoa
 
-
-# --- SERIALIZERS DE Pessoa ---
-
 class PessoaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Pessoa
@@ -18,5 +15,4 @@ class PessoaLookupSerializer(serializers.ModelSerializer):
         fields = ['value', 'label', 'cpf'] 
 
     def get_label(self, obj: Pessoa):
-        # Formata o texto exibido no Select
         return f"{obj.nome} ({obj.cpf})"
