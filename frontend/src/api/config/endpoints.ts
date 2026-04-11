@@ -31,8 +31,8 @@ export const ENDPOINTS = {
   frota: {
     veiculos: "/v1/frota/veiculos/",
     veiculosLookup: "/v1/frota/veiculos/lookup/",
-    tiposveiculo: "/v1/frota/tipos-veiculo/",
-    tiposveiculoLookup: "/v1/frota/tipos-veiculo/lookup/",
+    tiposVeiculo: "/v1/frota/tipos-veiculo/",
+    tiposVeiculoLookup: "/v1/frota/tipos-veiculo/lookup/",
     rotas: "/v1/frota/rotas/",
     rotasLookup: "/v1/frota/rotas/lookup/",
     tiposCombustivel: "/v1/frota/tipos-combustivel/",

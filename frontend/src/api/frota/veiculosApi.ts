@@ -1,25 +1,24 @@
-import { client } from "../config/apiClient"
-import { ENDPOINTS } from "../config/endpoints"
-import type { Veiculo } from "../../types/models"
+import { client } from "../config/apiClient";
+import { ENDPOINTS } from "../config/endpoints";
+import type { Veiculo } from "../../types/models";
 import type { PaginatedResponse } from "../../types/api";
 
-// Tipagem para os filtros
 interface VeiculoListParams {
-  // Filtros Exatos (filterset_fields do Django)
   id?: number;
   secretaria_id?: number;
   tipo_locomocao?: string;
-  tipo_combustivel?: string;
+  tipo_combustivel_id?: number;
+  tipo_veiculo_id?: number;
+  ativo?: string | boolean;
   search?: string;
   ordering?: string | null;
   page?: number;
   page_size?: number;
 }
 
-type VeiculoCreatePayload = Omit<Veiculo, "id">;
+type VeiculoCreatePayload = Omit<Veiculo, "id" | "secretaria_nome" | "secretaria_sigla" | "tipo_veiculo_nome" | "tipo_combustivel_nome" | "tipo_locomocao_display" | "unidade_consumo_display">;
 
 export const veiculosApi = {
-
   listar(params?: VeiculoListParams) {
     return client.get<PaginatedResponse<Veiculo>>(ENDPOINTS.frota.veiculos, { params });
   },
@@ -39,5 +38,4 @@ export const veiculosApi = {
   deletar(id: number) {
     return client.delete(`${ENDPOINTS.frota.veiculos}${id}/`);
   }
-
-}
+};
