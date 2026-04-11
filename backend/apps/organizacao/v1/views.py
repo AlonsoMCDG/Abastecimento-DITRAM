@@ -18,30 +18,33 @@ class SecretariaViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
     serializer_class = SecretariaSerializer
     permission_classes = [IsAuthenticated, CadastrosPermission]
 
-    # Habilitando os motores (Filtro Exato, Busca Textual, Ordenação)
     filter_backends = [
         DjangoFilterBackend, 
         filters.SearchFilter, 
         filters.OrderingFilter
     ]
 
-    # Configuração do Busca Textual (?search=SME ou ?search=Saúde)
+    # Filtro Exato
+    filterset_fields = ['id', 'sigla', 'ativo']
+
+    # Busca Textual
     search_fields = ['nome', 'sigla']
 
-    # Configuração do Filtro Exato (?sigla=SME)
-    filterset_fields = ['id', 'sigla']
-
-    # Configuração de Ordenação (?ordering=-id)
-    ordering_fields = ['nome', 'sigla']
-    ordering = ['nome'] # Ordenação padrão alfabética
+    # Ordenação (Ativos no topo, alfabético depois)
+    ordering_fields = ['nome', 'sigla', 'ativo']
+    ordering = ['-ativo', 'nome'] 
     
-    # endpoint customizado: /api/secretaria/lookup/
     @action(detail=False, methods=['get'])
     def lookup(self, request):
-        # Usamos o .only() para otimizar a query no banco, já que o lookup precisa de poucos campos
-        queryset = self.get_queryset().only('nome', 'sigla')
+        queryset = self.filter_queryset(self.get_queryset())
+        
+        # REGRA DE NEGÓCIO: Só exibe secretarias ativas nos Selects do sistema
+        if 'ativo' not in request.query_params:
+            queryset = queryset.filter(ativo=True)
 
-        # Usa o serializer leve para o Select
+        # Otimização da query
+        queryset = queryset.only('nome', 'sigla')
+
         serializer = SecretariaLookupSerializer(queryset, many=True)
         return Response(serializer.data)
 

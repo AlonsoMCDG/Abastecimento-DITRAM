@@ -7,21 +7,21 @@ from apps.organizacao.models import Secretaria, Instituicao
 class SecretariaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Secretaria
-        fields = "__all__"
+        fields = ['id', 'nome', 'sigla', 'ativo']
 
 class SecretariaLookupSerializer(serializers.ModelSerializer):
     value = serializers.ReadOnlyField(source='id')
-    label = serializers.SerializerMethodField()  # Retorno da função 'get_label()'
+    label = serializers.SerializerMethodField()  
     
     class Meta:
         model = Secretaria
         fields = [
-            'value',  # ID da instituição
-            'label',  # Retorno da função 'get_label()'
+            'value',  
+            'label',  
         ]
 
     def get_label(self, obj: Secretaria):
-        # Formatação: "SEME - Secretaria Municipal de Saúde"
+        # Formatação: "SEME - Secretaria Municipal de Educação"
         return f"{obj.sigla} - {obj.nome}"
 
 

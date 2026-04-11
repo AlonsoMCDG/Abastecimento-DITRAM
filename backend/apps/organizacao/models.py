@@ -1,9 +1,12 @@
 from django.db import models
 
 
+from django.db import models
+
 class Secretaria(models.Model):
     nome = models.CharField(max_length=100, verbose_name="Nome")
     sigla = models.CharField(max_length=10, verbose_name="Sigla")
+    ativo = models.BooleanField(default=True, verbose_name="Ativa")
 
     def __str__(self):
         return self.sigla
@@ -11,6 +14,15 @@ class Secretaria(models.Model):
     class Meta:
         verbose_name = "Secretaria"
         verbose_name_plural = "Secretarias"
+
+    def save(self, *args, **kwargs):
+        # Higienização de dados
+        if self.nome:
+            self.nome = self.nome.strip() # Remove espaços sobrando no início e fim
+        if self.sigla:
+            self.sigla = self.sigla.strip().upper() # Força a sigla a ser sempre MAIÚSCULA
+            
+        super().save(*args, **kwargs)
 
 
 class Instituicao(models.Model):
