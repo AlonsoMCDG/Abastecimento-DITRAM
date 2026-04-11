@@ -11,7 +11,7 @@ from apps.organizacao.models import Secretaria, Instituicao
 class TipoServicoSerializer(serializers.ModelSerializer):
     class Meta:
         model = TipoServico
-        fields = ['id', 'nome']
+        fields = ['id', 'nome', 'ativo']
 
 
 class TipoServicoLookupSerializer(serializers.ModelSerializer):

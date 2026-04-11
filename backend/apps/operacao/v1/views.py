@@ -30,16 +30,23 @@ class TipoServicoViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
         filters.OrderingFilter
     ]
 
+    # Filtros Exatos
+    filterset_fields = ['id', 'ativo']
+
     # Busca Textual
     search_fields = ['nome', 'id']
 
-    # Ordenação
-    ordering_fields = ['nome', 'id']
-    ordering = ['nome']
+    # Ordenação (Ativos primeiro, depois ordem alfabética)
+    ordering_fields = ['nome', 'id', 'ativo']
+    ordering = ['-ativo', 'nome']
 
     @action(detail=False, methods=['get'])
     def lookup(self, request):
         queryset = self.filter_queryset(self.get_queryset())
+        
+        # REGRA DE NEGÓCIO: Só exibe serviços ativos nos Selects (Dropdowns)
+        if 'ativo' not in request.query_params:
+            queryset = queryset.filter(ativo=True)
         
         # Otimização: Traz apenas o necessário para o Select do frontend
         queryset = queryset.only('id', 'nome')

@@ -5,8 +5,11 @@ from apps.pessoas.models import Pessoa
 from apps.frota.models import Veiculo, Rota, TipoVeiculo, TipoCombustivel
 from apps.organizacao.models import Secretaria, Instituicao
 
+from django.db import models
+
 class TipoServico(models.Model):
     nome = models.CharField(max_length=100, verbose_name="Nome do Serviço")
+    ativo = models.BooleanField(default=True, verbose_name="Ativo") # NOVO: Exclusão Lógica
 
     class Meta:
         verbose_name = "Tipo de Serviço"
@@ -14,6 +17,12 @@ class TipoServico(models.Model):
 
     def __str__(self):
         return self.nome
+
+    def save(self, *args, **kwargs):
+        # Higienização: Remove espaços extras e deixa as iniciais maiúsculas
+        if self.nome:
+            self.nome = " ".join(self.nome.split()).title()
+        super().save(*args, **kwargs)
 
 
 class AlocacaoServico(models.Model):
