@@ -59,6 +59,20 @@ class OperadorVeiculo(models.Model):
         verbose_name_plural = "Operadores de Veículos"
 
     def __str__(self):
+        principal_str = "⭐ Principal" if self.is_principal else "Secundário"
+        return f"{self.pessoa.nome} -> {self.veiculo.placa} [{principal_str}]"
+
+    @atomic
+    def save(self, *args, **kwargs):
+        # REGRA DE NEGÓCIO: Um veículo só pode ter UM operador principal por vez.
+        if self.is_principal:
+            OperadorVeiculo.objects.filter(veiculo=self.veiculo).exclude(pk=self.pk).update(is_principal=False)
+        
+        # Se for o PRIMEIRO motorista vinculado a este veículo, força ser o principal
+        elif not self.pk and not OperadorVeiculo.objects.filter(veiculo=self.veiculo).exists():
+            self.is_principal = True
+
+        super().save(*args, **kwargs)
         return f"{self.pessoa.nome} -> {self.veiculo.placa}"
 
 from django.db import models
