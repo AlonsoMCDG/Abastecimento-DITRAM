@@ -84,7 +84,20 @@ class OperadorVeiculoReadSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = OperadorVeiculo
-        fields = ['id', 'pessoa_id', 'pessoa_nome', 'veiculo_id', 'veiculo_placa', 'veiculo_modelo', 'is_principal']
+        fields = [
+            'id', 
+            'pessoa_id', 'pessoa_nome', 
+            'veiculo_id', 'veiculo_placa', 'veiculo_modelo', 
+            'is_principal'
+        ]
+
+class OperadorVeiculoWriteSerializer(serializers.ModelSerializer):
+    pessoa_id = serializers.PrimaryKeyRelatedField(source='pessoa', queryset=Pessoa.objects.all())
+    veiculo_id = serializers.PrimaryKeyRelatedField(source='veiculo', queryset=Veiculo.objects.all())
+
+    class Meta:
+        model = OperadorVeiculo
+        fields = ['id', 'pessoa_id', 'veiculo_id', 'is_principal']
 
 
 class OperadorVeiculoWriteSerializer(serializers.ModelSerializer):

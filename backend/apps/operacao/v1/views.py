@@ -114,17 +114,31 @@ class AlocacaoServicoViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
 
 
 class OperadorVeiculoViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
-    # Performance: Otimiza as duas FKs
+    # Performance: Otimiza as duas FKs para evitar N+1 queries
     queryset = OperadorVeiculo.objects.select_related('pessoa', 'veiculo').all()
     permission_classes = [IsAuthenticated, FrotaPermission]
 
-    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
+    # Habilitando motores
+    filter_backends = [
+        DjangoFilterBackend, 
+        filters.SearchFilter, # Faltava este!
+        filters.OrderingFilter
+    ]
     
-    # Permite filtrar rapidamente quais veículos pertencem a um motorista ou vice-versa
+    # Filtros exatos
     filterset_fields = ['pessoa_id', 'veiculo_id', 'is_principal']
     
-    ordering_fields = ['id']
-    ordering = ['-id']
+    # Busca Textual Inteligente
+    search_fields = [
+        'pessoa__nome', 
+        'pessoa__cpf', 
+        'veiculo__placa', 
+        'veiculo__modelo'
+    ]
+    
+    # Ordenação (Motoristas principais ficam no topo por padrão)
+    ordering_fields = ['id', 'pessoa__nome', 'veiculo__placa', 'is_principal']
+    ordering = ['-is_principal', 'pessoa__nome']
 
     def get_serializer_class(self):
         if self.request.method in ['GET', 'HEAD', 'OPTIONS']:

@@ -115,16 +115,17 @@ export interface AlocacaoServico {
   is_principal: boolean;
 }
 
-export interface OperadorVeiculo { // Antiga Lotacao
+export interface OperadorVeiculo { 
   id: number;
   
-  // IDs
+  // IDs (Payload)
   pessoa_id: number;
   veiculo_id: number;
   
-  // Campos de Leitura
+  // Campos de Leitura (Displays vindos do DRF)
   pessoa_nome?: string;
   veiculo_placa?: string;
+  veiculo_modelo?: string;
   
   is_principal: boolean;
 }

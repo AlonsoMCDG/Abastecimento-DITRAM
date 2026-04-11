@@ -28,6 +28,8 @@ import UsuariosPermissoesPage from "./pages/usuarios/UsuariosPermissoesPage";
 import PerfilPage from "./pages/perfil/PerfilPage";
 import PerfilEditPage from "./pages/perfil/PerfilEditPage";
 import DatabaseDangerPage from "./pages/sistema/DatabaseDangerPage";
+import OperadorListPage from "./pages/operacao/operadores/OperadorListPage";
+import OperadorFormPage from "./pages/operacao/operadores/OperadorFormPage";
 
 function FallbackRedirect() {
   return isAuthenticated() ? (
@@ -243,6 +245,25 @@ function App() {
                 element={
                   <RequirePermission allow={(me) => Boolean(me.is_staff || me.can_write_frota)}>
                     <AlocacaoFormPage />
+                  </RequirePermission>
+                }
+              />
+
+              {/* Operadores de Veículo */}
+              <Route path="operadores" element={<OperadorListPage />} />
+              <Route
+                path="operadores/criar"
+                element={
+                  <RequirePermission allow={(me) => Boolean(me.is_staff || me.can_write_frota)}>
+                    <OperadorFormPage />
+                  </RequirePermission>
+                }
+              />
+              <Route
+                path="operadores/editar/:id"
+                element={
+                  <RequirePermission allow={(me) => Boolean(me.is_staff || me.can_write_frota)}>
+                    <OperadorFormPage />
                   </RequirePermission>
                 }
               />

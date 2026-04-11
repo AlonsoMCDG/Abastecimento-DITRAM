@@ -3,22 +3,20 @@ import { ENDPOINTS } from "../config/endpoints";
 import type { OperadorVeiculo } from "../../types/models";
 import type { PaginatedResponse } from "../../types/api";
 
-// Permite buscar, por exemplo, "todos os motoristas do veículo X" ou "todos os veículos do motorista Y"
 interface OperadorListParams {
   pessoa_id?: number;
   veiculo_id?: number;
-  ativo?: boolean | "";
+  is_principal?: boolean | string;
   search?: string;
   ordering?: string | null;
   page?: number;
   page_size?: number;
 }
 
-// Payload focado apenas no que a API precisa para gravar no banco
 interface OperadorCreatePayload {
   pessoa_id: number;
   veiculo_id: number;
-  ativo?: boolean;
+  is_principal?: boolean;
 }
 
 export const operadoresApi = {
