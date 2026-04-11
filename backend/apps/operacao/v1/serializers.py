@@ -26,33 +26,51 @@ class TipoServicoLookupSerializer(serializers.ModelSerializer):
 # --- SERIALIZERS DE AlocacaoServico ---
 
 class AlocacaoServicoReadSerializer(serializers.ModelSerializer):
+    # Relacionamento Pessoa
     pessoa_id = serializers.IntegerField(read_only=True)
     pessoa_nome = serializers.CharField(source='pessoa.nome', read_only=True)
+    
+    # Relacionamento Tipo Servico
     tipo_servico_id = serializers.IntegerField(read_only=True)
     tipo_servico_nome = serializers.CharField(source='tipo_servico.nome', read_only=True)
+    
+    # Relacionamento Secretaria (CORRIGIDO: Agora exposto para a listagem)
+    secretaria_id = serializers.IntegerField(read_only=True)
+    secretaria_nome = serializers.CharField(source='secretaria.nome', read_only=True)
+    secretaria_sigla = serializers.CharField(source='secretaria.sigla', read_only=True)
 
     class Meta:
         model = AlocacaoServico
-        fields = ['id', 'pessoa_id', 'pessoa_nome', 'tipo_servico_id', 'tipo_servico_nome', 'is_principal']
-
+        fields = [
+            'id', 
+            'pessoa_id', 'pessoa_nome', 
+            'tipo_servico_id', 'tipo_servico_nome', 
+            'secretaria_id', 'secretaria_nome', 'secretaria_sigla',
+            'is_principal'
+        ]
 
 class AlocacaoServicoWriteSerializer(serializers.ModelSerializer):
     pessoa_id = serializers.PrimaryKeyRelatedField(source='pessoa', queryset=Pessoa.objects.all())
     tipo_servico_id = serializers.PrimaryKeyRelatedField(source='tipo_servico', queryset=TipoServico.objects.all())
+    secretaria_id = serializers.PrimaryKeyRelatedField(source='secretaria', queryset=Secretaria.objects.all()) # CORRIGIDO
 
     class Meta:
         model = AlocacaoServico
-        fields = ['id', 'pessoa_id', 'tipo_servico_id', 'is_principal']
+        fields = ['id', 'pessoa_id', 'tipo_servico_id', 'secretaria_id', 'is_principal']
 
 class AlocacaoServicoLookupSerializer(serializers.ModelSerializer):
     value = serializers.ReadOnlyField(source='id')
-    label = serializers.ReadOnlyField(source='pessoa.nome')
-
+    label = serializers.SerializerMethodField() # Melhoria para a label do select
     secretaria_id = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = AlocacaoServico
         fields = ['value', 'label', 'secretaria_id', 'is_principal']
+
+    def get_label(self, obj):
+        # Exibe "João da Silva - Roçagem" no Select do frontend
+        return f"{obj.pessoa.nome} - {obj.tipo_servico.nome}"
+
 
 # --- SERIALIZERS DE OPERADOR DE VEÍCULO ---
 

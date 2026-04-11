@@ -49,11 +49,34 @@ class TipoServicoViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
 
 
 class AlocacaoServicoViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
-    queryset = AlocacaoServico.objects.select_related('pessoa', 'tipo_servico').all()
-    # Adicione permissões
-    filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['pessoa_id', 'tipo_servico_id', 'is_principal']
+    # PREVENÇÃO N+1: Busca as 3 tabelas em uma única ida ao banco
+    queryset = AlocacaoServico.objects.select_related('pessoa', 'tipo_servico', 'secretaria').all()
     
+    # SEGURANÇA
+    permission_classes = [IsAuthenticated, CadastrosPermission] 
+
+    # MOTORES HABILITADOS
+    filter_backends = [
+        DjangoFilterBackend, 
+        filters.SearchFilter, 
+        filters.OrderingFilter
+    ]
+
+    # Filtros Exatos 
+    filterset_fields = ['pessoa_id', 'tipo_servico_id', 'secretaria_id', 'is_principal']
+    
+    # Busca Textual (Permite o usuário pesquisar pelo nome na tabela)
+    search_fields = [
+        'pessoa__nome', 
+        'pessoa__cpf', 
+        'tipo_servico__nome', 
+        'secretaria__sigla'
+    ]
+
+    # Ordenação
+    ordering_fields = ['id', 'pessoa__nome', 'tipo_servico__nome', 'secretaria__sigla', 'is_principal']
+    ordering = ['-is_principal', 'pessoa__nome'] # Traz os principais primeiro
+
     def get_serializer_class(self):
         if self.request.method in ['GET', 'HEAD', 'OPTIONS']:
             return AlocacaoServicoReadSerializer
@@ -61,6 +84,19 @@ class AlocacaoServicoViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'])
     def lookup(self, request):
+        queryset = self.filter_queryset(self.get_queryset())
+        
+        # OTIMIZAÇÃO LOOKUP
+        queryset = queryset.select_related(None).select_related('pessoa', 'tipo_servico').only(
+            'id', 
+            'pessoa__nome',
+            'tipo_servico__nome',
+            'secretaria_id', 
+            'is_principal'
+        )
+        
+        serializer = AlocacaoServicoLookupSerializer(queryset, many=True)
+        return Response(serializer.data)
         queryset = self.filter_queryset(self.get_queryset())
         
         # 1. select_related(None): Anula o 'tipo_servico' e 'pessoa' vindos do topo da classe.

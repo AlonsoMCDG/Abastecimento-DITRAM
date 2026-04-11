@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.transaction import atomic
 
 from apps.pessoas.models import Pessoa
 from apps.frota.models import Veiculo, Rota, TipoVeiculo, TipoCombustivel
@@ -17,9 +18,10 @@ class TipoServico(models.Model):
 
 class AlocacaoServico(models.Model):
     """Relacionamento entre PESSOA e TIPO_SERVICO"""
-    pessoa = models.ForeignKey(Pessoa, on_delete=models.CASCADE, related_name='servicos_alocados', verbose_name='Pessoa')
-    tipo_servico = models.ForeignKey(TipoServico, on_delete=models.PROTECT, related_name='pessoas_alocadas', verbose_name='Tipo de Serviço')
-    secretaria = models.ForeignKey(Secretaria, on_delete=models.PROTECT, related_name='pessoas_alocadas', verbose_name='Secretaria')
+    pessoa = models.ForeignKey('Pessoa', on_delete=models.CASCADE, related_name='servicos_alocados', verbose_name='Pessoa')
+    tipo_servico = models.ForeignKey('TipoServico', on_delete=models.PROTECT, related_name='pessoas_alocadas', verbose_name='Tipo de Serviço')
+    secretaria = models.ForeignKey('Secretaria', on_delete=models.PROTECT, related_name='pessoas_alocadas', verbose_name='Secretaria')
+    
     is_principal = models.BooleanField(default=False, verbose_name="É o serviço principal?")
 
     class Meta:
@@ -31,6 +33,18 @@ class AlocacaoServico(models.Model):
     def __str__(self):
         principal_str = "⭐ Principal" if self.is_principal else "Secundário"
         return f"{self.pessoa.nome} -> {self.tipo_servico.nome} [{principal_str}]"
+
+    @atomic
+    def save(self, *args, **kwargs):
+        # REGRA DE NEGÓCIO: Se esta alocação é a principal, remove o status de principal das outras
+        if self.is_principal:
+            AlocacaoServico.objects.filter(pessoa=self.pessoa).exclude(pk=self.pk).update(is_principal=False)
+        
+        # Se for a PRIMEIRA alocação da pessoa, força ser a principal
+        elif not self.pk and not AlocacaoServico.objects.filter(pessoa=self.pessoa).exists():
+            self.is_principal = True
+
+        super().save(*args, **kwargs)
 
 
 class OperadorVeiculo(models.Model):
