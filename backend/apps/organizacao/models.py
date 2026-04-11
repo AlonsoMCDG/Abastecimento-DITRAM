@@ -36,16 +36,24 @@ class Instituicao(models.Model):
 
     nome = models.CharField(max_length=100, verbose_name="Nome")
     tipo = models.CharField(max_length=100, choices=TIPO_CHOICES, verbose_name="Tipo")
-
+    
     secretaria = models.ForeignKey(
-        Secretaria,
+        Secretaria, # Importado diretamente no topo
         on_delete=models.PROTECT,
         related_name="instituicoes"
     )
+    
+    ativo = models.BooleanField(default=True, verbose_name="Ativa") # NOVO: Controle de inativação
 
     def __str__(self):
-        return self.nome
+        return f"{self.nome} ({self.get_tipo_display()})"
 
     class Meta:
         verbose_name = "Instituição"
         verbose_name_plural = "Instituições"
+
+    def save(self, *args, **kwargs):
+        # Higienização: Remove espaços duplos e espaços nas pontas
+        if self.nome:
+            self.nome = " ".join(self.nome.split())
+        super().save(*args, **kwargs)

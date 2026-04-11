@@ -50,46 +50,40 @@ class SecretariaViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
 
 
 class InstituicaoViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
-    queryset = Instituicao.objects.all().select_related('secretaria').all()
+    queryset = Instituicao.objects.select_related('secretaria').all()
     permission_classes = [IsAuthenticated, CadastrosPermission]
 
-    # Habilitando os motores (Filtro Exato, Busca Textual, Ordenação)
     filter_backends = [
         DjangoFilterBackend, 
         filters.SearchFilter, 
         filters.OrderingFilter
     ]
 
-    # Configuração de Filtros Exatos (?secretaria_id=1&tipo_locomocao=TERRESTRE)
-    filterset_fields = ['id', 'secretaria_id', 'tipo']
+    # Filtros Exatos
+    filterset_fields = ['id', 'secretaria_id', 'tipo', 'ativo']
 
-    # Configuração de Busca Textual (?search=hilux)
-    search_fields = ['nome', 'tipo', 'secretaria__nome']
+    # Busca Textual
+    search_fields = ['nome', 'tipo', 'secretaria__nome', 'secretaria__sigla']
     
-    # Configuração de Ordenação (?ordering=-id)
-    ordering_fields = ['nome', 'tipo', 'id', 'secretaria__nome']
-    ordering = ['nome'] # Ordenação padrão alfabética
+    # Ordenação
+    ordering_fields = ['nome', 'tipo', 'id', 'secretaria__sigla', 'ativo']
+    ordering = ['-ativo', 'nome'] # Ativas no topo, depois alfabético
 
     def get_serializer_class(self):
-        # CRUD Padrão: GET usa Read, POST/PUT/PATCH usa Write
         if self.request.method in ['GET', 'HEAD', 'OPTIONS']:
             return InstituicaoReadSerializer
         return InstituicaoWriteSerializer
     
-    # endpoint customizado: /api/instituicao/lookup/
     @action(detail=False, methods=['get'])
     def lookup(self, request):
-        # Usa self.filter_queryset para que o lookup também obedeça 
-        # aos filtros! Assim o frontend pode fazer: /lookup/?secretaria_id=1
         queryset = self.filter_queryset(self.get_queryset())
 
-        # Otimiza a query trazendo apenas o necessário para o Select
-        queryset = queryset.only(
-            'id', 'nome',
-            'secretaria_id'  # Busca o ID de secretaria por causa do `queryset = (...).select_related('secretaria')`
-        )
+        # Só exibe instituições ativas nos Selects
+        if 'ativo' not in request.query_params:
+            queryset = queryset.filter(ativo=True)
 
-        # Usamos o serializer leve e com dados embutidos para o Select
+        # Otimiza a query. Precisamos do tipo e nome para o get_label
+        queryset = queryset.only('id', 'nome', 'tipo', 'secretaria_id')
+
         serializer = InstituicaoLookupSerializer(queryset, many=True)
         return Response(serializer.data)
-

@@ -27,7 +27,7 @@ class SecretariaLookupSerializer(serializers.ModelSerializer):
 
 # --- SERIALIZERS DE ROTA ---
 
-# DTO de Escrita (Recebe o ID da secretaria para salvar no banco)
+# DTO de Escrita 
 class InstituicaoWriteSerializer(serializers.ModelSerializer):
     secretaria_id = serializers.PrimaryKeyRelatedField(
         source='secretaria', 
@@ -36,27 +36,31 @@ class InstituicaoWriteSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Instituicao
-        fields = ['id', 'nome', 'tipo', 'secretaria_id']
+        fields = ['id', 'nome', 'tipo', 'secretaria_id', 'ativo']
 
-# DTO de Leitura (Retorna o ID e o Nome extra)
+# DTO de Leitura 
 class InstituicaoReadSerializer(serializers.ModelSerializer):
-    # Pega o ID e o Nome
     secretaria_id = serializers.IntegerField(read_only=True)
     secretaria_nome = serializers.CharField(source='secretaria.nome', read_only=True)
+    secretaria_sigla = serializers.CharField(source='secretaria.sigla', read_only=True)
+    tipo_display = serializers.CharField(source='get_tipo_display', read_only=True)
 
-    class Meta:
-        model = Instituicao
-        # Além dos atributos da instituição, passa o ID e nome da secretaria
-        fields = ['id', 'nome', 'tipo', 'secretaria_id', 'secretaria_nome']
-
-
-class InstituicaoLookupSerializer(serializers.ModelSerializer):
-    value = serializers.ReadOnlyField(source='id')
-    label = serializers.ReadOnlyField(source='nome')
-    
     class Meta:
         model = Instituicao
         fields = [
-            'value',  # ID da instituição
-            'label',  # Campo 'nome'
+            'id', 'nome', 'tipo', 'tipo_display', 'ativo', 
+            'secretaria_id', 'secretaria_nome', 'secretaria_sigla'
         ]
+
+class InstituicaoLookupSerializer(serializers.ModelSerializer):
+    value = serializers.ReadOnlyField(source='id')
+    label = serializers.SerializerMethodField()
+    secretaria_id = serializers.IntegerField(read_only=True) # Útil para o frontend filtrar dropdowns
+    
+    class Meta:
+        model = Instituicao
+        fields = ['value', 'label', 'secretaria_id']
+
+    def get_label(self, obj: Instituicao):
+        # Formatação limpa para o Select: "Escola - João das Neves"
+        return f"{obj.get_tipo_display()} - {obj.nome}"
