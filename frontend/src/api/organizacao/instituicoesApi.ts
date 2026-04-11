@@ -6,15 +6,16 @@ import type { PaginatedResponse } from "../../types/api";
 interface InstituicaoListParams {
   nome?: string;
   tipo?: string;
-  // Filtra id para fazer combos em cascata (Select dependente)
   secretaria_id?: number; 
+  ativo?: boolean | string;
   search?: string;
   ordering?: string | null;
   page?: number;
   page_size?: number;
 }
 
-type InstituicaoCreatePayload = Omit<Instituicao, "id">;
+// Omite o ID e os campos de exibição ("_nome", "_sigla") que o banco não aceita na gravação
+type InstituicaoCreatePayload = Omit<Instituicao, "id" | "secretaria_nome" | "secretaria_sigla" | "tipo_nome">;
 
 export const instituicoesApi = {
   listar(params?: InstituicaoListParams) {

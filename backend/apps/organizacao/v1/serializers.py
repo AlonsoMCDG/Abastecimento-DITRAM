@@ -43,12 +43,12 @@ class InstituicaoReadSerializer(serializers.ModelSerializer):
     secretaria_id = serializers.IntegerField(read_only=True)
     secretaria_nome = serializers.CharField(source='secretaria.nome', read_only=True)
     secretaria_sigla = serializers.CharField(source='secretaria.sigla', read_only=True)
-    tipo_display = serializers.CharField(source='get_tipo_display', read_only=True)
+    tipo_nome = serializers.CharField(source='get_tipo_display', read_only=True)
 
     class Meta:
         model = Instituicao
         fields = [
-            'id', 'nome', 'tipo', 'tipo_display', 'ativo', 
+            'id', 'nome', 'tipo', 'tipo_nome', 'ativo', 
             'secretaria_id', 'secretaria_nome', 'secretaria_sigla'
         ]
 

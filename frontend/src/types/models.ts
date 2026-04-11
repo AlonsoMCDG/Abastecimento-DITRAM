@@ -13,7 +13,13 @@ export interface Instituicao {
   id: number;
   nome: string;
   tipo: string;
-  secretaria: number;
+  tipo_nome?: string;
+  
+  secretaria_id: number;
+  secretaria_nome?: string;
+  secretaria_sigla?: string;
+  
+  ativo: boolean;
 }
 
 // ==========================================

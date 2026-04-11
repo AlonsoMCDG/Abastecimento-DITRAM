@@ -1,15 +1,15 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import DataTable, { type DataTableParams } from "../../../components/DataTable";
-import { instituicoesApi } from "../../../api/organizacao/instituicoesApi";
+import { instituicoesApi } from "../../../api/organizacao/instituicoesApi"; // Ajuste se o caminho for diferente
 import { ROUTES } from "../../../routes/routes";
 import { useAuth } from "../../../auth/AuthContext";
 import { Can } from "../../../components/auth/Can";
 import { getApiErrorMessage } from "../../../api/config/errorHandlers";
 
 import type { Instituicao } from "../../../types/models";
-import { instituicaoFormSchema } from "../../../schemas/instituicao.schema";
+import { instituicaoListSchema } from "../../../schemas/instituicao.schema";
 
 import "../../../assets/css/ListPage.css";
 
@@ -17,22 +17,27 @@ export default function InstituicaoListPage() {
   const navigate = useNavigate();
   const { user: me } = useAuth();
 
-  // Estados da paginação e listagem
   const [instituicoes, setInstituicoes] = useState<Instituicao[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Permissão genérica para as ações das linhas da tabela
+  useEffect(() => {
+    return () => {
+      if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    };
+  }, []);
+
   const hasWritePermission = Boolean(me?.is_staff || me?.can_write_cadastros);
 
-  // Motor de busca com integração ao backend (Debounce de 500ms)
   const fetchInstituicoes = useCallback(async (params: DataTableParams) => {
     if (debounceTimer.current) clearTimeout(debounceTimer.current);
 
     debounceTimer.current = setTimeout(async () => {
       setLoading(true);
+      setErrorMessage(null);
       try {
         const res = await instituicoesApi.listar({
           page: params.page,
@@ -44,24 +49,21 @@ export default function InstituicaoListPage() {
         setInstituicoes(res.data.results || []);
         setTotal(res.data.count || 0);
       } catch (err) {
-        console.error("Erro ao buscar instituições:", err);
+        setErrorMessage("Erro ao buscar instituições no servidor.");
       } finally {
         setLoading(false);
       }
     }, 500);
   }, []);
 
-  // Tratamento seguro de exclusão com refresh da tabela
   async function handleDelete(item: Instituicao) {
     if (!item.id) return;
-
     try {
       await instituicoesApi.deletar(item.id);
-      
-      // Retorna para a página 1 após excluir, evitando telas vazias
+      setErrorMessage(null);
       fetchInstituicoes({ page: 1, pageSize: 10, search: "", ordering: null });
     } catch (err: unknown) {
-      alert(getApiErrorMessage(err, "Falha ao excluir instituição."));
+      setErrorMessage(getApiErrorMessage(err, "Falha ao excluir. É provável que existam rotas ou guias vinculadas. Recomendamos apenas desativar o registro."));
     }
   }
 
@@ -69,29 +71,31 @@ export default function InstituicaoListPage() {
     <div className="list-page">
       <div className="list-header">
         <div>
-          <h2 className="list-title">Instituições</h2>
-          <p className="list-subtitle">Escolas, UPA, hospitais e outros.</p>
+          <h2 className="list-title">Instituições e Locais</h2>
+          <p className="list-subtitle">Cadastro de escolas, creches, unidades de saúde e prédios públicos.</p>
         </div>
 
         <div className="list-actions">
           <Can action="can_write_cadastros">
             <Link className="list-create" to={ROUTES.organizacao.instituicoes.create}>
-              <span className="plus">+</span> Nova instituição
+              <span className="plus">+</span> Nova Instituição
             </Link>
           </Can>
         </div>
       </div>
-
+      
       <DataTable
         data={instituicoes}
         total={total}
         loading={loading}
-        schema={instituicaoFormSchema}
+        error={errorMessage}
+        schema={instituicaoListSchema}
         onParamsChange={fetchInstituicoes}
         canEdit={hasWritePermission}
         canDelete={hasWritePermission}
         onEdit={(item) => navigate(ROUTES.organizacao.instituicoes.edit(item.id!))}
         onDelete={handleDelete}
+        rowClassName={(i) => !i.ativo ? "dt-row-inactive" : ""}
       />
     </div>
   );
