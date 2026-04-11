@@ -501,6 +501,7 @@
     "model": "frota.veiculo",
     "pk": 1,
     "fields": {
+      "ativo": true,
       "placa": "BRA2E24",
       "modelo": "Mercedes-Benz OF 1721 (Escolar)",
       "tipo_locomocao": "TERRESTRE",
@@ -519,6 +520,7 @@
     "model": "frota.veiculo",
     "pk": 2,
     "fields": {
+      "ativo": true,
       "placa": "KRM4J12",
       "modelo": "Volkswagen Constellation 24.280",
       "tipo_locomocao": "TERRESTRE",
@@ -537,6 +539,7 @@
     "model": "frota.veiculo",
     "pk": 3,
     "fields": {
+      "ativo": true,
       "placa": "LPT9I55",
       "modelo": "Fiat Fiorino 1.4 Hard Working",
       "tipo_locomocao": "TERRESTRE",
@@ -555,6 +558,7 @@
     "model": "frota.veiculo",
     "pk": 4,
     "fields": {
+      "ativo": true,
       "placa": "OXX3C88",
       "modelo": "Chevrolet Onix 1.0 Joy",
       "tipo_locomocao": "TERRESTRE",
@@ -574,6 +578,7 @@
     "model": "frota.veiculo",
     "pk": 5,
     "fields": {
+      "ativo": true,
       "placa": "PQL7B11",
       "modelo": "Renault Logan 1.6 Expression",
       "capacidade_carga_kg": "10.5",
@@ -591,6 +596,7 @@
     "model": "frota.veiculo",
     "pk": 6,
     "fields": {
+      "ativo": true,
 
       "placa": "RRT1A09",
       "modelo": "Iveco Daily 55C17",
@@ -610,6 +616,7 @@
     "model": "frota.veiculo",
     "pk": 7,
     "fields": {
+      "ativo": true,
 
       "placa": "SAM5D32",
       "modelo": "Ford Cargo 1119",
@@ -629,6 +636,7 @@
     "model": "frota.veiculo",
     "pk": 8,
     "fields": {
+      "ativo": true,
       "placa": "TKB8F44",
       "modelo": "Toyota Hilux 4x4 Diesel",
       "tipo_locomocao": "TERRESTRE",
@@ -647,6 +655,7 @@
     "model": "frota.veiculo",
     "pk": 9,
     "fields": {
+      "ativo": true,
       "placa": "UUA2G77",
       "modelo": "Mitsubishi L200 Triton",
       "tipo_locomocao": "TERRESTRE",
@@ -665,6 +674,7 @@
     "model": "frota.veiculo",
     "pk": 10,
     "fields": {
+      "ativo": true,
       "placa": "VVI0H21",
       "modelo": "Fiat Uno Way 1.0",
       "tipo_locomocao": "TERRESTRE",
@@ -683,6 +693,7 @@
     "model": "frota.veiculo",
     "pk": 11,
     "fields": {
+      "ativo": true,
       "placa": "WWM4K90",
       "modelo": "Scania P310 B8X2",
       "tipo_locomocao": "TERRESTRE",
@@ -702,6 +713,7 @@
     "model": "frota.veiculo",
     "pk": 12,
     "fields": {
+      "ativo": true,
       "placa": "XXY5L33",
       "modelo": "Mercedes-Benz Sprinter 415",
       "tipo_locomocao": "TERRESTRE",
@@ -720,6 +732,7 @@
     "model": "frota.veiculo",
     "pk": 13,
     "fields": {
+      "ativo": true,
       "placa": "YYZ9M44",
       "modelo": "Honda NXR 160 Bros",
       "tipo_locomocao": "TERRESTRE",
@@ -738,6 +751,7 @@
     "model": "frota.veiculo",
     "pk": 14,
     "fields": {
+      "ativo": true,
       "placa": "ZZR3N11",
       "modelo": "Yamaha XTZ 250 Lander",
       "tipo_locomocao": "TERRESTRE",
@@ -756,6 +770,7 @@
     "model": "frota.veiculo",
     "pk": 15,
     "fields": {
+      "ativo": true,
       "placa": "ABC1D22",
       "modelo": "Hyundai HB20 1.6",
       "tipo_locomocao": "TERRESTRE",
@@ -774,6 +789,7 @@
     "model": "frota.veiculo",
     "pk": 16,
     "fields": {
+      "ativo": true,
       "placa": "DEF3E33",
       "modelo": "Renault Master Ambulância",
       "tipo_locomocao": "TERRESTRE",
@@ -792,6 +808,7 @@
     "model": "frota.veiculo",
     "pk": 17,
     "fields": {
+      "ativo": true,
       "placa": "GHI5F44",
       "modelo": "Peugeot Partner Rapid",
       "tipo_locomocao": "TERRESTRE",
@@ -810,6 +827,7 @@
     "model": "frota.veiculo",
     "pk": 18,
     "fields": {
+      "ativo": true,
       "placa": "JKL7G55",
       "modelo": "Volkswagen Voyage 1.6",
       "tipo_locomocao": "TERRESTRE",
@@ -828,6 +846,7 @@
     "model": "frota.veiculo",
     "pk": 19,
     "fields": {
+      "ativo": true,
       "placa": "MNO9H66",
       "modelo": "Toyota Corolla Altis",
       "tipo_locomocao": "TERRESTRE",
@@ -846,6 +865,7 @@
     "model": "frota.veiculo",
     "pk": 20,
     "fields": {
+      "ativo": true,
       "placa": "PQR1I77",
       "modelo": "Fiat Cronos 1.3 Drive",
       "tipo_locomocao": "TERRESTRE",
@@ -864,6 +884,7 @@
     "model": "frota.veiculo",
     "pk": 21,
     "fields": {
+      "ativo": true,
       "placa": "BAR-0001",
       "modelo": "Voadeira Alumínio 6m - Motor Yamaha 40HP",
       "tipo_locomocao": "FLUVIAL",
@@ -882,6 +903,7 @@
     "model": "frota.veiculo",
     "pk": 22,
     "fields": {
+      "ativo": true,
       "placa": "BAR-0002",
       "modelo": "Lancha Rápida Escolar - Motor 115HP",
       "tipo_locomocao": "FLUVIAL",
@@ -900,6 +922,7 @@
     "model": "frota.veiculo",
     "pk": 23,
     "fields": {
+      "ativo": true,
       "placa": "BAR-0003",
       "modelo": "Ambulancha Marajó 19 - Motor 90HP",
       "tipo_locomocao": "FLUVIAL",
@@ -918,6 +941,7 @@
     "model": "frota.veiculo",
     "pk": 24,
     "fields": {
+      "ativo": true,
       "placa": "BAR-0004",
       "modelo": "Balsa de Transporte de Resíduos",
       "tipo_locomocao": "FLUVIAL",

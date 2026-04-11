@@ -16,55 +16,60 @@ from .serializers import (
 )
 
 class VeiculoViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
-    # Performance: select_related para buscar a secretaria em uma única query
-    queryset = Veiculo.objects.select_related('secretaria').all()
+    queryset = Veiculo.objects.select_related(
+        'secretaria', 
+        'tipo_combustivel', 
+        'tipo_veiculo'
+    ).all()
+    
     permission_classes = [IsAuthenticated, FrotaPermission]
 
-    # Habilitando os motores (Filtro Exato, Busca Textual, Ordenação)
-    filter_backends = [
-        DjangoFilterBackend, 
-        filters.SearchFilter, 
-        filters.OrderingFilter
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+
+    # Filtros Exatos: Corrigido para as chaves estrangeiras com _id
+    filterset_fields = [
+        'id', 'secretaria_id', 'tipo_locomocao', 
+        'tipo_combustivel_id', 'tipo_veiculo_id', 'ativo'
     ]
 
-    # Filtros Exatos (?secretaria_id=1&tipo_locomocao=TERRESTRE)
-    filterset_fields = ['id', 'secretaria_id', 'tipo_locomocao', 'tipo_combustivel']
-
-    # Busca Textual (?search=hilux)
-    search_fields = ['placa', 'modelo', 'secretaria__nome', 'tipo_combustivel__nome']
+    # Busca Textual: Busca robusta cruzando as tabelas
+    search_fields = [
+        'placa', 'modelo', 
+        'secretaria__nome', 'secretaria__sigla',
+        'tipo_combustivel__nome', 
+        'tipo_veiculo__nome'
+    ]
 
     # Ordenação
-    ordering_fields = ['placa', 'modelo', 'id', 'secretaria__nome', 'tipo_combustivel__nome']
-    ordering = ['id']
+    ordering_fields = [
+        'id', 'placa', 'modelo', 'hodometro_atual',
+        'secretaria__nome', 'secretaria__sigla', 
+        'tipo_veiculo__nome', 'ativo'
+    ]
+    ordering = ['-ativo', 'modelo'] # Primeiro os ativos, ordem alfabética
 
     def get_queryset(self):
-        # Pega a query global da classe
         queryset = super().get_queryset()
-
-        # Verifica se o frontend mandou o parâmetro 'pessoa_id'
         pessoa_id = self.request.query_params.get('pessoa_id')
 
         if pessoa_id:
-            # Filtra os veículos que têm um registro na tabela OperadorVeiculo 
-            # associado a este motorista. 
+            # Filtra veículos associados ao motorista
             queryset = queryset.filter(operadores__pessoa_id=pessoa_id)
 
         return queryset
     
     def get_serializer_class(self):
-        # Roteamento de DTOs: Read para visualização, Write para salvamento
         if self.request.method in ['GET', 'HEAD', 'OPTIONS']:
             return VeiculoReadSerializer
         return VeiculoWriteSerializer
     
-    # endpoint customizado: /api/veiculo/lookup/
     @action(detail=False, methods=['get'])
     def lookup(self, request):
         queryset = self.filter_queryset(self.get_queryset())
 
-        # FIX: Substitui os JOINS globais apenas pelo que precisamos para a label
+        # Otimização do Lookup: Mantém o join com tipo_combustivel pois a label usa ele
         queryset = queryset.select_related('tipo_combustivel').only(
-            'id', 'modelo', 'placa',
+            'id', 'modelo', 'placa', 'ativo',
             'consumo_estimado_combustivel', 'unidade_consumo', 
             'tipo_combustivel_id', 'tipo_combustivel__nome',
             'secretaria_id', 'tipo_veiculo_id'

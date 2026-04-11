@@ -6,20 +6,9 @@ from apps.organizacao.models import Secretaria, Instituicao
 
 # DTO de Escrita
 class VeiculoWriteSerializer(serializers.ModelSerializer):
-    secretaria_id = serializers.PrimaryKeyRelatedField(
-        source='secretaria', 
-        queryset=Secretaria.objects.all()
-    )
-    
-    tipo_combustivel_id = serializers.PrimaryKeyRelatedField(
-        source='tipo_combustivel',
-        queryset=TipoCombustivel.objects.all()
-    )
-    
-    tipo_veiculo_id = serializers.PrimaryKeyRelatedField(
-        source='tipo_veiculo',
-        queryset=TipoVeiculo.objects.all()
-    )
+    secretaria_id = serializers.PrimaryKeyRelatedField(source='secretaria', queryset=Secretaria.objects.all())
+    tipo_combustivel_id = serializers.PrimaryKeyRelatedField(source='tipo_combustivel', queryset=TipoCombustivel.objects.all())
+    tipo_veiculo_id = serializers.PrimaryKeyRelatedField(source='tipo_veiculo', queryset=TipoVeiculo.objects.all())
 
     class Meta:
         model = Veiculo
@@ -28,14 +17,15 @@ class VeiculoWriteSerializer(serializers.ModelSerializer):
             'capacidade_carga_kg', 'capacidade_pessoas', 
             'consumo_estimado_combustivel', 'consumo_estimado_oleo',
             'unidade_consumo', 'hodometro_atual', 
-            'secretaria_id', 'tipo_combustivel_id', 'tipo_veiculo_id'
+            'secretaria_id', 'tipo_combustivel_id', 'tipo_veiculo_id',
+            'ativo'
         ]
 
 # DTO de Leitura
 class VeiculoReadSerializer(serializers.ModelSerializer):
-    # Relacionamentos
     secretaria_id = serializers.IntegerField(read_only=True)
     secretaria_nome = serializers.CharField(source='secretaria.nome', read_only=True)
+    secretaria_sigla = serializers.CharField(source='secretaria.sigla', read_only=True)
 
     tipo_combustivel_id = serializers.IntegerField(read_only=True)
     tipo_combustivel_nome = serializers.CharField(source='tipo_combustivel.nome', read_only=True)    
@@ -43,28 +33,24 @@ class VeiculoReadSerializer(serializers.ModelSerializer):
     tipo_veiculo_id = serializers.IntegerField(read_only=True)
     tipo_veiculo_nome = serializers.CharField(source='tipo_veiculo.nome', read_only=True)
     
-    # Displays (Choices)
     tipo_locomocao_display = serializers.CharField(source='get_tipo_locomocao_display', read_only=True)
     unidade_consumo_display = serializers.CharField(source='get_unidade_consumo_display', read_only=True)
 
     class Meta:
         model = Veiculo
         fields = [
-            'id', 'modelo', 'placa',
+            'id', 'modelo', 'placa', 'ativo',
             'consumo_estimado_combustivel', 'consumo_estimado_oleo', 
             'unidade_consumo', 'unidade_consumo_display',
-            'hodometro_atual',
+            'hodometro_atual', 'capacidade_carga_kg', 'capacidade_pessoas',
             'tipo_locomocao', 'tipo_locomocao_display',
             'tipo_combustivel_id', 'tipo_combustivel_nome',
             'tipo_veiculo_id', 'tipo_veiculo_nome',
-            'secretaria_id', 'secretaria_nome',
+            'secretaria_id', 'secretaria_nome', 'secretaria_sigla'
         ]
 
 # DTO de Lookup
 class VeiculoLookupSerializer(serializers.ModelSerializer):
-    """
-    Serializer para o Select de Veículos no Frontend.
-    """
     label = serializers.SerializerMethodField()
     value = serializers.ReadOnlyField(source='id')
 
@@ -75,20 +61,13 @@ class VeiculoLookupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Veiculo
         fields = [
-            'value',
-            'label',
-            'consumo_estimado_combustivel',
-            'consumo_estimado_oleo',
-            'unidade_consumo',
-            'tipo_combustivel_id',
-            'tipo_veiculo_id',
-            'secretaria_id'
+            'value', 'label', 'ativo',
+            'consumo_estimado_combustivel', 'consumo_estimado_oleo', 'unidade_consumo',
+            'tipo_combustivel_id', 'tipo_veiculo_id', 'secretaria_id'
         ]
 
     def get_label(self, obj: Veiculo):
         nome_combustivel = obj.tipo_combustivel.nome if obj.tipo_combustivel else "N/I"
-        
-        # Formatação: "Hilux - ABC1234 (Diesel S10)"
         return f"{obj.modelo} - {obj.placa} ({nome_combustivel})"
 
 

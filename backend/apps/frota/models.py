@@ -14,7 +14,6 @@ class TipoVeiculo(models.Model):
     nome = models.CharField(max_length=50, unique=True) # Ex: Ônibus, Carro, Moto
 
 class Veiculo(models.Model):
-
     UNIDADE_CONSUMO_CHOICES = [
         ("KM_POR_L", "km/L"),
         ("L_POR_H", "L/h")
@@ -40,27 +39,14 @@ class Veiculo(models.Model):
     hodometro_atual = models.FloatField()
     unidade_consumo = models.CharField(max_length=20, choices=UNIDADE_CONSUMO_CHOICES)
 
-    secretaria = models.ForeignKey(
-        Secretaria,
-        on_delete=models.PROTECT,
-        related_name="veiculos",
-    )
+    secretaria = models.ForeignKey(Secretaria, on_delete=models.PROTECT, related_name="veiculos")
+    tipo_veiculo = models.ForeignKey(TipoVeiculo, on_delete=models.PROTECT, related_name="veiculos")
+    tipo_combustivel = models.ForeignKey(TipoCombustivel, on_delete=models.PROTECT, related_name="veiculos")
 
-    tipo_veiculo = models.ForeignKey(
-        TipoVeiculo, 
-        on_delete=models.PROTECT,
-        related_name="veiculos"
-    )
-
-    tipo_combustivel = models.ForeignKey(
-        TipoCombustivel,
-        on_delete=models.PROTECT,
-        related_name="veiculos"
-    )
-    
+    ativo = models.BooleanField(default=True)
 
     def __str__(self):
-        return self.placa
+        return f"{self.modelo} - {self.placa}"
 
     class Meta:
         verbose_name = "Veículo"
