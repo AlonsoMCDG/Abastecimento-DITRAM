@@ -18,9 +18,9 @@ class TipoServico(models.Model):
 
 class AlocacaoServico(models.Model):
     """Relacionamento entre PESSOA e TIPO_SERVICO"""
-    pessoa = models.ForeignKey('Pessoa', on_delete=models.CASCADE, related_name='servicos_alocados', verbose_name='Pessoa')
-    tipo_servico = models.ForeignKey('TipoServico', on_delete=models.PROTECT, related_name='pessoas_alocadas', verbose_name='Tipo de Serviço')
-    secretaria = models.ForeignKey('Secretaria', on_delete=models.PROTECT, related_name='pessoas_alocadas', verbose_name='Secretaria')
+    pessoa = models.ForeignKey(Pessoa, on_delete=models.CASCADE, related_name='servicos_alocados', verbose_name='Pessoa')
+    tipo_servico = models.ForeignKey(TipoServico, on_delete=models.PROTECT, related_name='pessoas_alocadas', verbose_name='Tipo de Serviço')
+    secretaria = models.ForeignKey(Secretaria, on_delete=models.PROTECT, related_name='pessoas_alocadas', verbose_name='Secretaria')
     
     is_principal = models.BooleanField(default=False, verbose_name="É o serviço principal?")
 
