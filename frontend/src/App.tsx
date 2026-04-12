@@ -2,7 +2,6 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Layout from "./layouts/Layout";
 import Home from "./pages/Home";
 
-// Imports (mantidos os nomes dos seus arquivos atuais)
 import SecretariaFormPage from "./pages/cadastros/secretaria/SecretariaFormPage";
 import SecretariaListPage from "./pages/cadastros/secretaria/SecretariaListPage";
 import RotaListPage from "./pages/cadastros/rota/RotaListPage";
@@ -22,7 +21,6 @@ import { GuiaAbastecimentoFormPage } from "./pages/abastecimento/guias/GuiaAbast
 import { LoginPage } from "./pages/login/LoginPage";
 import { RegisterPage } from "./pages/login/RegisterPage";
 import { PrivateRoute } from "./components/PrivateRoute";
-import { isAuthenticated } from "./auth/auth";
 import { RequirePermission } from "./components/RequirePermission";
 import UsuariosPermissoesPage from "./pages/usuarios/UsuariosPermissoesPage";
 import PerfilPage from "./pages/perfil/PerfilPage";
@@ -33,13 +31,8 @@ import OperadorFormPage from "./pages/operacao/operadores/OperadorFormPage";
 import TipoServicoListPage from "./pages/operacao/TipoServicoListPage";
 import TipoServicoFormPage from "./pages/operacao/TipoServicoFormPage";
 
-function FallbackRedirect() {
-  return isAuthenticated() ? (
-    <Navigate to="/home" replace />
-  ) : (
-    <Navigate to="/login" replace />
-  );
-}
+// Novo componente de 404
+import NotFoundPage from "./pages/NotFoundPage";
 
 function App() {
   return (
@@ -48,15 +41,16 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
 
+        {/* ==========================================
+            ROTAS PRIVADAS (Requerem Login)
+            ========================================== */}
         <Route element={<PrivateRoute />}>
           <Route path="/" element={<Layout />}>
             <Route index element={<Navigate to="home" replace />} />
 
             <Route path="home" element={<Home />} />
 
-            {/* ==========================================
-                SISTEMA E USUÁRIOS
-                ========================================== */}
+            {/* SISTEMA E USUÁRIOS */}
             <Route path="perfil" element={<PerfilPage />} />
             <Route path="perfil/editar" element={<PerfilEditPage />} />
 
@@ -104,9 +98,7 @@ function App() {
               />
             </Route>
 
-            {/* ==========================================
-                1. PESSOAS
-                ========================================== */}
+            {/* 1. PESSOAS */}
             <Route path="pessoas">
               <Route index element={<PessoaListPage />} />
               <Route
@@ -127,9 +119,7 @@ function App() {
               />
             </Route>
 
-            {/* ==========================================
-                2. ORGANIZAÇÃO
-                ========================================== */}
+            {/* 2. ORGANIZAÇÃO */}
             <Route path="organizacao">
               <Route path="secretarias" element={<SecretariaListPage />} />
               <Route
@@ -168,9 +158,7 @@ function App() {
               />
             </Route>
 
-            {/* ==========================================
-                3. FROTA
-                ========================================== */}
+            {/* 3. FROTA */}
             <Route path="frota">
               <Route path="veiculos" element={<VeiculoListPage />} />
               <Route
@@ -209,9 +197,7 @@ function App() {
               />
             </Route>
 
-            {/* ==========================================
-                4. OPERAÇÃO
-                ========================================== */}
+            {/* 4. OPERAÇÃO */}
             <Route path="operacao">
               {/* Guias de Abastecimento */}
               <Route path="guias" element={<GuiaAbastecimentoListPage />} />
@@ -288,15 +274,19 @@ function App() {
                   </RequirePermission>
                 }
               />
-              
-              {/* Nota: Quando você criar as páginas de Tipos de Serviço e Operadores de Veículo,
-                  basta adicionar as rotas "tipos-servico" e "operadores" aqui dentro! */}
             </Route>
 
+            {/* ==========================================
+                404 INTERNO: Usuário logado digita rota errada
+                ========================================== */}
+            <Route path="*" element={<NotFoundPage />} />
           </Route>
         </Route>
 
-        <Route path="*" element={<FallbackRedirect />} />
+        {/* ==========================================
+            404 EXTERNO: Visitante digita rota errada
+            ========================================== */}
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>
   );
