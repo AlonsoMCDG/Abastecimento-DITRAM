@@ -1,9 +1,16 @@
-# projeto/urls.py
 from django.contrib import admin
 from django.urls import path, include
+from django.http import JsonResponse
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
+# Função simples para responder ao Render
+def health_check(request):
+    return JsonResponse({"status": "API online e operante", "servico": "Abastecimento"})
+
 urlpatterns = [
+    # Mapear a raiz para retornar 200 OK para o render
+    path('', health_check),
+    
     path('admin/', admin.site.urls),
 
     # Autenticação (Global)
