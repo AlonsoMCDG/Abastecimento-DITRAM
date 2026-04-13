@@ -23,7 +23,7 @@ interface Props<T> {
   canEdit?: boolean;
   canDelete?: boolean;
   pageSizeOptions?: number[];
-  rowClassName?: (item: T) => string; // Permite injetar classes customizadas por linha
+  rowClassName?: (item: T) => string; 
 }
 
 export default function DataTable<T extends { id: number }>({
@@ -55,10 +55,8 @@ export default function DataTable<T extends { id: number }>({
   const [deleteError, setDeleteError] = useState("");
   const [actionLoading, setActionLoading] = useState<{ id: number, action: string } | null>(null);
 
-  // Verifica se a tabela precisa renderizar a coluna de Ações nativa
   const hasActions = Boolean(onPdf || canEdit || canDelete);
 
-  // Efeito do Debounce da Pesquisa
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
       setParams((prev) => {
@@ -80,18 +78,14 @@ export default function DataTable<T extends { id: number }>({
   const handleSort = (col: any) => {
     if (col.sortable === false) return;
 
-    // Usa o sortKey do Django, se existir. Se não, usa a chave normal do frontend.
     const columnKey = col.sortKey || col.key;
     setParams((prev) => {
-      // Remove o sinal de "-" para descobrir qual é o campo base atual
       const currentOrderField = prev.ordering?.replace("-", "");
 
-      // Se o usuário clicou numa coluna NOVA, começa ordenando Crescente
       if (currentOrderField !== columnKey) {
         return { ...prev, ordering: columnKey, page: 1 };
       }
 
-      // Se ele clicou na MESMA coluna, inverte a ordem
       const isDescending = prev.ordering?.startsWith("-");
       const newOrdering = isDescending ? columnKey : `-${columnKey}`;
       return { ...prev, ordering: newOrdering, page: 1 };
@@ -158,7 +152,7 @@ export default function DataTable<T extends { id: number }>({
         <table className="datatable-table">
           <thead>
             <tr>
-              <th style={{ width: '50px', textAlign: 'center', cursor: 'default' }}>#</th>
+              <th className="dt-index-col">#</th>
               {schema.columns.map((col) => {
                 const targetKey = col.sortKey || col.key;
                 const isSorted = params.ordering?.replace("-", "") === targetKey;
@@ -169,7 +163,6 @@ export default function DataTable<T extends { id: number }>({
                     key={col.key}
                     onClick={() => handleSort(col)}
                     className={col.sortable !== false ? "sortable-th" : ""}
-                    style={{ cursor: col.sortable !== false ? 'pointer' : 'default' }}
                   >
                     {col.label}
                     {isSorted && (
@@ -178,23 +171,18 @@ export default function DataTable<T extends { id: number }>({
                   </th>
                 );
               })}
-              {/* Oculta o cabeçalho de ações se não houver botões nativos */}
               {hasActions && <th className="actions-th">Ações</th>}
             </tr>
           </thead>
           <tbody>
             {data.length > 0 ? (
               data.map((item, index) => {
-                // Cálculo para manter a numeração correta mesmo em outras páginas
                 const rowNumber = (params.page - 1) * params.pageSize + index + 1;
-
-                // Aplica a classe customizada na linha se a prop existir
                 const customClass = rowClassName ? rowClassName(item) : "";
 
                 return (
                   <tr key={item.id} className={customClass}>
-                    {/* CÉLULA DO NÚMERO DA LINHA */}
-                    <td style={{ textAlign: 'center', fontWeight: '500', color: '#6b7280' }}>
+                    <td className="dt-index-cell">
                       {rowNumber}
                     </td>
 
@@ -206,7 +194,7 @@ export default function DataTable<T extends { id: number }>({
                         </td>
                       );
                     })}
-                    {/* Oculta a célula de ações se não houver botões nativos */}
+                    
                     {hasActions && (
                       <td className="dt-actions-cell">
                         <div className="dt-actions">
@@ -244,7 +232,6 @@ export default function DataTable<T extends { id: number }>({
               })
             ) : (
               <tr>
-                {/* Atualizado o colSpan para incluir a coluna '#' (+2) */}
                 <td colSpan={schema.columns.length + 2} className="td-empty">
                   {loading ? "Carregando dados..." : "Nenhum registro encontrado."}
                 </td>
@@ -280,6 +267,7 @@ export default function DataTable<T extends { id: number }>({
         </div>
       </div>
 
+      {/* MODAL DE CONFIRMAÇÃO DE EXCLUSÃO */}
       {deleteTarget && (
         <div className="dt-modal-overlay">
           <div className="dt-modal">

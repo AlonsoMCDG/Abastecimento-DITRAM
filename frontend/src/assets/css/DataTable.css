@@ -1,7 +1,11 @@
-.datatable {
+/* ==============================================================
+   1. ESTRUTURA PRINCIPAL (CONTAINER E TOOLBAR)
+   ============================================================== */
+.datatable-container {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  width: 100%;
 }
 
 .datatable-toolbar {
@@ -12,13 +16,19 @@
   flex-wrap: wrap;
 }
 
-.datatable-search {
+.search-wrapper {
+  position: relative;
   width: min(520px, 100%);
+}
+
+.datatable-search {
+  width: 100%;
   padding: 10px 12px;
   border: 1px solid #cbd5e0;
   border-radius: 10px;
   background: #fff;
   outline: none;
+  transition: all 0.2s ease;
 }
 
 .datatable-search:focus {
@@ -26,6 +36,26 @@
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
 }
 
+.inner-spinner {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  border: 2px solid #e2e8f0;
+  border-top-color: #667eea;
+  border-radius: 50%;
+  animation: dt-spin 0.8s linear infinite;
+}
+
+@keyframes dt-spin {
+  to { transform: translateY(-50%) rotate(360deg); }
+}
+
+/* ==============================================================
+   2. A TABELA (GRIDS, CABEÇALHOS E LINHAS)
+   ============================================================== */
 .datatable-tablewrap {
   width: 100%;
   overflow-x: auto;
@@ -49,6 +79,7 @@
   font-size: 13px;
 }
 
+/* O Cabeçalho (Fixo no topo caso a tabela tenha rolagem interna) */
 .datatable-table th {
   position: sticky;
   top: 0;
@@ -57,16 +88,44 @@
   font-weight: 700;
   text-align: left;
   white-space: nowrap;
-  cursor: pointer;
   user-select: none;
+  z-index: 10;
 }
 
-.datatable-table th .dt-sort {
+.sortable-th {
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.sortable-th:hover {
+  background-color: #f1f5f9;
+}
+
+.sort-icon {
   margin-left: 6px;
   font-size: 11px;
   opacity: 0.85;
 }
 
+/* Colunas Especiais (Índice e Ações) */
+.dt-index-col {
+  width: 50px;
+  text-align: center !important;
+  cursor: default;
+}
+
+.dt-index-cell {
+  text-align: center;
+  font-weight: 500;
+  color: #6b7280;
+}
+
+.actions-th {
+  width: 120px;
+  text-align: right !important;
+}
+
+/* Efeitos de Hover nas Linhas */
 .datatable-table tr:nth-child(even) td {
   background: #fcfdff;
 }
@@ -75,15 +134,35 @@
   background: #f3f6ff;
 }
 
+.td-empty {
+  text-align: center;
+  padding: 32px !important;
+  color: #64748b;
+  font-style: italic;
+}
+
+/* Classes Injetáveis por Linha (rowClassName) */
+.dt-row-inactive td {
+  opacity: 0.6;
+  background-color: #f8fafc !important;
+}
+
+.dt-row-highlight td {
+  background-color: #eff6ff !important; /* Azul bem clarinho para destaque */
+}
+
+/* ==============================================================
+   3. BOTÕES E BADGES INTERNOS
+   ============================================================== */
 .dt-actions {
   display: flex;
   gap: 8px;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: flex-end; /* Alinha os botões à direita */
   flex-wrap: wrap;
 }
 
-.dt-action {
+.dt-btn {
   width: 32px;
   height: 32px;
   border-radius: 10px;
@@ -93,38 +172,33 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 14px;
   line-height: 1;
   transition: transform 0.12s ease, background-color 0.12s ease, border-color 0.12s ease;
 }
 
-.dt-action:disabled {
+.dt-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.dt-action:hover {
+.dt-btn:hover:not(:disabled) {
   transform: translateY(-1px);
 }
 
-.dt-action svg {
-  width: 16px;
-  height: 16px;
-}
-
-.dt-action-edit {
+.dt-btn.edit {
   color: #2563eb;
   background: rgba(37, 99, 235, 0.10);
   border-color: rgba(37, 99, 235, 0.25);
 }
 
-.dt-action-delete {
+.dt-btn.delete {
   color: #dc2626;
   background: rgba(220, 38, 38, 0.10);
   border-color: rgba(220, 38, 38, 0.25);
 }
 
-.dt-action-pdf {
+.dt-btn.pdf {
   color: #16a34a;
   background: rgba(22, 163, 74, 0.10);
   border-color: rgba(22, 163, 74, 0.25);
@@ -153,144 +227,205 @@
   border-color: #fecaca;
 }
 
+/* ==============================================================
+   4. RODAPÉ E PAGINAÇÃO
+   ============================================================== */
 .datatable-footer {
   display: flex;
   gap: 12px;
   align-items: center;
   flex-wrap: wrap;
   justify-content: space-between;
+  margin-top: 4px;
 }
 
-.datatable-footer .dt-page {
+.footer-info {
+  font-size: 0.9rem;
+  color: #475569;
+}
+
+.footer-controls {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.dt-select-pagesize {
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  color: #334155;
+  font-size: 0.85rem;
+  outline: none;
+}
+
+.dt-pagination-btns {
   display: flex;
   gap: 6px;
   align-items: center;
 }
 
-.datatable-footer button {
+.dt-pagination-btns button {
   padding: 6px 10px;
-  border-radius: 10px;
+  border-radius: 8px;
   border: 1px solid #e2e8f0;
   background: #fff;
+  color: #334155;
+  font-size: 0.85rem;
   cursor: pointer;
-  transition: background-color 0.12s ease, transform 0.12s ease;
+  transition: all 0.2s ease;
 }
 
-.datatable-footer button:hover:not(:disabled) {
+.dt-pagination-btns button:hover:not(:disabled) {
   background: #f8fafc;
   transform: translateY(-1px);
 }
 
-.datatable-footer button:disabled {
+.dt-pagination-btns button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+  background-color: #f1f5f9;
 }
 
-.datatable-footer select {
-  padding: 6px 10px;
-  border-radius: 10px;
-  border: 1px solid #e2e8f0;
-  background: #fff;
+.page-indicator {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #0f172a;
+  padding: 0 4px;
 }
 
-.dt-modal-backdrop {
+/* ==============================================================
+   5. MODAL FLUTUANTE (OVERLAY E CONFIRMAÇÃO)
+   ============================================================== */
+.dt-modal-overlay {
   position: fixed;
-  inset: 0;
-  background: rgba(15, 23, 42, 0.55);
+  inset: 0; /* Equivalente a top:0, left:0, right:0, bottom:0 */
+  background: rgba(15, 23, 42, 0.65);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 16px;
-  z-index: 999;
+  z-index: 9999; /* Força sobreposição absoluta */
+  backdrop-filter: blur(2px);
 }
 
 .dt-modal {
-  width: min(520px, 100%);
-  background: #fff;
-  border-radius: 16px;
+  width: 100%;
+  max-width: 420px;
+  background: #ffffff;
+  border-radius: 12px;
   border: 1px solid #e2e8f0;
-  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.25);
-  padding: 16px 16px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  padding: 24px;
+  animation: dt-modal-pop 0.2s ease-out;
 }
 
-.dt-modal-title {
-  font-size: 16px;
-  font-weight: 900;
+.dt-modal h3 {
+  margin-top: 0;
   color: #0f172a;
-}
-
-.dt-modal-text {
-  margin-top: 8px;
-  color: #334155;
-  font-size: 13px;
-  line-height: 1.35;
-}
-
-.dt-modal-error {
-  margin-top: 12px;
-  padding: 10px 12px;
-  border-radius: 12px;
-  border: 1px solid #fecaca;
-  background: #fee2e2;
-  color: #7f1d1d;
-  font-weight: 700;
-  font-size: 13px;
-}
-
-.dt-modal-actions {
-  margin-top: 14px;
-  display: flex;
-  gap: 10px;
-  justify-content: flex-end;
-  flex-wrap: wrap;
-}
-
-.dt-modal-actions button {
-  padding: 10px 14px;
-  border-radius: 12px;
-  border: 1px solid #e2e8f0;
-  background: #fff;
-  cursor: pointer;
+  font-size: 1.25rem;
   font-weight: 800;
+  margin-bottom: 12px;
 }
 
-.dt-modal-actions button:disabled {
+.dt-modal p {
+  color: #475569;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin-bottom: 24px;
+}
+
+.dt-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.dt-modal-footer button {
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+
+.btn-cancel {
+  background-color: #f1f5f9;
+  color: #475569;
+}
+
+.btn-cancel:hover:not(:disabled) {
+  background-color: #e2e8f0;
+}
+
+.btn-confirm-delete {
+  background-color: #ef4444;
+  color: white;
+}
+
+.btn-confirm-delete:hover:not(:disabled) {
+  background-color: #dc2626;
+}
+
+.btn-confirm-delete:disabled,
+.btn-cancel:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
-.dt-modal-actions .dt-modal-danger {
-  border-color: rgba(220, 38, 38, 0.35);
-  background: rgba(220, 38, 38, 0.10);
-  color: #b91c1c;
+@keyframes dt-modal-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
+/* ==============================================================
+   6. TRATAMENTO DE ERROS GLOBAIS DA TABELA
+   ============================================================== */
 .dt-global-error {
   background-color: #fef2f2;
   color: #b91c1c;
   border-left: 4px solid #b91c1c;
   padding: 1rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.5rem;
   font-weight: 600;
   border-radius: 4px;
   font-size: 0.95rem;
   box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }
 
+.dt-error-msg {
+  background-color: #fee2e2;
+  color: #7f1d1d;
+  padding: 10px 12px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  border: 1px solid #fecaca;
+}
+
 /* ========================================================
-   ESTILOS ESPECÍFICOS: MATRIZ DE PERMISSÕES
+   7. ESTILOS ESPECÍFICOS (MATRIZ DE PERMISSÕES)
    ======================================================== */
 .text-center {
   text-align: center !important;
 }
 
-/* Destaca a linha que possui alterações não salvas */
-.dt-row-dirty {
-  background-color: #f0fdf4 !important; /* Fundo levemente verde */
+.dt-row-dirty td {
+  background-color: #f0fdf4 !important;
   transition: background-color 0.3s ease;
 }
 
-/* Checkboxes da tabela */
 .dt-checkbox {
   width: 18px;
   height: 18px;
@@ -303,13 +438,11 @@
   opacity: 0.6;
 }
 
-/* Badge específica para Superadmin */
 .dt-badge-superadmin {
   background-color: #475569;
   color: #ffffff;
 }
 
-/* Botão de salvar da linha */
 .dt-btn-save {
   background-color: #e2e8f0;
   color: #94a3b8;
@@ -322,7 +455,6 @@
   cursor: not-allowed;
 }
 
-/* Estado ativado (quando há edições na linha) */
 .dt-btn-save.is-dirty {
   background-color: #2563eb;
   color: #ffffff;
