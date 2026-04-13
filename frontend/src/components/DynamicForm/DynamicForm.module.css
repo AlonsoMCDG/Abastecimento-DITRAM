@@ -319,3 +319,69 @@
     grid-column: 1 / -1 !important; 
   }
 }
+
+/* Container relativo para o Combobox */
+.comboWrapper {
+  position: relative;
+  width: 100%;
+}
+
+/* Espaço reservado para a setinha */
+.comboInput {
+  padding-right: 32px; 
+  cursor: text;
+}
+
+.comboChevron {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #64748b;
+  font-size: 0.8rem;
+  pointer-events: none;
+}
+
+/* O Dropdown Flutuante (O segredo do visual) */
+.comboDropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  width: 100%;
+  max-height: 220px;
+  overflow-y: auto;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  z-index: 1000; /* Fica por cima de outros inputs */
+  list-style: none;
+  padding: 4px 0;
+  margin: 0;
+}
+
+.comboOption {
+  padding: 10px 14px;
+  font-size: 0.95rem;
+  color: #334155;
+  cursor: pointer;
+  transition: background-color 0.1s ease;
+}
+
+.comboOption:hover {
+  background-color: #f8fafc;
+  color: #2563eb;
+}
+
+.comboSelected {
+  background-color: #eff6ff;
+  color: #1d4ed8;
+  font-weight: 500;
+}
+
+.comboEmpty {
+  color: #94a3b8;
+  text-align: center;
+  padding: 16px;
+  cursor: default;
+}

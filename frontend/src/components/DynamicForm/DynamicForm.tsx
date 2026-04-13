@@ -4,8 +4,8 @@ import { useForm, Controller, type SubmitHandler, type UseFormSetValue, type Def
 import type { FormSchema, FormField } from '../../types/form';
 import styles from './DynamicForm.module.css';
 
-import { AsyncSelect } from './AsyncSelect';
-import { DatalistInput } from './DatalistInput';
+import { SearchableAsyncSelect } from './SearchableAsyncSelect';
+import { SearchableSelect } from './SearchableSelect';
 
 interface DynamicFormProps<T extends FieldValues> {
   title?: string;
@@ -112,11 +112,10 @@ export const DynamicForm = <T extends FieldValues>({
         />
       );
       
-      // Retorna o input com máscara já passado pelo empacotador!
       return wrapWithAddons(maskedInput); 
     }
     
-    // 2. CASO PADRÃO: Campos Nativos (Não Controlados)
+    // 2. CASO PADRÃO: Props base para inputs
     const commonProps = {
       ...register(fieldPath, { required: fieldConfig.required }),
       id: fieldConfig.name,
@@ -125,26 +124,51 @@ export const DynamicForm = <T extends FieldValues>({
       disabled: fieldConfig.disabled,
     };
 
+    // 3. ROTEAMENTO DE COMPONENTES
     switch (fieldConfig.type) {
-      case 'textarea': return <textarea {...commonProps} rows={4} />;
-      case 'checkbox': return <input type="checkbox" {...commonProps} id={fieldConfig.name} />;
+      case 'textarea': 
+        return wrapWithAddons(<textarea {...commonProps} rows={4} />);
+        
+      case 'checkbox': 
+        return <input type="checkbox" {...commonProps} id={fieldConfig.name} />;
+        
+      // Melhoria Pertinente: Agrupamos todas as variações de Select!
       case 'select':
-        if (fieldConfig.endpoint) {
-          return <AsyncSelect field={fieldConfig} control={control} setValue={setValue} register={register} error={errors[fieldConfig.name]} />;
-        } else {
-          return (
-            <select {...commonProps}>
-              <option value="">Selecione...</option>
-              {fieldConfig.options?.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
-            </select>
-          );
-        }
       case 'datalist':
-        return <DatalistInput field={fieldConfig} control={control} setValue={setValue} register={register} error={errors[fieldConfig.name]} />;
+      case 'combobox':
+        const SelectComponent = fieldConfig.endpoint ? (
+          // Se tem endpoint -> Busca da API (SearchableAsyncSelect)
+          <SearchableAsyncSelect
+            field={fieldConfig} 
+            control={control} 
+            setValue={setValue} 
+            register={register} 
+            error={errors[fieldPath]} 
+          />
+        ) : (
+          // Se não tem endpoint (tem options locais) -> Select Customizado Síncrono
+          <Controller
+            key={fieldConfig.name}
+            name={fieldPath}
+            control={control}
+            rules={{ required: fieldConfig.required }}
+            render={({ field: { onChange, value } }) => (
+              <SearchableSelect
+                options={fieldConfig.options || []}
+                value={value ?? ""} 
+                onChange={onChange}
+                placeholder={fieldConfig.placeholder}
+                // Se for readOnly, passamos como disabled para o select customizado não abrir
+                disabled={fieldConfig.disabled || fieldConfig.readOnly} 
+              />
+            )}
+          />
+        );
+        // Retorna o Select já passado pelo empacotador de prefixo/sufixo!
+        return wrapWithAddons(SelectComponent);
+
       default:
         const baseInput = <input type={fieldConfig.type} readOnly={fieldConfig.readOnly} {...commonProps} />;
-        
-        // Retorna o input normal já passado pelo empacotador!
         return wrapWithAddons(baseInput);
     }
   };
