@@ -431,72 +431,52 @@
     "model": "frota.tipoveiculo",
     "pk": 1,
     "fields": {
-      "nome": "ÔNIBUS"
+      "nome": "Ônibus"
     }
   },
   {
     "model": "frota.tipoveiculo",
     "pk": 2,
     "fields": {
-      "nome": "CARRO"
+      "nome": "Carro"
     }
   },
   {
     "model": "frota.tipoveiculo",
     "pk": 3,
     "fields": {
-      "nome": "MOTO"
+      "nome": "Moto"
     }
   },
   {
     "model": "frota.tipoveiculo",
     "pk": 4,
     "fields": {
-      "nome": "CAMINHÃO"
+      "nome": "Caminhão"
     }
   },
   {
     "model": "frota.tipoveiculo",
     "pk": 5,
     "fields": {
-      "nome": "CAMINHONETE"
+      "nome": "Caminhonete"
     }
   },
   {
     "model": "frota.tipoveiculo",
     "pk": 6,
     "fields": {
-      "nome": "MARRUÁ"
+      "nome": "Barco"
     }
   },
   {
     "model": "frota.tipoveiculo",
     "pk": 7,
     "fields": {
-      "nome": "BARCO"
+      "nome": "Van"
     }
   },
-  {
-    "model": "frota.tipoveiculo",
-    "pk": 8,
-    "fields": {
-      "nome": "BALSA"
-    }
-  },
-  {
-    "model": "frota.tipoveiculo",
-    "pk": 9,
-    "fields": {
-      "nome": "FURGÃO"
-    }
-  },
-  {
-    "model": "frota.tipoveiculo",
-    "pk": 10,
-    "fields": {
-      "nome": "AMBULÂNCIA"
-    }
-  },
+
   {
     "model": "frota.veiculo",
     "pk": 1,
@@ -603,7 +583,7 @@
       "tipo_locomocao": "TERRESTRE",
       "capacidade_carga_kg": "10.5",
       "capacidade_pessoas": 20,
-      "tipo_veiculo": 9,
+      "tipo_veiculo": 7,
       "tipo_combustivel": 2,
       "consumo_estimado_combustivel": "15.000",
       "consumo_estimado_oleo": "2.000",
@@ -719,7 +699,7 @@
       "tipo_locomocao": "TERRESTRE",
       "capacidade_carga_kg": "10.5",
       "capacidade_pessoas": 20,
-      "tipo_veiculo": 9,
+      "tipo_veiculo": 7,
       "tipo_combustivel": 3,
       "consumo_estimado_combustivel": "15.000",
       "consumo_estimado_oleo": "2.000",
@@ -795,7 +775,7 @@
       "tipo_locomocao": "TERRESTRE",
       "capacidade_carga_kg": "1200.0",
       "capacidade_pessoas": 4,
-      "tipo_veiculo": 10,
+      "tipo_veiculo": 7,
       "tipo_combustivel": 3,
       "consumo_estimado_combustivel": "10.000",
       "consumo_estimado_oleo": "0.200",
@@ -814,7 +794,7 @@
       "tipo_locomocao": "TERRESTRE",
       "capacidade_carga_kg": "10.5",
       "capacidade_pessoas": 20,
-      "tipo_veiculo": 9,
+      "tipo_veiculo": 7,
       "tipo_combustivel": 3,
       "consumo_estimado_combustivel": "15.000",
       "consumo_estimado_oleo": "2.000",
@@ -890,7 +870,7 @@
       "tipo_locomocao": "FLUVIAL",
       "capacidade_carga_kg": "600.0",
       "capacidade_pessoas": 5,
-      "tipo_veiculo": 7,
+      "tipo_veiculo": 6,
       "tipo_combustivel": 1,
       "consumo_estimado_combustivel": "15.000",
       "consumo_estimado_oleo": "0.500",
@@ -909,7 +889,7 @@
       "tipo_locomocao": "FLUVIAL",
       "capacidade_carga_kg": "1200.0",
       "capacidade_pessoas": 15,
-      "tipo_veiculo": 7,
+      "tipo_veiculo": 6,
       "tipo_combustivel": 1,
       "consumo_estimado_combustivel": "25.000",
       "consumo_estimado_oleo": "1.000",
@@ -928,7 +908,7 @@
       "tipo_locomocao": "FLUVIAL",
       "capacidade_carga_kg": "800.0",
       "capacidade_pessoas": 4,
-      "tipo_veiculo": 7,
+      "tipo_veiculo": 6,
       "tipo_combustivel": 1,
       "consumo_estimado_combustivel": "20.000",
       "consumo_estimado_oleo": "0.800",
@@ -947,7 +927,7 @@
       "tipo_locomocao": "FLUVIAL",
       "capacidade_carga_kg": "5000.0",
       "capacidade_pessoas": 3,
-      "tipo_veiculo": 8,
+      "tipo_veiculo": 6,
       "tipo_combustivel": 2,
       "consumo_estimado_combustivel": "12.000",
       "consumo_estimado_oleo": "2.000",
@@ -1889,7 +1869,7 @@
       "rota": 21,
       "instituicao": 1,
       "tipo_servico": 5,
-      "tipo_veiculo": 7,
+      "tipo_veiculo": 6,
       "tipo_combustivel": 1,
       "quantidade_combustivel": "38.75",
       "quantidade_oleo": "0.00",
@@ -1912,7 +1892,7 @@
       "rota": 6,
       "instituicao": 1,
       "tipo_servico": 1,
-      "tipo_veiculo": 9,
+      "tipo_veiculo": 7,
       "tipo_combustivel": 2,
       "quantidade_combustivel": "45.50",
       "quantidade_oleo": "0.00",
@@ -2004,7 +1984,7 @@
       "rota": 23,
       "instituicao": 1,
       "tipo_servico": 5,
-      "tipo_veiculo": 7,
+      "tipo_veiculo": 6,
       "tipo_combustivel": 1,
       "quantidade_combustivel": "22.00",
       "quantidade_oleo": "0.80",
@@ -2050,7 +2030,7 @@
       "rota": 12,
       "instituicao": 1,
       "tipo_servico": 2,
-      "tipo_veiculo": 9,
+      "tipo_veiculo": 7,
       "tipo_combustivel": 3,
       "quantidade_combustivel": "55.00",
       "quantidade_oleo": "0.00",
@@ -2142,7 +2122,7 @@
       "rota": 16,
       "instituicao": 1,
       "tipo_servico": 1,
-      "tipo_veiculo": 10,
+      "tipo_veiculo": 7,
       "tipo_combustivel": 3,
       "quantidade_combustivel": "60.00",
       "quantidade_oleo": "0.00",
@@ -2165,7 +2145,7 @@
       "rota": 26,
       "instituicao": 1,
       "tipo_servico": 5,
-      "tipo_veiculo": 7,
+      "tipo_veiculo": 6,
       "tipo_combustivel": 1,
       "quantidade_combustivel": "45.00",
       "quantidade_oleo": "1.200",
@@ -2188,7 +2168,7 @@
       "rota": 27,
       "instituicao": 1,
       "tipo_servico": 5,
-      "tipo_veiculo": 7,
+      "tipo_veiculo": 6,
       "tipo_combustivel": 1,
       "quantidade_combustivel": "32.00",
       "quantidade_oleo": "1.00",
@@ -2234,7 +2214,7 @@
       "rota": 20,
       "instituicao": 1,
       "tipo_servico": 5,
-      "tipo_veiculo": 7,
+      "tipo_veiculo": 6,
       "tipo_combustivel": 5,
       "quantidade_combustivel": "50.00",
       "quantidade_oleo": "1.50",
@@ -2257,7 +2237,7 @@
       "rota": 21,
       "instituicao": 1,
       "tipo_servico": 5,
-      "tipo_veiculo": 7,
+      "tipo_veiculo": 6,
       "tipo_combustivel": 1,
       "quantidade_combustivel": "15.00",
       "quantidade_oleo": "0.50",
@@ -2280,7 +2260,7 @@
       "rota": 22,
       "instituicao": 1,
       "tipo_servico": 5,
-      "tipo_veiculo": 7,
+      "tipo_veiculo": 6,
       "tipo_combustivel": 1,
       "quantidade_combustivel": "35.00",
       "quantidade_oleo": "1.00",
@@ -2326,7 +2306,7 @@
       "rota": 29,
       "instituicao": 1,
       "tipo_servico": 5,
-      "tipo_veiculo": 8,
+      "tipo_veiculo": 6,
       "tipo_combustivel": 2,
       "quantidade_combustivel": "42.00",
       "quantidade_oleo": "2.00",
@@ -2349,7 +2329,7 @@
       "rota": 25,
       "instituicao": 1,
       "tipo_servico": 5,
-      "tipo_veiculo": 7,
+      "tipo_veiculo": 6,
       "tipo_combustivel": 1,
       "quantidade_combustivel": "38.00",
       "quantidade_oleo": "1.00",
@@ -2418,7 +2398,7 @@
       "rota": 12,
       "instituicao": 1,
       "tipo_servico": 2,
-      "tipo_veiculo": 9,
+      "tipo_veiculo": 7,
       "tipo_combustivel": 3,
       "quantidade_combustivel": "48.00",
       "quantidade_oleo": "0.00",
@@ -2533,7 +2513,7 @@
       "rota": 16,
       "instituicao": 1,
       "tipo_servico": 1,
-      "tipo_veiculo": 10,
+      "tipo_veiculo": 7,
       "tipo_combustivel": 3,
       "quantidade_combustivel": "55.00",
       "quantidade_oleo": "0.00",
@@ -2556,7 +2536,7 @@
       "rota": 30,
       "instituicao": 1,
       "tipo_servico": 5,
-      "tipo_veiculo": 7,
+      "tipo_veiculo": 6,
       "tipo_combustivel": 1,
       "quantidade_combustivel": "40.00",
       "quantidade_oleo": "0.50",
@@ -2579,7 +2559,7 @@
       "rota": 13,
       "instituicao": 1,
       "tipo_servico": 3,
-      "tipo_veiculo": 8,
+      "tipo_veiculo": 6,
       "tipo_combustivel": 2,
       "quantidade_combustivel": "25.00",
       "quantidade_oleo": "1.00",
