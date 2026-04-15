@@ -1,14 +1,18 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import type { UseFormSetValue } from 'react-hook-form';
+import type { UseFormSetValue, Path, PathValue } from 'react-hook-form';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+
 import { DynamicForm } from '../../../components/DynamicForm/DynamicForm'; 
 import { guiaAbastecimentoFormSchema } from '../../../schemas/guiaAbastecimento.schema';
 import { guiasApi } from '../../../api/operacao/guiasApi';
 import { rotaApi } from '../../../api/frota/rotasApi';
-import type { GuiaAbastecimento } from '../../../types/models';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { ROUTES } from '../../../routes/routes';
 import { veiculosApi } from '../../../api/frota/veiculosApi';
-import styles from '../../../components/DynamicForm/DynamicForm.module.css'
+import { getApiErrorMessage } from '../../../api/config/errorHandlers';
+import { processPdfBlob } from '../../../utils/pdfHandler';
+import { ROUTES } from '../../../routes/routes';
+import type { GuiaAbastecimento } from '../../../types/models';
+
+import styles from '../../../components/DynamicForm/DynamicForm.module.css';
 
 export const GuiaAbastecimentoFormPage: React.FC = () => {
   const navigate = useNavigate();
@@ -16,6 +20,7 @@ export const GuiaAbastecimentoFormPage: React.FC = () => {
   const [searchParams] = useSearchParams();
 
   const [warnings, setWarnings] = useState<Record<string, string>>({});
+  const [globalError, setGlobalError] = useState<string | null>(null);
 
   const [initialValues, setInitialValues] = useState<Partial<GuiaAbastecimento> | undefined>(undefined);
   const [loading, setLoading] = useState(!!id);
@@ -26,7 +31,7 @@ export const GuiaAbastecimentoFormPage: React.FC = () => {
   const submitIntent = useRef<'save' | 'save_print'>('save');
 
   const getLocalISOString = () => {
-    const tzoffset = (new Date()).getTimezoneOffset() * 60000; // offset em milissegundos
+    const tzoffset = (new Date()).getTimezoneOffset() * 60000;
     const localISOTime = (new Date(Date.now() - tzoffset)).toISOString().slice(0, 16);
     return localISOTime;
   };
@@ -50,9 +55,9 @@ export const GuiaAbastecimentoFormPage: React.FC = () => {
           if (dados.data_hora) {
             dados.data_hora = new Date(dados.data_hora).toISOString().slice(0, 16);
           }
-          setInitialValues(res.data);
+          setInitialValues(dados);
         })
-        .catch(err => console.error("Erro ao carregar guia:", err))
+        .catch(err => setGlobalError(getApiErrorMessage(err, "Erro ao carregar a guia. O servidor pode estar inacessível.")))
         .finally(() => setLoading(false));
     } else {
       setInitialValues(defaultValues);
@@ -60,6 +65,8 @@ export const GuiaAbastecimentoFormPage: React.FC = () => {
   }, [id, defaultValues]);
   
   const handleSubmit = async (formData: GuiaAbastecimento) => {
+    setGlobalError(null); // Limpa erros antigos antes de tentar salvar
+    
     try {
       let currentId = id ? Number(id) : null;
       
@@ -70,37 +77,50 @@ export const GuiaAbastecimentoFormPage: React.FC = () => {
         currentId = res.data.id; // Captura o ID da guia que acabou de nascer no banco!
       }
       
-      // Se o usuário clicou no botão "Salvar e Imprimir"
+      // Se a intenção era Salvar e Imprimir
       if (submitIntent.current === 'save_print' && currentId) {
         setIsPrinting(true);
         try {
-          await guiasApi.imprimirPdfDireto(currentId);
+          const response = await guiasApi.obterPdfBlob(currentId);
+          await processPdfBlob(
+            response.data, 
+            `Guia_Abastecimento_${currentId}.pdf`, 
+            'print'
+          );
         } catch(err) {
-          alert("A guia foi salva, mas ocorreu um erro de conexão ao gerar o PDF.");
+          // Captura erro específico da falha do PDF, mas não impede a navegação pois já salvou
+          alert(getApiErrorMessage(err, "A guia foi salva, mas ocorreu um erro ao gerar o PDF."));
         } finally {
           setIsPrinting(false);
         }
-      } else {
-        // Fluxo normal
-        alert('Guia salva com sucesso!');
       }
 
-      // Por padrão, terminada a ação, volta para a listagem
+      // Sucesso: Retorna à lista
       navigate(ROUTES.operacao.guias.list);
     } catch (error) {
-      console.error('Erro ao salvar guia', error);
-      alert('Erro ao salvar. Verifique os dados e tente novamente.');
+      // ✅ CORREÇÃO: Tratamento rigoroso de erro em vez de alert genérico
+      console.error('Erro ao salvar guia:', error);
+      setGlobalError(getApiErrorMessage(error, "Não foi possível salvar a guia. Verifique sua conexão com o servidor."));
+      
+      // Reseta a intenção para evitar bugs se o usuário tentar clicar no botão normal de salvar depois
+      submitIntent.current = 'save';
     }
   };
 
-  // Botão 3: Imprimir a versão que já está no banco sem alterar nada
   const handlePrintOnly = async () => {
     if (!id) return;
+    setGlobalError(null);
     setIsPrinting(true);
     try {
-      await guiasApi.imprimirPdfDireto(Number(id));
+      const response = await guiasApi.obterPdfBlob(Number(id));
+      await processPdfBlob(
+        response.data, 
+        `Guia_Abastecimento_${id}.pdf`, 
+        'print'
+      );
     } catch (err) {
-      alert("Erro ao imprimir PDF.");
+      // Extração de erro detalhada no print
+      setGlobalError(getApiErrorMessage(err, "Falha ao baixar o PDF da guia. O servidor pode estar inativo."));
     } finally {
       setIsPrinting(false);
     }
@@ -110,7 +130,7 @@ export const GuiaAbastecimentoFormPage: React.FC = () => {
   const extraActions = useMemo(() => {
     return (
       <>
-        {/* BOTÃO 2: É um botão de "submit" que altera a intenção de salvar antes de disparar */}
+        {/* É um botão de "submit" que altera a intenção de salvar antes de disparar */}
         <button
           type="submit"
           className={styles.btnSecondary}
@@ -120,7 +140,7 @@ export const GuiaAbastecimentoFormPage: React.FC = () => {
           {isPrinting ? "Gerando PDF..." : "💾 Salvar e Imprimir"}
         </button>
 
-        {/* BOTÃO 3: type="button" é crucial para NÃO acionar a validação e salvamento do form */}
+        {/* type="button" é crucial para NÃO acionar a validação e salvamento do form */}
         {id && (
           <button
             type="button" 
@@ -138,24 +158,23 @@ export const GuiaAbastecimentoFormPage: React.FC = () => {
 
   // Escuta as mudanças do DynamicForm
   const handleValuesChange = async (
-    changedField: { name: string; value: string | number },
+    changedField: { name: Path<GuiaAbastecimento>; value: unknown },
     _currentValues: Partial<GuiaAbastecimento>,
     setValue: UseFormSetValue<GuiaAbastecimento>
   ) => {
     const { name, value } = changedField;
+    const numValue = Number(value) || 0;
     
     // =======================================================
     // BLOCO 1: REGRAS MATEMÁTICAS E AVISOS
     // =======================================================
-
     if (name === 'hodometro_atual' || name === 'hodometro_anterior') {
-      const hodometroAtual = name === 'hodometro_atual' ? Number(value) : Number(_currentValues.hodometro_atual);
-      const hodometroAnterior = name === 'hodometro_anterior' ? Number(value) : Number(_currentValues.hodometro_anterior);
+      const hodometroAtual = name === 'hodometro_atual' ? numValue : Number(_currentValues.hodometro_atual);
+      const hodometroAnterior = name === 'hodometro_anterior' ? numValue : Number(_currentValues.hodometro_anterior);
 
       if (!hodometroAtual || !hodometroAnterior || hodometroAtual <= hodometroAnterior) {
-        setValue('distancia_percorrida', null, { shouldValidate: true, shouldDirty: true });
+        setValue('distancia_percorrida', null as PathValue<GuiaAbastecimento, "distancia_percorrida">, { shouldValidate: true, shouldDirty: true });
         
-        // Remove o aviso se os campos forem limpos
         setWarnings(prev => {
           const next = { ...prev };
           delete next.distancia_percorrida;
@@ -164,18 +183,18 @@ export const GuiaAbastecimentoFormPage: React.FC = () => {
         return; 
       }
 
-      // Calcula e define a distância
       const percorrida = hodometroAtual - hodometroAnterior;
-      setValue('distancia_percorrida', percorrida, { shouldValidate: true, shouldDirty: true });
       
-      // Validação com a Rota (se existir)
+      // ✅ Correção: Usando PathValue para forçar a tipagem sem usar 'as any'
+      setValue('distancia_percorrida', percorrida as PathValue<GuiaAbastecimento, "distancia_percorrida">, { shouldValidate: true, shouldDirty: true });
+      
       const rotaDistancia = Number(_currentValues.rota_distancia_km) || 0;
 
       if (rotaDistancia > 0) {
         const diferenca = percorrida - rotaDistancia;
         const diferencaAbsoluta = Math.abs(diferenca);
 
-        if (diferencaAbsoluta > 2) { // Margem de tolerância de 2km
+        if (diferencaAbsoluta > 2) { 
           const status = diferenca > 0 ? "a mais" : "a menos";
           const formata = (n: number) => n.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
           
@@ -198,19 +217,16 @@ export const GuiaAbastecimentoFormPage: React.FC = () => {
     // VALIDAÇÃO DE COMBUSTÍVEL E ÓLEO
     // =======================================================
     if (name === 'quantidade_combustivel' || name === 'quantidade_oleo') {
-      const valorDigitado = Number(value) || 0;
-      
-      // Descobre qual dos dois estamos avaliando para pegar o gabarito correto
       const isCombustivel = name === 'quantidade_combustivel';
       const chaveGabarito = isCombustivel ? 'rota_consumo_combustivel' : 'rota_consumo_oleo';
       const valorRota = Number(_currentValues[chaveGabarito as keyof GuiaAbastecimento]) || 0;
 
-      if (valorRota > 0 && valorDigitado > 0) {
-        const diferenca = valorDigitado - valorRota;
+      if (valorRota > 0 && numValue > 0) {
+        const diferenca = numValue - valorRota;
         const diferencaAbsoluta = Math.abs(diferenca);
 
-        // Tolerância (ex: avisa se passar de 0.5 Litros de diferença). Ajuste como quiser!
-        if (diferencaAbsoluta > 0.5) { 
+        // Tolerância (ex: avisa se passar de 0.1 Litros de diferença). Ajuste como quiser!
+        if (diferencaAbsoluta > 0.1) { 
           const status = diferenca > 0 ? "a mais" : "a menos";
           const formata = (n: number) => n.toLocaleString('pt-BR', { minimumFractionDigits: 1 });
           
@@ -248,16 +264,14 @@ export const GuiaAbastecimentoFormPage: React.FC = () => {
       try {
         const res = await veiculosApi.buscar(Number(value));
         
-        // Aplica as regras de auto-preenchimento
         if (res.data.tipo_combustivel_id) {
-          setValue('tipo_combustivel_id', res.data.tipo_combustivel_id, { shouldValidate: true });
+          setValue('tipo_combustivel_id', res.data.tipo_combustivel_id as PathValue<GuiaAbastecimento, "tipo_combustivel_id">, { shouldValidate: true });
         }
         if (res.data.tipo_veiculo_id) {
-          console.log("Tipo veiculo, id=",res.data.tipo_veiculo_id, "display=", res.data.tipo_veiculo_nome)
-          setValue('tipo_veiculo_id', res.data.tipo_veiculo_id, { shouldValidate: true });
+          setValue('tipo_veiculo_id', res.data.tipo_veiculo_id as PathValue<GuiaAbastecimento, "tipo_veiculo_id">, { shouldValidate: true });
         }
         if (res.data.hodometro_atual) {
-          setValue('hodometro_anterior', res.data.hodometro_atual, { shouldValidate: true });
+          setValue('hodometro_anterior', res.data.hodometro_atual as PathValue<GuiaAbastecimento, "hodometro_anterior">, { shouldValidate: true });
         }
       } catch (err) {
         console.error("Erro ao buscar veículo", err);
@@ -271,26 +285,26 @@ export const GuiaAbastecimentoFormPage: React.FC = () => {
         try {
           const res = await rotaApi.buscar(Number(value));
 
-          // 2. Salva a distância oficial da rota num campo oculto para o cálculo acima
+          // Salva a distância oficial da rota num campo oculto para o cálculo acima
           if (res.data.distancia_km) {
-            setValue('rota_distancia_km' as any, Number(res.data.distancia_km));
+            setValue('rota_distancia_km' as Path<GuiaAbastecimento>, Number(res.data.distancia_km) as PathValue<GuiaAbastecimento, Path<GuiaAbastecimento>>);
           }
           if (res.data.instituicao_id) {
-            setValue('instituicao_id', res.data.instituicao_id, { shouldValidate: true });
+            setValue('instituicao_id', res.data.instituicao_id as PathValue<GuiaAbastecimento, "instituicao_id">, { shouldValidate: true });
           }
 
           // SALVANDO O GABARITO E AUTO-PREENCHENDO O COMBUSTÍVEL
           if (res.data.consumo_estimado_combustivel) {
             const combustivelEstimado = Number(res.data.consumo_estimado_combustivel);
-            setValue('rota_consumo_combustivel', combustivelEstimado);
-            setValue('quantidade_combustivel', combustivelEstimado, { shouldValidate: true });
+            setValue('rota_consumo_combustivel' as Path<GuiaAbastecimento>, combustivelEstimado as PathValue<GuiaAbastecimento, Path<GuiaAbastecimento>>);
+            setValue('quantidade_combustivel', combustivelEstimado as PathValue<GuiaAbastecimento, "quantidade_combustivel">, { shouldValidate: true });
           }
           
           // SALVANDO O GABARITO E AUTO-PREENCHENDO O ÓLEO
           if (res.data.consumo_estimado_oleo) {
             const oleoEstimado = Number(res.data.consumo_estimado_oleo);
-            setValue('rota_consumo_oleo', oleoEstimado);
-            setValue('quantidade_oleo', oleoEstimado, { shouldValidate: true });
+            setValue('rota_consumo_oleo' as Path<GuiaAbastecimento>, oleoEstimado as PathValue<GuiaAbastecimento, Path<GuiaAbastecimento>>);
+            setValue('quantidade_oleo', oleoEstimado as PathValue<GuiaAbastecimento, "quantidade_oleo">, { shouldValidate: true });
           }
         } catch (err) {
           console.error('Erro ao buscar detalhes da rota', err);
@@ -302,17 +316,20 @@ export const GuiaAbastecimentoFormPage: React.FC = () => {
   if (loading) return <div>Carregando dados...</div>;
 
   return (
-    <DynamicForm 
-      title={id ? "Editar Guia de Abastecimento" : "Nova Guia de Abastecimento"}
-      subtitle={id ? `Editando registro #${id}` : "Preencha os dados para gerar uma nova guia."}
-      schema={guiaAbastecimentoFormSchema}
-      initialValues={initialValues}
-      warnings={warnings}
-      onValuesChange={handleValuesChange}
-      onSubmit={handleSubmit}
-      submitLabel="💾 Salvar Guia"
-      onCancel={() => navigate(ROUTES.frota.rotas.list)}
-      extraActions={extraActions}
-    />
+    <div style={{ paddingBottom: "2rem" }}>
+      <DynamicForm<GuiaAbastecimento> 
+        title={id ? "Editar Guia de Abastecimento" : "Nova Guia de Abastecimento"}
+        subtitle={id ? `Editando registro #${id}` : "Preencha os dados para gerar uma nova guia."}
+        schema={guiaAbastecimentoFormSchema}
+        initialValues={initialValues}
+        warnings={warnings}
+        globalError={globalError}
+        onValuesChange={handleValuesChange}
+        onSubmit={handleSubmit}
+        submitLabel="💾 Salvar Guia"
+        onCancel={() => navigate(ROUTES.operacao.guias.list)}
+        extraActions={extraActions}
+      />
+    </div>
   );
 };

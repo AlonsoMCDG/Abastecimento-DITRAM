@@ -26,6 +26,7 @@ interface DynamicFormProps<T extends FieldValues> {
     setValue: UseFormSetValue<T>
   ) => void;
   warnings?: Record<string, string>;
+  globalError?: string | null; // Recebe o erro da página
   submitLabel?: string; 
   onSubmit: SubmitHandler<T>;
   cancelLabel?: string;
@@ -41,6 +42,7 @@ export const DynamicForm = <T extends FieldValues>({
   onSubmit,
   onValuesChange,
   warnings = {},
+  globalError = null,
   submitLabel = "Salvar",
   cancelLabel = "Cancelar",
   onCancel,
@@ -72,7 +74,6 @@ export const DynamicForm = <T extends FieldValues>({
       // Não usar type === 'change', para aceitar os setValues dos custom components
       if (name && onValuesChange) {
         const fieldName = name as Path<T>;
-        // Extração segura do valor sem usar "as any"
         const fieldValue = value[name as keyof typeof value]; 
         
         onValuesChange(
@@ -105,7 +106,6 @@ export const DynamicForm = <T extends FieldValues>({
 
     // Campos com Máscara (Controlados)
     if (fieldConfig.mask) {
-      // Tipagem segura para as propriedades da máscara
       const maskProps: Record<string, unknown> = typeof fieldConfig.mask === 'object' 
         ? fieldConfig.mask 
         : { mask: fieldConfig.mask };
@@ -179,7 +179,6 @@ export const DynamicForm = <T extends FieldValues>({
                 value={(value as string | number) ?? ""} 
                 onChange={onChange}
                 placeholder={fieldConfig.placeholder}
-                // Se for readOnly, passamos como disabled para o select customizado não abrir
                 disabled={fieldConfig.disabled || fieldConfig.readOnly} 
               />
             )}
@@ -218,6 +217,13 @@ export const DynamicForm = <T extends FieldValues>({
           {title && <h1 className={styles.layoutTitle}>{title}</h1>}
           {subtitle && <p className={styles.layoutSubtitle}>{subtitle}</p>}
         </header>
+      )}
+
+      {/* RENDERIZAÇÃO DO ERRO GLOBAL */}
+      {globalError && (
+        <div className={styles.globalError}>
+          ⚠️ {globalError}
+        </div>
       )}
 
       <form onSubmit={handleSubmit(onSubmit)} onKeyDown={handleFormKeyDown} className={styles.formContainer}>
@@ -272,7 +278,6 @@ export const DynamicForm = <T extends FieldValues>({
                 </label>
               )}
 
-              {/* Mensagens de erro dinâmicas do react-hook-form */}
               {hasError ? (
                 <span className={styles.error}>{errorMessage}</span>
               ) : (
