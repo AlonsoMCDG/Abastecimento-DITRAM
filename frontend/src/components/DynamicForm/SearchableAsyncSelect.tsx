@@ -74,15 +74,19 @@ export const SearchableAsyncSelect = <T extends FieldValues>({
   // 2. SINCRONIA VISUAL (ID salvo -> Label na tela)
   useEffect(() => {
     if (currentValue === undefined || currentValue === null || currentValue === '') {
-      setSearchTerm('');
+      if (!isOpen) setSearchTerm('');
       return;
     }
 
     const matchedOption = options.find(opt => String(opt.value) === String(currentValue));
-    if (matchedOption && !isOpen) {
-      setSearchTerm(matchedOption.label);
+    
+    if (matchedOption) {
+      if (!isOpen) setSearchTerm(matchedOption.label);
+    } else if (field.creatable) {
+      // SE FOR CREATABLE: O próprio valor digitado e salvo atua como label
+      if (!isOpen) setSearchTerm(String(currentValue));
     }
-  }, [currentValue, options, isOpen]);
+  }, [currentValue, options, isOpen, field.creatable]);
 
   // 3. LIMPEZA EM CASCATA
   useEffect(() => {
@@ -96,18 +100,29 @@ export const SearchableAsyncSelect = <T extends FieldValues>({
     }
   }, [parentValue, field.dependsOn, fieldPath, setValue]);
 
-  // 4. CLICK OUTSIDE
+  // 4. CLICK OUTSIDE INTELIGENTE
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
         setIsOpen(false);
         const matched = options.find(opt => String(opt.value) === String(currentValue));
-        setSearchTerm(matched ? matched.label : '');
+        
+        if (!matched) {
+          if (field.creatable && searchTerm.trim() !== '') {
+            // SE FOR CREATABLE: Salva o texto livre se o usuário clicar fora
+            setValue(fieldPath, searchTerm.trim() as PathValue<T, Path<T>>, { shouldValidate: true, shouldDirty: true });
+          } else {
+            // Limpa se clicou fora e não selecionou nada
+            setSearchTerm('');
+          }
+        } else {
+          setSearchTerm(matched.label);
+        }
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [currentValue, options]);
+  }, [currentValue, options, searchTerm, field.creatable, fieldPath, setValue]);
 
   // 5. FILTRAGEM LOCAL
   const filteredOptions = useMemo(() => {
@@ -118,11 +133,14 @@ export const SearchableAsyncSelect = <T extends FieldValues>({
     );
   }, [options, searchTerm]);
 
-  const handleSelect = (opt: Option) => {
-    setSearchTerm(opt.label);
-    setValue(fieldPath, opt.value as PathValue<T, Path<T>>, { shouldValidate: true, shouldDirty: true });
+  const handleSelect = (valueToSave: string | number, labelToShow: string) => {
+    setSearchTerm(labelToShow);
+    setValue(fieldPath, valueToSave as PathValue<T, Path<T>>, { shouldValidate: true, shouldDirty: true });
     setIsOpen(false);
   };
+
+  // Verifica se o texto digitado já corresponde exatamente a uma opção existente
+  const hasExactMatch = options.some(opt => opt.label.toLowerCase() === searchTerm.trim().toLowerCase());
 
   return (
     <div className={styles.comboWrapper} ref={wrapperRef}>
@@ -141,24 +159,39 @@ export const SearchableAsyncSelect = <T extends FieldValues>({
       
       <span className={styles.comboChevron}>{isOpen ? "▲" : "▼"}</span>
 
+      {/* Input oculto que realmente guarda o valor/id para o React Hook Form */}
       <input type="hidden" {...register(fieldPath, { required: field.required })} />
 
       {isOpen && (
         <ul className={styles.comboDropdown}>
-          {filteredOptions.length > 0 ? (
-            filteredOptions.map((opt) => (
-              <li
-                key={opt.value}
-                className={`${styles.comboOption} ${String(opt.value) === String(currentValue) ? styles.comboSelected : ''}`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleSelect(opt);
-                }}
-              >
-                {opt.label}
-              </li>
-            ))
-          ) : (
+          {filteredOptions.map((opt) => (
+            <li
+              key={opt.value}
+              className={`${styles.comboOption} ${String(opt.value) === String(currentValue) ? styles.comboSelected : ''}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleSelect(opt.value, opt.label);
+              }}
+            >
+              {opt.label}
+            </li>
+          ))}
+
+          {/* OPÇÃO "CRIAR NOVO": Aparece se for creatable e não houver match exato */}
+          {field.creatable && searchTerm.trim() !== '' && !hasExactMatch && (
+            <li
+              className={`${styles.comboOption} ${styles.comboOptionCreatable}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                // Salva a própria string como valor
+                handleSelect(searchTerm.trim(), searchTerm.trim());
+              }}
+            >
+              ➕ Usar "{searchTerm.trim()}" (Nova rota)
+            </li>
+          )}
+
+          {filteredOptions.length === 0 && !field.creatable && (
             <li className={styles.comboEmpty}>Nenhum resultado</li>
           )}
         </ul>

@@ -69,11 +69,16 @@ class Rota(models.Model):
         verbose_name="Consumo Estimado (Óleo)"
     )
 
-    detalhes = models.CharField(max_length=256)
+    detalhes = models.CharField(
+        max_length=256, 
+        blank=True, 
+        null=True
+    )
     
     tipo_locomocao = models.CharField(
         max_length=50,
-        choices=TIPO_LOCOMOCAO_CHOICES
+        choices=TIPO_LOCOMOCAO_CHOICES,
+        default='TERRESTRE'
     )
 
     secretaria = models.ForeignKey(
@@ -95,7 +100,7 @@ class Rota(models.Model):
     ativa = models.BooleanField(default=True)
 
     def __str__(self):
-        return self.descricao
+        return self.nome
 
     class Meta:
         verbose_name = "Rota"

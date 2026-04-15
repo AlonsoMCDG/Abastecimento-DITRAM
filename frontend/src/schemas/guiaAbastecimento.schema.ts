@@ -77,6 +77,7 @@ export const guiaAbastecimentoFormSchema: FormSchema = {
       placeholder: 'Selecione ou digite uma nova rota...',
       colSpan: 3,
       required: true,
+      creatable: true,
     },
     {
       name: 'instituicao_id',

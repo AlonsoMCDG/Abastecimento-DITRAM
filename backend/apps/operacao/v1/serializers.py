@@ -120,6 +120,36 @@ class OperadorVeiculoLookupSerializer(serializers.ModelSerializer):
 
 # --- SERIALIZERS DE GUIA (ABASTECIMENTO) ---
 
+class CreatableRotaField(serializers.PrimaryKeyRelatedField):
+    """
+    Campo inteligente: Aceita um ID numérico (opção existente) ou 
+    uma String (texto livre). Se for String, cria a Rota automaticamente.
+    """
+    def to_internal_value(self, data):
+        # Ignora nulos e vazios, passando para a validação padrão (allow_null=True)
+        if data in [None, '', 'null']:
+            return super().to_internal_value(data)
+            
+        try:
+            # 1. TENTATIVA PADRÃO: Verifica se o valor recebido é um ID numérico
+            # Se for, deixa o DRF validar se essa rota existe no banco
+            int(data)
+            return super().to_internal_value(data)
+            
+        except (ValueError, TypeError):
+            # 2. FALLBACK: Se falhou ao converter para int, é um texto livre (Rota Nova)
+            if isinstance(data, str) and data.strip():
+                nome_digitado = data.strip()
+                
+                # Procura uma rota com esse nome exato ou cria uma nova
+                nova_rota, created = Rota.objects.get_or_create(nome=nome_digitado)
+                
+                # Retorna a instância da Rota para ser salva na Guia
+                return nova_rota
+            
+            # Se for outro tipo de dado bizarro (ex: uma lista ou dict), levanta erro padrão
+            self.fail('incorrect_type', data_type=type(data).__name__)
+
 class GuiaReadSerializer(serializers.ModelSerializer):
     # ==========================================
     # TRADUÇÃO DE CHAVES ESTRANGEIRAS PARA O FRONTEND
@@ -185,8 +215,7 @@ class GuiaWriteSerializer(serializers.ModelSerializer):
     tipo_veiculo_id = serializers.PrimaryKeyRelatedField(source='tipo_veiculo', queryset=TipoVeiculo.objects.all())
     tipo_combustivel_id = serializers.PrimaryKeyRelatedField(source='tipo_combustivel', queryset=TipoCombustivel.objects.all())
     
-    # Rota é opcional no model (null=True), então o serializer deve refletir isso
-    rota_id = serializers.PrimaryKeyRelatedField(
+    rota_id = CreatableRotaField(
         source='rota', queryset=Rota.objects.all(), required=False, allow_null=True
     )
 

@@ -47,6 +47,7 @@ export interface FormField {
   suffix?: string | React.ReactNode;  // (Ex: R$, Kg, m²)
   mask?: any;
   visibleIf?: (values: any) => boolean;
+  creatable?: boolean; // Permite digitar texto livre no combobox
 }
 
 export interface FormSchema {
