@@ -87,6 +87,7 @@ export const guiaAbastecimentoFormSchema: FormSchema = {
       placeholder: 'Selecione uma instituição...',
       colSpan: 3,
       required: true,
+      creatable: true,
     },
     {
       name: 'hodometro_atual',

@@ -121,6 +121,20 @@ class OperadorVeiculoLookupSerializer(serializers.ModelSerializer):
 
 # --- SERIALIZERS DE GUIA (ABASTECIMENTO) ---
 
+
+class CreatableInstituicaoField(serializers.PrimaryKeyRelatedField):
+    def to_internal_value(self, data):
+        if data in [None, '', 'null']:
+            return super().to_internal_value(data)
+        try:
+            int(data)
+            return super().to_internal_value(data)
+        except (ValueError, TypeError):
+            if isinstance(data, str) and data.strip():
+                # Cria a instituição apenas com o nome
+                instituicao, _ = Instituicao.objects.get_or_create(nome=data.strip())
+                return instituicao
+            self.fail('incorrect_type', data_type=type(data).__name__)
 class CreatableRotaField(serializers.PrimaryKeyRelatedField):
     """
     Campo inteligente: Aceita um ID numérico (opção existente) ou 
@@ -145,14 +159,21 @@ class CreatableRotaField(serializers.PrimaryKeyRelatedField):
                 request = self.context.get('request')
                 payload = request.data if request else {}
 
+                # Resolvemos a Instituição antes de configurar os defaults da Rota
+                instituicao_raw = payload.get('instituicao_id')
+                instituicao_obj = None
+
+                if instituicao_raw:
+                    if str(instituicao_raw).isdigit():
+                        instituicao_obj = Instituicao.objects.filter(id=instituicao_raw).first()
+                    else:
+                        # Se for string, cria/recupera agora para ter o objeto pronto
+                        instituicao_obj, _ = Instituicao.objects.get_or_create(nome=str(instituicao_raw).strip())
+
                 # Função segura para converter as strings com vírgula do frontend
-                def safe_decimal(value):
-                    if not value: return Decimal('0.00')
-                    try:
-                        # Troca vírgula por ponto caso a máscara tenha enviado assim
-                        return Decimal(str(value).replace(',', '.'))
-                    except InvalidOperation:
-                        return Decimal('0.00')
+                def safe_decimal(v):
+                    try: return Decimal(str(v).replace(',', '.')) if v else Decimal('0.00')
+                    except: return Decimal('0.00')
                 
                 # Extrai Combustível e Óleo
                 qtd_combustivel = safe_decimal(payload.get('quantidade_combustivel'))
@@ -161,7 +182,7 @@ class CreatableRotaField(serializers.PrimaryKeyRelatedField):
                 # Extrai Hodômetros e calcula a distância
                 hodo_atual = safe_decimal(payload.get('hodometro_atual'))
                 hodo_anterior = safe_decimal(payload.get('hodometro_anterior'))
-                distancia_calculada = hodo_atual - hodo_anterior
+                distancia_calculada = max(0, hodo_atual - hodo_anterior)
 
                 # Define os dados padrão (defaults) para quando a rota for NOVA
                 defaults = {
@@ -170,12 +191,8 @@ class CreatableRotaField(serializers.PrimaryKeyRelatedField):
                     'detalhes': "Rota criada automaticamente na emissão da guia.",
                     'tipo_locomocao': 'TERRESTRE', 
                     'secretaria_id': payload.get('secretaria_id'),
-                    'instituicao_id': payload.get('instituicao_id'),
+                    'instituicao_id': instituicao_obj,
                 }
-
-                # Se a distância calculada for válida (maior que zero), adicionamos ao default
-                if distancia_calculada > 0:
-                    defaults['distancia_km'] = distancia_calculada
 
                 # Busca ou Cria a Rota. Se criar, usa os defaults
                 nova_rota, created = Rota.objects.get_or_create(
