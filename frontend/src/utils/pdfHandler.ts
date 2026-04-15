@@ -3,60 +3,77 @@ export async function processPdfBlob(
   filename: string,
   action: 'open' | 'print'
 ) {
-  const file = new File([pdfBlob], filename, { type: 'application/pdf' });
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
   const blobUrl = URL.createObjectURL(pdfBlob);
 
-  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-
   // =========================================================
-  // FLUXO 1: É CELULAR (Mobile)
-  // =========================================================
-  if (isMobile) {
-    // Tenta a Web Share API. A gaveta do celular já possui a opção "Imprimir" nativa.
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      try {
-        await navigator.share({ files: [file], title: filename });
-        return;
-      } catch (error: any) {
-        if (error.name !== 'AbortError') console.warn("Share API falhou", error);
-      }
-    }
-    
-    // Fallback: Se o celular for muito antigo, força o download.
-    const link = document.createElement('a');
-    link.href = blobUrl;
-    link.download = filename;
-    link.click();
-    return;
-  }
-
-  // =========================================================
-  // FLUXO 2: É COMPUTADOR (Desktop)
+  // FLUXO 1: AÇÃO DE IMPRIMIR (Funciona no PC e no Celular)
   // =========================================================
   if (action === 'print') {
-    // IMPRIMIR DIRETO: Cria um iframe invisível, injeta o PDF e chama a impressora
     const iframe = document.createElement('iframe');
-    iframe.style.display = 'none';
+    
+    // TRUQUE DE MESTRE PARA CELULAR (Especialmente iOS Safari):
+    // Nunca use 'display: none', senão o celular imprime uma folha em branco.
+    // Usamos position absolute e tamanho zero para esconder o iframe na tela.
+    iframe.style.position = 'absolute';
+    iframe.style.width = '0px';
+    iframe.style.height = '0px';
+    iframe.style.border = 'none';
     iframe.src = blobUrl;
+    
     document.body.appendChild(iframe);
     
     iframe.onload = () => {
-      iframe.contentWindow?.print();
-      // Remove o iframe invisível da memória após 5 segundos
-      setTimeout(() => document.body.removeChild(iframe), 5000);
+      try {
+        iframe.contentWindow?.focus();
+        // Dispara a tela de impressão nativa do SO (iOS, Android, Windows, Mac)
+        iframe.contentWindow?.print(); 
+      } catch (e) {
+        console.error("Falha ao abrir a tela de impressão", e);
+        // Fallback de segurança se o navegador barrar o print via iframe
+        if (isMobile) window.location.assign(blobUrl);
+      }
+      
+      // Limpa a memória após 5 minutos (tempo de folga enquanto o usuário configura a impressora)
+      setTimeout(() => {
+        if (document.body.contains(iframe)) {
+          document.body.removeChild(iframe);
+        }
+        URL.revokeObjectURL(blobUrl);
+      }, 300000); 
     };
-    return;
-  } 
-  
-  if (action === 'open') {
-    // ABRIR EM NOVA ABA
-    const pdfWindow = window.open(blobUrl, '_blank');
-    if (!pdfWindow) {
-      // Ocorreu bloqueio severo de Pop-up. Força o download como plano B.
-      const link = document.createElement('a');
-      link.href = blobUrl;
-      link.download = filename;
-      link.click();
-    }
+    
+    return; // Encerra aqui se a ação for de imprimir
   }
+
+  // =========================================================
+  // FLUXO 2: AÇÃO DE VISUALIZAR (Open)
+  // =========================================================
+  if (isMobile) {
+    // Para mobile, navegar para o PDF evita avisos de vírus
+    const newTab = window.open(blobUrl, '_blank');
+
+    if (!newTab) {
+      // Se bloqueou popup, navega na aba atual (o usuário clica em Voltar depois)
+      window.location.assign(blobUrl);
+    }
+    
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
+    return;
+  }
+
+  // Fluxo de visualizar no PC
+  const pdfWindow = window.open(blobUrl, '_blank');
+  
+  if (!pdfWindow) {
+    // Fallback: bloqueio de pop-up agressivo no PC força download limpo
+    const link = document.createElement('a');
+    link.href = blobUrl;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+  
+  setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
 }
