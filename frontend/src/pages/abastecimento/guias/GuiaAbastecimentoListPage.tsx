@@ -127,11 +127,12 @@ export default function GuiaAbastecimentoListPage() {
         onClose={() => setViewItem(null)}
         data={viewItem}
         schema={guiaViewSchema}
+        onEdit={(item) => navigate(ROUTES.operacao.guias.edit(item.id!))}
         footerActions={(item) => (
           <button 
             className="dt-btn pdf dt-btn-text" 
             onClick={() => handlePdfAction(item.id, 'print')}
-          >
+            >
             🖨️ Gerar PDF para Impressão
           </button>
         )}
