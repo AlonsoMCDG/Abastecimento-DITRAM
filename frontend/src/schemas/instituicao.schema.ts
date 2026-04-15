@@ -1,5 +1,7 @@
 import type { FormSchema, TableSchema } from "../types/form";
 import { ENDPOINTS } from "../api/config/endpoints";
+import type { Instituicao } from "../types/models";
+import type { ViewSchema } from "../types/views";
 
 // --------------------------------------------------------
 // FORMULÁRIO DE CRIAÇÃO / EDIÇÃO
@@ -72,5 +74,16 @@ export const instituicaoListSchema: TableSchema = {
       sortKey: "ativo",
       format: (val: boolean) => val ? '✅ Ativa' : '❌ Inativa'
     }
+  ]
+};
+
+// --------------------------------------------------------
+// MODAL DE QUICK VIEW
+// --------------------------------------------------------
+export const instituicaoViewSchema: ViewSchema<Instituicao> = {
+  title: (item) => `Instituição #${item.id}`,
+  fields: [
+    { label: 'Nome', key: 'nome', fullWidth: true },
+    { label: 'Ativo', render: (item) => `${item.ativo ? 'Sim' : 'Não'}` },
   ]
 };

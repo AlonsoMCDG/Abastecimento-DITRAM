@@ -9,11 +9,10 @@ import { Can } from "../../../components/auth/Can";
 import { getApiErrorMessage } from "../../../api/config/errorHandlers";
 
 import type { Instituicao } from "../../../types/models";
-import { instituicaoListSchema } from "../../../schemas/instituicao.schema";
+import { instituicaoListSchema, instituicaoViewSchema } from "../../../schemas/instituicao.schema";
 
 import "../../../assets/css/ListPage.css";
 import { QuickViewModal } from "../../../components/QuickViewModal";
-import { instituicaoViewSchema } from "../../../schemas/tipoServico.schema";
 
 export default function InstituicaoListPage() {
   const navigate = useNavigate();
