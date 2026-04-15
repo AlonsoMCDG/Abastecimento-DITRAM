@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { authApi } from '../../api/config/authApi';
 import { useAuth } from '../../auth/AuthContext';
 import { isAuthenticated } from '../../auth/auth';
