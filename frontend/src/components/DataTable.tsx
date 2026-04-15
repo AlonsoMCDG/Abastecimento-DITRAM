@@ -57,7 +57,7 @@ export default function DataTable<T extends { id: number }>({
   const [deleteError, setDeleteError] = useState("");
   const [actionLoading, setActionLoading] = useState<{ id: number, action: string } | null>(null);
 
-  const hasActions = Boolean(onPdf || canEdit || canDelete);
+  const hasActions = Boolean(onPdf || onView || canEdit || canDelete);
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
