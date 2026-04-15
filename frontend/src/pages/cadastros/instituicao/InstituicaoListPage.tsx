@@ -12,6 +12,8 @@ import type { Instituicao } from "../../../types/models";
 import { instituicaoListSchema } from "../../../schemas/instituicao.schema";
 
 import "../../../assets/css/ListPage.css";
+import { QuickViewModal } from "../../../components/QuickViewModal";
+import { instituicaoViewSchema } from "../../../schemas/tipoServico.schema";
 
 export default function InstituicaoListPage() {
   const navigate = useNavigate();
@@ -21,6 +23,7 @@ export default function InstituicaoListPage() {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [viewItem, setViewitem] = useState<Instituicao | null>(null);
 
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -91,11 +94,21 @@ export default function InstituicaoListPage() {
         error={errorMessage}
         schema={instituicaoListSchema}
         onParamsChange={fetchInstituicoes}
+        onView={(item) => setViewitem(item)}
         canEdit={hasWritePermission}
         canDelete={hasWritePermission}
         onEdit={(item) => navigate(ROUTES.organizacao.instituicoes.edit(item.id!))}
         onDelete={handleDelete}
         rowClassName={(i) => !i.ativo ? "dt-row-inactive" : ""}
+      />
+
+      <QuickViewModal<Instituicao>
+        isOpen={!!viewItem}
+        onClose={() => setViewitem(null)}
+        data={viewItem}
+        schema={instituicaoViewSchema}
+        onEdit={(item) => navigate(ROUTES.organizacao.instituicoes.edit(item.id!))}
+        canEdit={hasWritePermission}
       />
     </div>
   );

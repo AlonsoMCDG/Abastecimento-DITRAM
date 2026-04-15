@@ -47,10 +47,10 @@ export const tipoServicoListSchema: TableSchema = {
 // --------------------------------------------------------
 // MODAL DE QUICK VIEW
 // --------------------------------------------------------
-export const tipoServicoViewSchema: ViewSchema<TipoServico> = {
-  title: (item) => `Tipo de Serviço #${item.id}`,
+export const instituicaoViewSchema: ViewSchema<TipoServico> = {
+  title: (item) => `Instituição #${item.id}`,
   fields: [
-    { label: 'Serviço', key: 'nome' },
+    { label: 'Nome', key: 'nome' },
     { label: 'Ativo', render: (item) => `${item.ativo ? 'Sim' : 'Não'}` },
   ]
 };
