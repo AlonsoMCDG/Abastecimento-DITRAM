@@ -11,9 +11,10 @@ import { Can } from "../../components/auth/Can";
 import { getApiErrorMessage } from "../../api/config/errorHandlers";
 
 import type { Usuario } from "../../types/models";
-import { usuarioListSchema } from "../../schemas/usuario.schema"; // Importando o schema correto!
+import { usuarioListSchema, usuarioViewSchema } from "../../schemas/usuario.schema"; // Importando o schema correto!
 
 import "../../assets/css/ListPage.css"
+import { QuickViewModal } from "../../components/QuickViewModal";
 
 export default function UsuarioListPage() {
   const navigate = useNavigate();
@@ -23,6 +24,7 @@ export default function UsuarioListPage() {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [viewItem, setViewItem] = useState<Usuario | null>(null);
 
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isAdmin = Boolean(me?.is_staff);
@@ -95,10 +97,19 @@ export default function UsuarioListPage() {
         error={errorMessage} 
         schema={usuarioListSchema} 
         onParamsChange={fetchUsuarios}
+        onView={(item) => setViewItem(item)}
         canEdit={isAdmin}
         canDelete={isAdmin}
         onEdit={(item) => navigate(ROUTES.sistema.usuarios.edit(item.id!))}
         onDelete={handleDelete}
+      />
+      
+      <QuickViewModal<Usuario>
+        isOpen={!!viewItem}
+        onClose={() => setViewItem(null)}
+        data={viewItem}
+        schema={usuarioViewSchema}
+        onEdit={(item) => navigate(ROUTES.sistema.usuarios.edit(item.id!))}
       />
     </div>
   );

@@ -128,6 +128,7 @@ export default function GuiaAbastecimentoListPage() {
         data={viewItem}
         schema={guiaViewSchema}
         onEdit={(item) => navigate(ROUTES.operacao.guias.edit(item.id!))}
+        canEdit={canEdit}
         footerActions={(item) => (
           <button 
             className="dt-btn pdf dt-btn-text" 

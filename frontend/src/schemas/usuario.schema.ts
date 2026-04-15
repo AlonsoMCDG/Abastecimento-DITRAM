@@ -1,4 +1,8 @@
+import { IMask } from "react-imask";
 import type { FormSchema, TableSchema } from "../types/form";
+import type { Usuario } from "../types/models";
+import type { ViewSchema } from "../types/views";
+import { MASKS } from "../utils/masks";
 
 // --------------------------------------------------------
 // FORMULÁRIO DE CRIAÇÃO / EDIÇÃO
@@ -70,6 +74,39 @@ export const usuarioListSchema: TableSchema = {
       label: 'Admin',
       sortKey: 'is_staff',
       format: (val: boolean) => val ? '👑 Sim' : 'Usuário',
+    },
+  ]
+};
+
+const formatarCPF = (cpf?: string | null) => {
+  if (!cpf) return "—";
+  
+  // O createPipe processa a string bruta e devolve ela formatada
+  const pipe = IMask.createPipe({ mask: MASKS.CPF });
+  return pipe(String(cpf));
+};
+
+// --------------------------------------------------------
+// MODAL DE QUICK VIEW
+// --------------------------------------------------------
+export const usuarioViewSchema: ViewSchema<Usuario> = {
+  title: (item) => `Usuário #${item.id}`,
+  fields: [
+    { 
+      label: 'Nome', 
+      render: (item) => `${item.first_name} ${item.last_name}`, 
+    },
+    { 
+      label: 'CPF', 
+      render: (item) => formatarCPF(item.cpf)
+    },
+    { 
+      label: 'Email', 
+      key: 'email' 
+    },
+    { 
+      label: 'Papel', 
+      render: (item) => item.is_superuser ? 'Super Admin' : item.is_staff ? 'Admin' : 'Comum'
     },
   ]
 };

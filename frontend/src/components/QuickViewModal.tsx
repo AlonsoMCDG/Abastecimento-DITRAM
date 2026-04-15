@@ -9,6 +9,7 @@ interface QuickViewModalProps<T> {
   schema: ViewSchema<T>;
   footerActions?: (item: T) => React.ReactNode;
   onEdit?: (item: T) => void;
+  canEdit?: boolean;
 }
 
 export function QuickViewModal<T>({
@@ -18,6 +19,7 @@ export function QuickViewModal<T>({
   schema,
   footerActions,
   onEdit,
+  canEdit = false,
 }: QuickViewModalProps<T>) {
   if (!isOpen || !data) return null;
 
@@ -67,7 +69,7 @@ export function QuickViewModal<T>({
           {footerActions && footerActions(data)}
 
           {/* Renderiza o botão padrão de edição se a função for passada */}
-          {onEdit && (
+          {onEdit && canEdit && (
             <button 
               className="dt-btn edit dt-btn-text" 
               onClick={() => onEdit(data)}

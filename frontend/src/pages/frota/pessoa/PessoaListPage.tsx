@@ -109,6 +109,7 @@ export default function PessoaListPage() {
         data={viewItem}
         schema={pessoaViewSchema}
         onEdit={(item) => navigate(ROUTES.pessoas.base.edit(item.id!))}
+        canEdit={hasWritePermission}
       />
     </div>
   );
