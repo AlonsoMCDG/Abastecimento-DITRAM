@@ -5,6 +5,7 @@ from apps.pessoas.models import Pessoa
 from apps.frota.models import Veiculo, Rota, TipoVeiculo, TipoCombustivel
 from apps.organizacao.models import Secretaria, Instituicao
 
+from decimal import Decimal, InvalidOperation
 
 # --- SERIALIZERS DE TipoServico ---
 
@@ -131,18 +132,56 @@ class CreatableRotaField(serializers.PrimaryKeyRelatedField):
             return super().to_internal_value(data)
             
         try:
-            # 1. TENTATIVA PADRÃO: Verifica se o valor recebido é um ID numérico
+            # TENTATIVA PADRÃO: Verifica se o valor recebido é um ID numérico
             # Se for, deixa o DRF validar se essa rota existe no banco
             int(data)
             return super().to_internal_value(data)
-            
         except (ValueError, TypeError):
-            # 2. FALLBACK: Se falhou ao converter para int, é um texto livre (Rota Nova)
+            # FALLBACK: Se falhou ao converter para int, é um texto livre (Rota Nova)
             if isinstance(data, str) and data.strip():
                 nome_digitado = data.strip()
                 
-                # Procura uma rota com esse nome exato ou cria uma nova
-                nova_rota, created = Rota.objects.get_or_create(nome=nome_digitado)
+                # Captura o payload completo enviado pelo React
+                request = self.context.get('request')
+                payload = request.data if request else {}
+
+                # Função segura para converter as strings com vírgula do frontend
+                def safe_decimal(value):
+                    if not value: return Decimal('0.00')
+                    try:
+                        # Troca vírgula por ponto caso a máscara tenha enviado assim
+                        return Decimal(str(value).replace(',', '.'))
+                    except InvalidOperation:
+                        return Decimal('0.00')
+                
+                # Extrai Combustível e Óleo
+                qtd_combustivel = safe_decimal(payload.get('quantidade_combustivel'))
+                qtd_oleo = safe_decimal(payload.get('quantidade_oleo'))
+
+                # Extrai Hodômetros e calcula a distância
+                hodo_atual = safe_decimal(payload.get('hodometro_atual'))
+                hodo_anterior = safe_decimal(payload.get('hodometro_anterior'))
+                distancia_calculada = hodo_atual - hodo_anterior
+
+                # Define os dados padrão (defaults) para quando a rota for NOVA
+                defaults = {
+                    'consumo_estimado_combustivel': qtd_combustivel,
+                    'consumo_estimado_oleo': qtd_oleo,
+                    'detalhes': "Rota criada automaticamente na emissão da guia.",
+                    'tipo_locomocao': 'TERRESTRE', 
+                    'secretaria_id': payload.get('secretaria_id'),
+                    'instituicao_id': payload.get('instituicao_id'),
+                }
+
+                # Se a distância calculada for válida (maior que zero), adicionamos ao default
+                if distancia_calculada > 0:
+                    defaults['distancia_km'] = distancia_calculada
+
+                # Busca ou Cria a Rota. Se criar, usa os defaults
+                nova_rota, created = Rota.objects.get_or_create(
+                    nome=nome_digitado,
+                    defaults=defaults
+                )
                 
                 # Retorna a instância da Rota para ser salva na Guia
                 return nova_rota
