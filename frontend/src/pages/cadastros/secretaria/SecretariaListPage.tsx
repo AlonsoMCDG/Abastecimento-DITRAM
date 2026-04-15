@@ -9,9 +9,10 @@ import { Can } from "../../../components/auth/Can";
 import { getApiErrorMessage } from "../../../api/config/errorHandlers";
 
 import type { Secretaria } from "../../../types/models";
-import { secretariaListSchema } from "../../../schemas/secretaria.schema";
+import { secretariaListSchema, secretariaViewSchema } from "../../../schemas/secretaria.schema";
 
 import "../../../assets/css/ListPage.css";
+import { QuickViewModal } from "../../../components/QuickViewModal";
 
 export default function SecretariaListPage() {
   const navigate = useNavigate();
@@ -21,6 +22,7 @@ export default function SecretariaListPage() {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [viewItem, setViewItem] = useState<Secretaria | null>(null);
 
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -92,11 +94,21 @@ export default function SecretariaListPage() {
         error={errorMessage}
         schema={secretariaListSchema}
         onParamsChange={fetchSecretarias}
+        onView={(item) => setViewItem(item)}
         canEdit={hasWritePermission}
         canDelete={hasWritePermission}
         onEdit={(item) => navigate(ROUTES.organizacao.secretarias.edit(item.id!))}
         onDelete={handleDelete}
         rowClassName={(s) => !s.ativo ? "dt-row-inactive" : ""}
+      />
+
+      <QuickViewModal<Secretaria>
+        isOpen={!!viewItem}
+        onClose={() => setViewItem(null)}
+        data={viewItem}
+        schema={secretariaViewSchema}
+        onEdit={(item) => navigate(ROUTES.organizacao.secretarias.edit(item.id!))}
+        canEdit={hasWritePermission}
       />
     </div>
   );

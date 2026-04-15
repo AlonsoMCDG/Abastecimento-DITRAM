@@ -1,4 +1,6 @@
 import type { FormSchema, TableSchema } from "../types/form";
+import type { Secretaria } from "../types/models";
+import type { ViewSchema } from "../types/views";
 
 // --------------------------------------------------------
 // FORMULÁRIO DE CRIAÇÃO / EDIÇÃO
@@ -52,5 +54,17 @@ export const secretariaListSchema: TableSchema = {
       sortKey: "ativo",
       format: (val: boolean) => val ? '✅ Ativa' : '❌ Inativa'
     }
+  ]
+};
+
+// --------------------------------------------------------
+// MODAL DE QUICK VIEW
+// --------------------------------------------------------
+export const secretariaViewSchema: ViewSchema<Secretaria> = {
+  title: (item) => `Secretaria #${item.id}`,
+  fields: [
+    { label: 'Nome', key: 'nome', fullWidth: true},
+    { label: 'Sigla', key: 'sigla' },
+    { label: 'Ativo', render: (item) => `${item.ativo ? 'Sim' : 'Não'}` },
   ]
 };
