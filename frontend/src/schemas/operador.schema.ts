@@ -1,5 +1,7 @@
 import type { FormSchema, TableSchema } from "../types/form";
 import { ENDPOINTS } from "../api/config/endpoints";
+import type { ViewSchema } from "../types/views";
+import type { OperadorVeiculo } from "../types/models";
 
 // --------------------------------------------------------
 // FORMULÁRIO DE CRIAÇÃO / EDIÇÃO
@@ -59,4 +61,16 @@ export const operadorListSchema: TableSchema = {
       format: (val: boolean) => val ? '⭐ Titular' : 'Reserva / Secundário',
     },
   ],
+};
+
+// --------------------------------------------------------
+// MODAL DE QUICK VIEW
+// --------------------------------------------------------
+export const operadorViewSchema: ViewSchema<OperadorVeiculo> = {
+  title: (item) => `Operador de Veículo #${item.id}`,
+  fields: [
+    { label: 'Motorista/Operador', key: 'pessoa_nome' },
+    { label: 'Veículo', render: (item) => `${item.veiculo_modelo} - ${item.veiculo_placa}` },
+    { label: 'Status', render: (item) => `${item.is_principal ? '⭐ Titular' : 'Reserva / Secundário'}` },
+  ]
 };

@@ -9,9 +9,10 @@ import { Can } from "../../../components/auth/Can";
 import { getApiErrorMessage } from "../../../api/config/errorHandlers";
 
 import type { OperadorVeiculo } from "../../../types/models";
-import { operadorListSchema } from "../../../schemas/operador.schema";
+import { operadorListSchema, operadorViewSchema } from "../../../schemas/operador.schema";
 
 import "../../../assets/css/ListPage.css";
+import { QuickViewModal } from "../../../components/QuickViewModal";
 
 export default function OperadorListPage() {
   const navigate = useNavigate();
@@ -21,6 +22,7 @@ export default function OperadorListPage() {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [viewItem, setViewItem] = useState<OperadorVeiculo | null>(null);
 
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -91,12 +93,22 @@ export default function OperadorListPage() {
         error={errorMessage}
         schema={operadorListSchema}
         onParamsChange={fetchOperadores}
+        onView={(item) => setViewItem(item)}
         canEdit={hasWritePermission}
         canDelete={hasWritePermission}
         onEdit={(item) => navigate(ROUTES.operacao.operadoresVeiculo.edit(item.id!))}
         onDelete={handleDelete}
         // Destaca levemente a linha se o motorista for o titular daquele veículo
         rowClassName={(item) => item.is_principal ? "dt-row-highlight" : ""} 
+      />
+
+      <QuickViewModal<OperadorVeiculo>
+        isOpen={!!viewItem}
+        onClose={() => setViewItem(null)}
+        data={viewItem}
+        schema={operadorViewSchema}
+        onEdit={(item) => navigate(ROUTES.operacao.operadoresVeiculo.edit(item.id!))}
+        canEdit={hasWritePermission}
       />
     </div>
   );
