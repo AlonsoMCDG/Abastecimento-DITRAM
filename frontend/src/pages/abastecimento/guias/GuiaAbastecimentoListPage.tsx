@@ -13,6 +13,7 @@ import { guiaAbastecimentoListSchema, guiaViewSchema } from "../../../schemas/gu
 
 import "../../../assets/css/ListPage.css";
 import { QuickViewModal } from "../../../components/QuickViewModal";
+import { processPdfBlob } from "../../../utils/pdfHandler";
 
 
 export default function GuiaAbastecimentoListPage() {
@@ -76,11 +77,14 @@ export default function GuiaAbastecimentoListPage() {
   async function handlePdfAction(id: number, action: 'open' | 'print') {
     setErrorMessage(null);
     try {
-      if (action === 'open') {
-        await guiasApi.abrirPdfEmNovaAba(id);
-      } else {
-        await guiasApi.imprimirPdfDireto(id);
-      }
+      const response = await guiasApi.obterPdfBlob(id);
+
+      await processPdfBlob(
+        response.data, 
+        `Guia_Abastecimento_${id}.pdf`, 
+        action
+      );
+
     } catch (err: unknown) {
       setErrorMessage(getApiErrorMessage(err, "Erro ao processar PDF."));
     }
