@@ -9,9 +9,10 @@ import { Can } from "../../../components/auth/Can";
 import { getApiErrorMessage } from "../../../api/config/errorHandlers";
 
 import type { Pessoa } from "../../../types/models";
-import { pessoaListSchema } from "../../../schemas/pessoa.schema";
+import { pessoaListSchema, pessoaViewSchema } from "../../../schemas/pessoa.schema";
 
 import "../../../assets/css/ListPage.css";
+import { QuickViewModal } from "../../../components/QuickViewModal";
 
 export default function PessoaListPage() {
   const navigate = useNavigate();
@@ -21,6 +22,7 @@ export default function PessoaListPage() {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [viewItem, setViewItem] = useState<Pessoa | null>(null);
 
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -44,7 +46,7 @@ export default function PessoaListPage() {
           page_size: params.pageSize,
           search: params.search,
           ordering: params.ordering ?? undefined,
-          // ativo: "" // Deixe em branco para listar ativos e inativos na tela de gerência
+          ativo: "" // Deixe em branco para listar ativos e inativos na tela de gerência
         });
 
         setPessoas(res.data.results || []);
@@ -92,12 +94,21 @@ export default function PessoaListPage() {
         error={errorMessage}
         schema={pessoaListSchema}
         onParamsChange={fetchPessoas}
+        onView={(item) => setViewItem(item)}
         canEdit={hasWritePermission}
         canDelete={hasWritePermission}
         onEdit={(item) => navigate(ROUTES.pessoas.base.edit(item.id!))}
         onDelete={handleDelete}
         // Aplica classe nativa caso inativo para dar feedback visual
         rowClassName={(p) => !p.ativo ? "dt-row-inactive" : ""}
+      />
+
+      <QuickViewModal<Pessoa>
+        isOpen={!!viewItem}
+        onClose={() => setViewItem(null)}
+        data={viewItem}
+        schema={pessoaViewSchema}
+        onEdit={(item) => navigate(ROUTES.pessoas.base.edit(item.id!))}
       />
     </div>
   );

@@ -1,4 +1,6 @@
 import type { FormSchema, TableSchema } from "../types/form";
+import type { Pessoa } from "../types/models";
+import type { ViewSchema } from "../types/views";
 import { MASKS } from "../utils/masks"; // Assumindo que você tem as máscaras isoladas
 
 // --------------------------------------------------------
@@ -54,5 +56,17 @@ export const pessoaListSchema: TableSchema = {
       sortKey: "ativo",
       format: (val: boolean) => val ? '✅ Ativo' : '❌ Inativo'
     }
+  ]
+};
+
+// --------------------------------------------------------
+// MODAL DE QUICK VIEW
+// --------------------------------------------------------
+export const pessoaViewSchema: ViewSchema<Pessoa> = {
+  title: (item) => `Motorista/Operador #${item.id}`,
+  fields: [
+    { label: 'Nome', key: 'nome', fullWidth: true },
+    { label: 'CPF', key: 'cpf' },
+    { label: 'Ativo', render: (item) => `${item.ativo ? 'Sim' : 'Não'}` },
   ]
 };
