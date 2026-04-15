@@ -1,6 +1,8 @@
 import type { FormSchema, TableSchema } from "../types/form";
 import { ENDPOINTS } from "../api/config/endpoints";
 import { MASKS } from "../utils/masks";
+import type { ViewSchema } from "../types/views";
+import type { Veiculo } from "../types/models";
 
 // --------------------------------------------------------
 // FORMULÁRIO
@@ -137,5 +139,29 @@ export const veiculoListSchema: TableSchema = {
       sortKey: "ativo",
       format: (val: boolean) => val ? '✅ Ativo' : '❌ Inativo'
     }
+  ]
+};
+
+// --------------------------------------------------------
+// MODAL DE QUICK VIEW
+// --------------------------------------------------------
+export const veiculoViewSchema: ViewSchema<Veiculo> = {
+  title: (item) => `Rota #${item.id}`,
+  fields: [
+    { label: 'Modelo', key: 'modelo' },
+    { label: 'Placa', key: 'placa' },
+    { 
+      label: 'Hodômetro Atual', 
+      render: (item) => `${item.hodometro_atual} km` 
+    },
+    { 
+      label: 'Consumo Médio de Combustível', 
+      render: (item) => `${item.consumo_estimado_combustivel} Litros` 
+    },
+    { 
+      label: 'Consumo Médio de Óleo', 
+      render: (item) => `${item.consumo_estimado_oleo} Litros` 
+    },
+    { label: 'Ativo', render: (item) => `${item.ativo ? 'Sim' : 'Não'}` },
   ]
 };

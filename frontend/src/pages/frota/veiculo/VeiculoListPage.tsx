@@ -9,9 +9,10 @@ import { Can } from "../../../components/auth/Can";
 import { getApiErrorMessage } from "../../../api/config/errorHandlers";
 
 import type { Veiculo } from "../../../types/models";
-import { veiculoListSchema } from "../../../schemas/veiculo.schema";
+import { veiculoListSchema, veiculoViewSchema } from "../../../schemas/veiculo.schema";
 
 import "../../../assets/css/ListPage.css";
+import { QuickViewModal } from "../../../components/QuickViewModal";
 
 export default function VeiculoListPage() {
   const navigate = useNavigate();
@@ -21,6 +22,7 @@ export default function VeiculoListPage() {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [viewItem, setViewItem] = useState<Veiculo | null>(null);
 
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -92,11 +94,21 @@ export default function VeiculoListPage() {
         error={errorMessage}
         schema={veiculoListSchema}
         onParamsChange={fetchVeiculos}
+        onView={(item) => {setViewItem(item)}}
         canEdit={hasWritePermission}
         canDelete={hasWritePermission}
         onEdit={(item) => navigate(ROUTES.frota.veiculos.edit(item.id!))}
         onDelete={handleDelete}
         rowClassName={(v) => !v.ativo ? "dt-row-inactive" : ""}
+      />
+      
+      <QuickViewModal<Veiculo>
+        isOpen={!!viewItem}
+        onClose={() => setViewItem(null)}
+        data={viewItem}
+        schema={veiculoViewSchema}
+        onEdit={(item) => navigate(ROUTES.frota.veiculos.edit(item.id!))}
+        canEdit={hasWritePermission}
       />
     </div>
   );
