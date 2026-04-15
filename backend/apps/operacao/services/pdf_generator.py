@@ -111,7 +111,8 @@ def _draw_guia_impressao_copy(pdf: canvas.Canvas, guia: Guia, y_bottom: float, y
     nome_condutor = getattr(guia.pessoa, 'nome', '-')
     instituicao = getattr(guia.instituicao, 'nome', '-')
 
-    litros = _format_decimal_min1_keep_rest(guia.quantidade_combustivel)
+    litros_combustivel = _format_decimal_min1_keep_rest(guia.quantidade_combustivel)
+    litros_oleo = _format_decimal_min1_keep_rest(guia.quantidade_oleo)
 
     # Informações do Veículo
     if guia.veiculo:
@@ -163,11 +164,16 @@ def _draw_guia_impressao_copy(pdf: canvas.Canvas, guia: Guia, y_bottom: float, y
     draw_field_with_line(pdf, x_left, y, f"{label_instituicao}: ", instituicao)
 
     y -= 8 * mm
-    litros_val = f"{litros} L ({tipo_combustivel_display})"
-    draw_field_with_line(pdf, x_left, y, "Quantidade de Litros: ", litros_val, line_width_extra=60 * mm)
+    combustivel_litros_val = f"{litros_combustivel} L ({tipo_combustivel_display})"
+    draw_field_with_line(pdf, x_left, y, "Quantidade de Litros: ", combustivel_litros_val, line_width_extra=60 * mm)
 
-    y -= 8 * mm
-    draw_field_with_line(pdf, x_left, y, "Período de uso: ", periodo, line_width_extra=50 * mm)
+    if tipo_servico_nome.lower() == 'barqueiro':
+        y -= 8 * mm
+        oleo_litros_val = f"{litros_oleo} L"
+        draw_field_with_line(pdf, x_left, y, "Óleo Lubrificante: ", oleo_litros_val, line_width_extra=60 * mm)
+
+        y -= 8 * mm
+        draw_field_with_line(pdf, x_left, y, "Período de uso: ", periodo, line_width_extra=50 * mm)
 
     if tipo_servico_raw in vehicle_services or not tipo_servico_raw:
         y -= 8 * mm
