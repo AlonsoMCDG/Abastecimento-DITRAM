@@ -15,4 +15,9 @@ class PessoaLookupSerializer(serializers.ModelSerializer):
         fields = ['value', 'label', 'cpf'] 
 
     def get_label(self, obj: Pessoa):
-        return f"{obj.nome} ({obj.cpf})"
+        # Se tiver CPF, mostra o formato: Nome (CPF)
+        if obj.cpf:
+            return f"{obj.nome} ({obj.cpf})"
+        
+        # Se não tiver, mostra apenas o Nome
+        return obj.nome

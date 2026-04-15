@@ -28,7 +28,7 @@ export interface Instituicao {
 
 export interface Pessoa {
   id: number;
-  cpf: string;
+  cpf?: string | null;
   nome: string;
   ativo: boolean;
 }

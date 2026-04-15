@@ -23,7 +23,7 @@ export const pessoaFormSchema: FormSchema = {
       mask: MASKS.CPF,
       placeholder: "000.000.000-00",
       colSpan: 1,
-      required: true
+      required: false
     },
     {
       name: "ativo",
