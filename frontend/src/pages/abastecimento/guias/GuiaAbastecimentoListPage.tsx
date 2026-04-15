@@ -9,9 +9,11 @@ import { Can } from "../../../components/auth/Can";
 import { getApiErrorMessage } from "../../../api/config/errorHandlers";
 
 import type { GuiaAbastecimento } from "../../../types/models";
-import { guiaAbastecimentoListSchema } from "../../../schemas/guiaAbastecimento.schema";
+import { guiaAbastecimentoListSchema, guiaViewSchema } from "../../../schemas/guiaAbastecimento.schema";
 
 import "../../../assets/css/ListPage.css";
+import { QuickViewModal } from "../../../components/QuickViewModal";
+
 
 export default function GuiaAbastecimentoListPage() {
   const navigate = useNavigate();
@@ -21,6 +23,7 @@ export default function GuiaAbastecimentoListPage() {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [viewItem, setViewItem] = useState<GuiaAbastecimento | null>(null);
   
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -107,11 +110,27 @@ export default function GuiaAbastecimentoListPage() {
         error={errorMessage}
         schema={guiaAbastecimentoListSchema}
         onParamsChange={fetchGuias}
+        onView={(item) => setViewItem(item)}
         onPdf={(item, action) => handlePdfAction(item.id!, action)}
         canEdit={canEdit}
         canDelete={canDelete}
         onEdit={(item) => navigate(ROUTES.operacao.guias.edit(item.id!))}
         onDelete={handleDelete}
+      />
+
+      <QuickViewModal<GuiaAbastecimento>
+        isOpen={!!viewItem}
+        onClose={() => setViewItem(null)}
+        data={viewItem}
+        schema={guiaViewSchema}
+        footerActions={(item) => (
+          <button 
+            className="dt-btn pdf dt-btn-text" 
+            onClick={() => handlePdfAction(item.id, 'print')}
+          >
+            🖨️ Gerar PDF para Impressão
+          </button>
+        )}
       />
     </div>
   );

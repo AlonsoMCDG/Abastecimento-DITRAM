@@ -19,6 +19,7 @@ interface Props<T> {
   onParamsChange: (params: DataTableParams) => void;
   onEdit?: (item: T) => void;
   onDelete?: (item: T) => void | Promise<void>;
+  onView?: (item: T) => void; // Prop para Modal Rápido
   onPdf?: (item: T, action: 'open' | 'print') => void | Promise<void>;
   canEdit?: boolean;
   canDelete?: boolean;
@@ -35,6 +36,7 @@ export default function DataTable<T extends { id: number }>({
   onParamsChange,
   onEdit,
   onDelete,
+  onView,
   onPdf,
   canEdit = true,
   canDelete = true,
@@ -198,16 +200,25 @@ export default function DataTable<T extends { id: number }>({
                     {hasActions && (
                       <td className="dt-actions-cell">
                         <div className="dt-actions">
+                          {onView && (
+                            <button 
+                              className="dt-btn view" 
+                              onClick={() => onView(item)} 
+                              title="Visualizar Detalhes"
+                            >
+                              👁️
+                            </button>
+                          )}
                           {onPdf && (
                             <>
-                              <button
+                              {/* <button
                                 className="dt-btn pdf"
                                 onClick={() => handlePdfClick(item, 'open')}
                                 title="Visualizar PDF"
                                 disabled={actionLoading?.id === item.id}
                               >
                                 {actionLoading?.id === item.id && actionLoading.action === 'open' ? '⏳' : '👁️'}
-                              </button>
+                              </button> */}
                               <button
                                 className="dt-btn pdf"
                                 onClick={() => handlePdfClick(item, 'print')}

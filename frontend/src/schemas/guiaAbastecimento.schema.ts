@@ -1,5 +1,7 @@
 import { ENDPOINTS } from "../api/config/endpoints"
 import type { FormSchema, TableSchema } from "../types/form"
+import type { GuiaAbastecimento } from "../types/models"
+import type { ViewSchema } from "../types/views"
 import { MASKS } from "../utils/masks"
 
 // --------------------------------------------------------
@@ -178,7 +180,7 @@ export const guiaAbastecimentoFormSchema: FormSchema = {
 }
 
 // --------------------------------------------------------
-// DATATABLE (LISTAGEM) - FOCO NO ESSENCIAL
+// DATATABLE (LISTAGEM)
 // --------------------------------------------------------
 
 export const guiaAbastecimentoListSchema: TableSchema = {
@@ -212,3 +214,40 @@ export const guiaAbastecimentoListSchema: TableSchema = {
   ],
 }
 
+// --------------------------------------------------------
+// MODAL DE QUICK VIEW
+// --------------------------------------------------------
+export const guiaViewSchema: ViewSchema<GuiaAbastecimento> = {
+  title: (item) => `Guia de Abastecimento #${item.id}`,
+  subtitle: (item) => {
+    const dataFormatada = new Date(item.data_hora).toLocaleString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+    
+    return `Emitida em: ${dataFormatada.replace(',', ' às')}`;
+  },
+  fields: [
+    { label: 'Veículo', key: 'veiculo_placa' },
+    { label: 'Motorista', key: 'pessoa_nome' },
+    { 
+      label: 'Combustível', 
+      // Usando o render para formatar dados compostos
+      render: (item) => `${item.quantidade_combustivel} Litros (${item.tipo_combustivel_nome})` 
+    },
+    { 
+      label: 'Óleo Lubrificante', 
+      // Usando o render para formatar dados compostos
+      render: (item) => `${item.quantidade_oleo} Litros` 
+    },
+    // { label: 'Status', key: 'status' },
+    { 
+      label: 'Observações', 
+      key: 'observacao', 
+      fullWidth: true // Exemplo: Faz a observação ocupar a linha toda da grid
+    }
+  ]
+};
