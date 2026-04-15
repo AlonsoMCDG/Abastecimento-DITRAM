@@ -235,8 +235,10 @@ export const guiaViewSchema: ViewSchema<GuiaAbastecimento> = {
     return `Emitida em: ${dataFormatada.replace(',', ' às')}`;
   },
   fields: [
+    { label: 'Serviço', key: 'tipo_servico_nome' },
     { label: 'Veículo', key: 'veiculo_placa' },
     { label: 'Motorista', key: 'pessoa_nome' },
+    { label: 'Rota', key: 'rota_nome' },
     { 
       label: 'Combustível', 
       // Usando o render para formatar dados compostos

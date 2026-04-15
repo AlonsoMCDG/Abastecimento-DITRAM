@@ -157,6 +157,7 @@ export interface GuiaAbastecimento {
   usuario_nome?: string;
   tipo_combustivel_nome?: string;
   tipo_veiculo_id_display?: string;
+  rota_nome?: string;
   
   // ==========================================
   // COMBUSTÍVEL E HODÔMETRO
