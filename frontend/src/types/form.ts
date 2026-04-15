@@ -46,6 +46,7 @@ export interface FormField {
   prefix?: string | React.ReactNode;  // (Ex: R$, Kg, m²) 
   suffix?: string | React.ReactNode;  // (Ex: R$, Kg, m²)
   mask?: any;
+  visibleIf?: (values: any) => boolean;
 }
 
 export interface FormSchema {

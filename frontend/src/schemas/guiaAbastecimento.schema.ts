@@ -1,4 +1,6 @@
 import { ENDPOINTS } from "../api/config/endpoints"
+import type { GuiaCreatePayload } from "../api/operacao/guiasApi"
+import { TIPO_SERVICO_BARQUEIRO_ID } from "../constants/operacao"
 import type { FormSchema, TableSchema } from "../types/form"
 import type { GuiaAbastecimento } from "../types/models"
 import type { ViewSchema } from "../types/views"
@@ -159,6 +161,7 @@ export const guiaAbastecimentoFormSchema: FormSchema = {
       colSpan: 1,
       required: true,
       mask: MASKS.DECIMAL,
+      visibleIf: (values: Partial<GuiaCreatePayload>) => values.tipo_servico_id == TIPO_SERVICO_BARQUEIRO_ID,
     },
     {
       name: 'periodo_uso_dias',
@@ -168,6 +171,7 @@ export const guiaAbastecimentoFormSchema: FormSchema = {
       placeholder: 'Ex: 30',
       colSpan: 1,
       required: false,
+      visibleIf: (values: Partial<GuiaCreatePayload>) => values.tipo_servico_id == TIPO_SERVICO_BARQUEIRO_ID,
     },
     {
       name: 'observacao',

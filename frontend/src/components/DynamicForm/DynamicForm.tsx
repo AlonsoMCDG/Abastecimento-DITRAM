@@ -1,6 +1,14 @@
 import React, { useEffect } from 'react';
 import { IMaskInput } from 'react-imask';
-import { useForm, Controller, type SubmitHandler, type UseFormSetValue, type DefaultValues, type FieldValues, type Path } from 'react-hook-form';
+import { 
+  useForm, 
+  Controller, 
+  type SubmitHandler, 
+  type UseFormSetValue, 
+  type DefaultValues, 
+  type FieldValues, 
+  type Path,
+} from 'react-hook-form';
 import type { FormSchema, FormField } from '../../types/form';
 import styles from './DynamicForm.module.css';
 
@@ -13,7 +21,7 @@ interface DynamicFormProps<T extends FieldValues> {
   schema: FormSchema;
   initialValues?: DefaultValues<T>;
   onValuesChange?: (
-    changedField: { name: string; value: any },
+    changedField: { name: Path<T>; value: unknown },
     currentValues: Partial<T>,
     setValue: UseFormSetValue<T>
   ) => void;
@@ -50,6 +58,9 @@ export const DynamicForm = <T extends FieldValues>({
     defaultValues: initialValues,
   });
 
+  // Captura o estado global do formulário para a renderização condicional
+  const currentValues = watch();
+
   useEffect(() => {
     if (initialValues) {
       reset(initialValues);
@@ -60,7 +71,15 @@ export const DynamicForm = <T extends FieldValues>({
     const subscription = watch((value, { name }) => {
       // Não usar type === 'change', para aceitar os setValues dos custom components
       if (name && onValuesChange) {
-        onValuesChange({ name, value: (value as any)[name] }, value as Partial<T>, setValue);
+        const fieldName = name as Path<T>;
+        // Extração segura do valor sem usar "as any"
+        const fieldValue = value[name as keyof typeof value]; 
+        
+        onValuesChange(
+          { name: fieldName, value: fieldValue }, 
+          value as Partial<T>, 
+          setValue
+        );
       }
     });
     return () => subscription.unsubscribe();
@@ -70,7 +89,7 @@ export const DynamicForm = <T extends FieldValues>({
     const fieldPath = fieldConfig.name as Path<T>;
     const hasError = !!errors[fieldPath];
 
-    // Empacotador de Prefixo/Sufixo para todos os campos pertinentes
+    // Empacotador de Prefixo/Sufixo para todos os campos que necessitam
     const wrapWithAddons = (inputElement: React.ReactNode) => {
       if (fieldConfig.prefix || fieldConfig.suffix) {
         return (
@@ -84,9 +103,12 @@ export const DynamicForm = <T extends FieldValues>({
       return inputElement;
     };
 
-    // 1. Campos com Máscara (Controlados)
+    // Campos com Máscara (Controlados)
     if (fieldConfig.mask) {
-      const maskProps: any = typeof fieldConfig.mask === 'object' ? fieldConfig.mask : { mask: fieldConfig.mask };
+      // Tipagem segura para as propriedades da máscara
+      const maskProps: Record<string, unknown> = typeof fieldConfig.mask === 'object' 
+        ? fieldConfig.mask 
+        : { mask: fieldConfig.mask };
       
       const maskedInput = (
         <Controller
@@ -115,7 +137,7 @@ export const DynamicForm = <T extends FieldValues>({
       return wrapWithAddons(maskedInput); 
     }
     
-    // 2. CASO PADRÃO: Props base para inputs
+    // CASO PADRÃO: Props base para inputs
     const commonProps = {
       ...register(fieldPath, { required: fieldConfig.required }),
       id: fieldConfig.name,
@@ -124,7 +146,7 @@ export const DynamicForm = <T extends FieldValues>({
       disabled: fieldConfig.disabled,
     };
 
-    // 3. ROTEAMENTO DE COMPONENTES
+    // ROTEAMENTO DE COMPONENTES
     switch (fieldConfig.type) {
       case 'textarea': 
         return wrapWithAddons(<textarea {...commonProps} rows={4} />);
@@ -132,7 +154,6 @@ export const DynamicForm = <T extends FieldValues>({
       case 'checkbox': 
         return <input type="checkbox" {...commonProps} id={fieldConfig.name} />;
         
-      // Melhoria Pertinente: Agrupamos todas as variações de Select!
       case 'select':
       case 'datalist':
       case 'combobox':
@@ -155,7 +176,7 @@ export const DynamicForm = <T extends FieldValues>({
             render={({ field: { onChange, value } }) => (
               <SearchableSelect
                 options={fieldConfig.options || []}
-                value={value ?? ""} 
+                value={(value as string | number) ?? ""} 
                 onChange={onChange}
                 placeholder={fieldConfig.placeholder}
                 // Se for readOnly, passamos como disabled para o select customizado não abrir
@@ -164,7 +185,6 @@ export const DynamicForm = <T extends FieldValues>({
             )}
           />
         );
-        // Retorna o Select já passado pelo empacotador de prefixo/sufixo!
         return wrapWithAddons(SelectComponent);
 
       default:
@@ -173,26 +193,19 @@ export const DynamicForm = <T extends FieldValues>({
     }
   };
 
-  // Lógica para ir par o próximo campo ao apertar Enter
   const handleFormKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
     const target = e.target as HTMLElement;
     if (e.key === 'Enter' && !e.shiftKey) {
-      // EXCEÇÕES: Não queremos bloquear o Enter nesses casos:
-      // 1. Textarea (onde o Enter serve para quebrar linha)
-      // 2. Botões (onde o Enter serve para clicar, como no botão Salvar ou no Quick Add)
       if (target.tagName === 'TEXTAREA' || target.tagName === 'BUTTON') return;
       e.preventDefault(); 
       const form = e.currentTarget;
       
-      // Cria uma lista com todos os campos que podem receber foco (ignorando os desativados/hidden/readOnly)
       const focusableElements = Array.from(
         form.querySelectorAll('input:not([type="hidden"]):not([disabled]):not([readonly]), select:not([disabled]), textarea:not([disabled]):not([readonly]), button[type="submit"]:not([disabled])')
       ) as HTMLElement[];
 
-      // Descobre em qual posição da lista nós estamos agora
       const currentIndex = focusableElements.indexOf(target);
       if (currentIndex > -1 && currentIndex < focusableElements.length - 1) {
-        // Joga o foco para o próximo elemento!
         focusableElements[currentIndex + 1].focus();
       }
     }
@@ -209,12 +222,20 @@ export const DynamicForm = <T extends FieldValues>({
 
       <form onSubmit={handleSubmit(onSubmit)} onKeyDown={handleFormKeyDown} className={styles.formContainer}>
         {schema.fields.map((field) => {
+          // VISIBILIDADE CONDICIONAL
+          if (field.visibleIf && !field.visibleIf(currentValues)) {
+            return null; // Não renderiza o campo se a condição não for satisfeita
+          }
+
+          const fieldPath = field.name as Path<T>;
+
           if (field.type === 'hidden') {
-            return <input key={field.name} type="hidden" {...register(field.name as any)} />;
+            return <input key={field.name} type="hidden" {...register(fieldPath)} />;
           }
 
           const warningMessage = warnings[field.name];
-          const hasError = !!errors[field.name];
+          const hasError = !!errors[fieldPath];
+          const errorMessage = errors[fieldPath]?.message as string || "Este campo é obrigatório";
 
           return (
             <div 
@@ -251,9 +272,9 @@ export const DynamicForm = <T extends FieldValues>({
                 </label>
               )}
 
-              {/* RENDERIZAÇÃO DE ERROS OU AVISOS */}
+              {/* Mensagens de erro dinâmicas do react-hook-form */}
               {hasError ? (
-                <span className={styles.error}>Este campo é obrigatório</span>
+                <span className={styles.error}>{errorMessage}</span>
               ) : (
                 warningMessage && <span className={styles.warningMessage}>{warningMessage}</span>
               )}
@@ -261,13 +282,16 @@ export const DynamicForm = <T extends FieldValues>({
           );
         })}
 
-        {/* CONTAINER DE AÇÕES (Botões) */}
         <div className={styles.formActions}>
-          <button type="submit" className={styles.submitButton}>
-            {submitLabel}
-          </button>
+          {/* Oculta o botão primário caso o submitLabel seja vazio (ex: tela de visualização) */}
+          {submitLabel && (
+            <button type="submit" className={styles.submitButton}>
+              {submitLabel}
+            </button>
+          )}
+          
           {extraActions}
-          {/* Renderiza o botão de cancelar apenas se a função for passada */}
+          
           {onCancel && (
             <button 
               type="button" 

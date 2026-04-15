@@ -1391,42 +1391,49 @@
     "model": "operacao.tiposervico",
     "pk": 1,
     "fields": {
-      "nome": "TRANSPORTE ESCOLAR"
+      "nome": "Corote"
     }
   },
   {
     "model": "operacao.tiposervico",
     "pk": 2,
     "fields": {
-      "nome": "TRANSPORTE DE MERENDA"
+      "nome": "Roçagem"
     }
   },
   {
     "model": "operacao.tiposervico",
     "pk": 3,
     "fields": {
-      "nome": "ROÇAGEM"
+      "nome": "Carro"
     }
   },
   {
     "model": "operacao.tiposervico",
     "pk": 4,
     "fields": {
-      "nome": "TRANSPORTE DE MEDICAMENTOS"
+      "nome": "Caminhonete"
     }
   },
   {
     "model": "operacao.tiposervico",
     "pk": 5,
     "fields": {
-      "nome": "TRANSPORTE DE ENTIDADE PÚBLICA"
+      "nome": "Moto"
     }
   },
   {
     "model": "operacao.tiposervico",
     "pk": 6,
     "fields": {
-      "nome": "COROTE"
+      "nome": "Ônibus"
+    }
+  },
+  {
+    "model": "operacao.tiposervico",
+    "pk": 7,
+    "fields": {
+      "nome": "Barqueiro"
     }
   },
   {
