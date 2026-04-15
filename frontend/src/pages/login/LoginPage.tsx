@@ -112,9 +112,6 @@ export const LoginPage = () => {
           {loading ? 'Autenticando...' : 'Entrar'}
         </button>
 
-        <p className={styles.smallText}>
-          Não tem cadastro? <Link to="/register" className={styles.link}>Criar conta</Link>
-        </p>
       </form>
     </div>
   );
