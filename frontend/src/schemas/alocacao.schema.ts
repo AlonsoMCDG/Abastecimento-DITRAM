@@ -1,5 +1,7 @@
 import type { FormSchema, TableSchema } from "../types/form";
 import { ENDPOINTS } from "../api/config/endpoints";
+import type { AlocacaoServico } from "../types/models";
+import type { ViewSchema } from "../types/views";
 
 // --------------------------------------------------------
 // FORMULÁRIO DE CRIAÇÃO / EDIÇÃO
@@ -67,4 +69,20 @@ export const alocacaoListSchema: TableSchema = {
       format: (val: boolean) => val ? '⭐ Principal' : 'Secundário',
     },
   ],
+};
+
+// --------------------------------------------------------
+// MODAL DE QUICK VIEW
+// --------------------------------------------------------
+export const alocacaoViewSchema: ViewSchema<AlocacaoServico> = {
+  title: (item) => `Alocação #${item.id}`,
+  fields: [
+    { label: 'Motorista/Operador', key: 'pessoa_nome' },
+    { label: 'Serviço Prestado', key: 'tipo_servico_nome' },
+    { 
+      label: 'Secretaria', 
+      key: 'secretaria_nome'
+    },
+    { label: 'Status', render: (item) => `${item.is_principal ? '⭐ Principal' : 'Secundário'}` },
+  ]
 };

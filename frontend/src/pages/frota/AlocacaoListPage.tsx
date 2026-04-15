@@ -9,9 +9,10 @@ import { Can } from "../../components/auth/Can";
 import { getApiErrorMessage } from "../../api/config/errorHandlers";
 
 import type { AlocacaoServico } from "../../types/models";
-import { alocacaoListSchema } from "../../schemas/alocacao.schema";
+import { alocacaoListSchema, alocacaoViewSchema } from "../../schemas/alocacao.schema";
 
 import "../../assets/css/ListPage.css";
+import { QuickViewModal } from "../../components/QuickViewModal";
 
 export default function AlocacaoListPage() {
   const navigate = useNavigate();
@@ -21,6 +22,7 @@ export default function AlocacaoListPage() {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [viewItem, setViewItem] = useState<AlocacaoServico| null>(null);
 
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -91,12 +93,22 @@ export default function AlocacaoListPage() {
         error={errorMessage}
         schema={alocacaoListSchema}
         onParamsChange={fetchAlocacoes}
+        onView={(item) => setViewItem(item)}
         canEdit={hasWritePermission}
         canDelete={hasWritePermission}
         onEdit={(item) => navigate(ROUTES.operacao.alocacoesServico.edit(item.id!))}
         onDelete={handleDelete}
         // Exemplo visual: Destaca levemente a linha se for o serviço principal
         rowClassName={(item) => item.is_principal ? "dt-row-highlight" : ""} 
+      />
+
+      <QuickViewModal<AlocacaoServico>
+        isOpen={!!viewItem}
+        onClose={() => setViewItem(null)}
+        data={viewItem}
+        schema={alocacaoViewSchema}
+        onEdit={(item) => navigate(ROUTES.operacao.alocacoesServico.edit(item.id!))}
+        canEdit={hasWritePermission}
       />
     </div>
   );
