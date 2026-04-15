@@ -1,4 +1,6 @@
 import type { FormSchema, TableSchema } from "../types/form";
+import type { TipoServico } from "../types/models";
+import type { ViewSchema } from "../types/views";
 
 // --------------------------------------------------------
 // FORMULÁRIO DE CRIAÇÃO / EDIÇÃO
@@ -39,5 +41,16 @@ export const tipoServicoListSchema: TableSchema = {
       sortKey: "ativo",
       format: (val: boolean) => val ? '✅ Ativo' : '❌ Inativo'
     }
+  ]
+};
+
+// --------------------------------------------------------
+// MODAL DE QUICK VIEW
+// --------------------------------------------------------
+export const tipoServicoViewSchema: ViewSchema<TipoServico> = {
+  title: (item) => `Tipo de Serviço #${item.id}`,
+  fields: [
+    { label: 'Serviço', key: 'nome' },
+    { label: 'Ativo', render: (item) => `${item.ativo ? 'Sim' : 'Não'}` },
   ]
 };

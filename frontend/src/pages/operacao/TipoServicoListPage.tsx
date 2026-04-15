@@ -9,9 +9,10 @@ import { Can } from "../../components/auth/Can";
 import { getApiErrorMessage } from "../../api/config/errorHandlers";
 
 import type { TipoServico } from "../../types/models";
-import { tipoServicoListSchema } from "../../schemas/tipoServico.schema";
+import { tipoServicoListSchema, tipoServicoViewSchema } from "../../schemas/tipoServico.schema";
 
 import "../../assets/css/ListPage.css";
+import { QuickViewModal } from "../../components/QuickViewModal";
 
 export default function TipoServicoListPage() {
   const navigate = useNavigate();
@@ -21,6 +22,7 @@ export default function TipoServicoListPage() {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [viewItem, setViewItem] = useState<TipoServico | null>(null);
 
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -91,11 +93,21 @@ export default function TipoServicoListPage() {
         error={errorMessage}
         schema={tipoServicoListSchema}
         onParamsChange={fetchTipos}
+        onView={(item) => setViewItem(item)}
         canEdit={hasWritePermission}
         canDelete={hasWritePermission}
         onEdit={(item) => navigate(ROUTES.operacao.tiposServico.edit(item.id!))}
         onDelete={handleDelete}
         rowClassName={(t) => !t.ativo ? "dt-row-inactive" : ""}
+      />
+
+      <QuickViewModal<TipoServico>
+        isOpen={!!viewItem}
+        onClose={() => setViewItem(null)}
+        data={viewItem}
+        schema={tipoServicoViewSchema}
+        onEdit={(item) => navigate(ROUTES.operacao.tiposServico.edit(item.id!))}
+        canEdit={hasWritePermission}
       />
     </div>
   );
