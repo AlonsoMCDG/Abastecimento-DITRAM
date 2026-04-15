@@ -1,5 +1,7 @@
 import { ENDPOINTS } from "../api/config/endpoints";
 import type { FormSchema, TableSchema } from "../types/form";
+import type { Rota } from "../types/models";
+import type { ViewSchema } from "../types/views";
 import { MASKS } from "../utils/masks";
 
 // --------------------------------------------------------
@@ -121,5 +123,29 @@ export const rotaListSchema: TableSchema = {
       sortKey: 'ativa',
       format: (val: boolean) => val ? '✅ Ativa' : '❌ Inativa',
     },
+  ]
+};
+
+// --------------------------------------------------------
+// MODAL DE QUICK VIEW
+// --------------------------------------------------------
+export const rotaViewSchema: ViewSchema<Rota> = {
+  title: (item) => `Rota #${item.id}`,
+  fields: [
+    { label: 'Rota', key: 'nome' },
+    { label: 'Instituição', key: 'instituicao_nome' },
+    { 
+      label: 'Distância Média', 
+      render: (item) => `${item.distancia_km} km` 
+    },
+    { 
+      label: 'Consumo de Combustível', 
+      render: (item) => `${item.consumo_estimado_combustivel} Litros` 
+    },
+    { 
+      label: 'Consumo de Óleo', 
+      render: (item) => `${item.consumo_estimado_oleo} Litros` 
+    },
+    { label: 'Detalhes', key: 'detalhes', fullWidth: true },
   ]
 };

@@ -9,9 +9,10 @@ import { Can } from "../../../components/auth/Can";
 import { getApiErrorMessage } from "../../../api/config/errorHandlers";
 
 import type { Rota } from "../../../types/models";
-import { rotaListSchema } from "../../../schemas/rota.schema";
+import { rotaListSchema, rotaViewSchema } from "../../../schemas/rota.schema";
 
 import "../../../assets/css/ListPage.css";
+import { QuickViewModal } from "../../../components/QuickViewModal";
 
 export default function RotaListPage() {
   const navigate = useNavigate();
@@ -21,6 +22,7 @@ export default function RotaListPage() {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [viewItem, setViewItem] = useState<Rota | null>(null);
 
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -96,10 +98,19 @@ export default function RotaListPage() {
         error={errorMessage}
         schema={rotaListSchema}
         onParamsChange={fetchRotas}
+        onView={(item) => setViewItem(item)}
         canEdit={canEdit}
         canDelete={canDelete}
         onEdit={(item) => navigate(ROUTES.frota.rotas.edit(item.id!))}
         onDelete={handleDelete}
+      />
+
+      <QuickViewModal<Rota>
+        isOpen={!!viewItem}
+        onClose={() => setViewItem(null)}
+        data={viewItem}
+        schema={rotaViewSchema}
+        onEdit={(item) => navigate(ROUTES.frota.rotas.edit(item.id!))}
       />
     </div>
   );
