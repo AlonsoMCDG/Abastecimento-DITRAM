@@ -146,7 +146,7 @@ export const veiculoListSchema: TableSchema = {
 // MODAL DE QUICK VIEW
 // --------------------------------------------------------
 export const veiculoViewSchema: ViewSchema<Veiculo> = {
-  title: (item) => `Rota #${item.id}`,
+  title: (item) => `Veículo #${item.id}`,
   fields: [
     { label: 'Modelo', key: 'modelo' },
     { label: 'Placa', key: 'placa' },
