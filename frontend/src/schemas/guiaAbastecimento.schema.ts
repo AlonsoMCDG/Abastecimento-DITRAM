@@ -5,6 +5,7 @@ import type { FormSchema, TableSchema } from "../types/form"
 import type { GuiaAbastecimento } from "../types/models"
 import type { ViewSchema } from "../types/views"
 import { MASKS } from "../utils/masks"
+import { ROUTES } from "../routes/routes"
 
 // --------------------------------------------------------
 // FORMULÁRIO DE CRIAÇÃO / EDIÇÃO (DynamicForm)
@@ -47,7 +48,9 @@ export const guiaAbastecimentoFormSchema: FormSchema = {
         {
           icon: '➕',
           tooltip: 'Cadastrar novo Motorista',
-          onClick: () => console.log('Abrir modal de Motorista!'), // Será sobrescrito na página se necessário
+          onClick: () => {
+            window.open(ROUTES.pessoas.base.create, '_blank');
+          },
         }
       ]
     },
