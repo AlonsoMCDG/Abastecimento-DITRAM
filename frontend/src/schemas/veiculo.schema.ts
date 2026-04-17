@@ -3,28 +3,14 @@ import { ENDPOINTS } from "../api/config/endpoints";
 import { MASKS } from "../utils/masks";
 import type { ViewSchema } from "../types/views";
 import type { Veiculo } from "../types/models";
+import type { VeiculoCreatePayload } from "../api/frota/veiculosApi"
+import { TIPO_VEICULO_BARCO_ID } from "../constants/constants";
 
 // --------------------------------------------------------
 // FORMULÁRIO
 // --------------------------------------------------------
 export const veiculoFormSchema: FormSchema = {
   fields: [
-    {
-      name: "placa",
-      label: "Placa",
-      type: "text",
-      placeholder: "ABC1234",
-      colSpan: 1,
-      required: true
-    },
-    {
-      name: "modelo",
-      label: "Modelo",
-      type: "text",
-      placeholder: "Ex: Toyota Hilux",
-      colSpan: 2,
-      required: true
-    },
     {
       name: "tipo_veiculo_id",
       label: "Tipo de Veículo",
@@ -34,11 +20,27 @@ export const veiculoFormSchema: FormSchema = {
       required: true
     },
     {
+      name: "modelo",
+      label: "Modelo",
+      type: "text",
+      placeholder: "Ex: Toyota Hilux",
+      colSpan: 1,
+      required: true
+    },
+    {
+      name: "placa",
+      label: "Placa",
+      type: "text",
+      placeholder: "ABC1234",
+      visibleIf: (values: Partial<VeiculoCreatePayload>) => values.tipo_veiculo_id != TIPO_VEICULO_BARCO_ID,
+      colSpan: 1,
+    },
+    {
       name: "secretaria_id",
-      label: "Secretaria",
+      label: "Secretaria Vinculada",
       type: "select",
       endpoint: ENDPOINTS.organizacao.secretariasLookup,
-      colSpan: 2,
+      colSpan: 3,
       required: true
     },
     {
@@ -69,7 +71,6 @@ export const veiculoFormSchema: FormSchema = {
         { value: "L_POR_H", label: "L/h" }
       ],
       colSpan: 1,
-      required: true
     },
     {
       name: "consumo_estimado_combustivel",
@@ -77,16 +78,18 @@ export const veiculoFormSchema: FormSchema = {
       type: "text",
       mask: MASKS.DECIMAL,
       suffix: "Litros",
+      placeholder: '0,0',
       colSpan: 1,
-      required: true
     },
     {
       name: "consumo_estimado_oleo",
-      label: "Consumo Estim. Óleo (Opcional)",
+      label: "Consumo Estim. Óleo",
       type: "text",
       mask: MASKS.DECIMAL,
       suffix: "Litros",
+      placeholder: '0,0',
       colSpan: 1,
+      visibleIf: (values: Partial<VeiculoCreatePayload>) => values.tipo_veiculo_id == TIPO_VEICULO_BARCO_ID,
       required: false
     },
     {
@@ -94,6 +97,8 @@ export const veiculoFormSchema: FormSchema = {
       label: "Hodômetro / Horímetro Atual",
       type: "text",
       mask: MASKS.DECIMAL,
+      suffix: 'km',
+      placeholder: '0,0',
       colSpan: 1,
       required: true
     },
@@ -103,15 +108,15 @@ export const veiculoFormSchema: FormSchema = {
       type: "text",
       mask: MASKS.DECIMAL,
       suffix: "kg",
+      placeholder: '0,0',
       colSpan: 1,
-      required: true
     },
     {
       name: "capacidade_pessoas",
-      label: "Cap. Pessoas",
+      label: "Capacidade Pessoas",
       type: "number",
       colSpan: 1,
-      required: true
+      placeholder: '0',
     },
     {
       name: "ativo",

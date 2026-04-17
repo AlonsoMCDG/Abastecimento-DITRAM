@@ -1,0 +1,2 @@
+export const TIPO_SERVICO_BARQUEIRO_ID = 7  // Olhar isso no default_data.json do backend
+export const TIPO_VEICULO_BARCO_ID = 6

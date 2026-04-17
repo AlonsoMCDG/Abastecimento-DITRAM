@@ -16,7 +16,16 @@ interface VeiculoListParams {
   page_size?: number;
 }
 
-type VeiculoCreatePayload = Omit<Veiculo, "id" | "secretaria_nome" | "secretaria_sigla" | "tipo_veiculo_nome" | "tipo_combustivel_nome" | "tipo_locomocao_display" | "unidade_consumo_display">;
+export type VeiculoCreatePayload = Omit<
+  Veiculo, 
+  | "id" 
+  | "secretaria_nome" 
+  | "secretaria_sigla" 
+  | "tipo_veiculo_nome" 
+  | "tipo_combustivel_nome" 
+  | "tipo_locomocao_display" 
+  | "unidade_consumo_display"
+>;
 
 export const veiculosApi = {
   listar(params?: VeiculoListParams) {

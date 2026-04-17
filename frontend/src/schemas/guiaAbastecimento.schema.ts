@@ -1,6 +1,6 @@
 import { ENDPOINTS } from "../api/config/endpoints"
 import type { GuiaCreatePayload } from "../api/operacao/guiasApi"
-import { TIPO_SERVICO_BARQUEIRO_ID } from "../constants/operacao"
+import { TIPO_SERVICO_BARQUEIRO_ID } from "../constants/constants"
 import type { FormSchema, TableSchema } from "../types/form"
 import type { GuiaAbastecimento } from "../types/models"
 import type { ViewSchema } from "../types/views"

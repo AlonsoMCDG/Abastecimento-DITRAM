@@ -39,38 +39,45 @@ export interface Pessoa {
 
 export interface Veiculo {
   id: number;
-  placa: string;
   modelo: string;
-  tipo_locomocao: string; 
-  tipo_locomocao_display?: string;
-  
-  capacidade_carga_kg: number | string;
-  capacidade_pessoas: number;
+  placa: string;
 
-  tipo_veiculo_id?: number | null;
-  tipo_veiculo_nome?: string;
-  
-  tipo_combustivel_id?: number | null;
-  tipo_combustivel_nome?: string;
+  ativo: boolean;
   
   consumo_estimado_combustivel: number | string;
   consumo_estimado_oleo?: number | string | null;
-  hodometro_atual: number | string;
   unidade_consumo: string; 
-  unidade_consumo_display?: string;
+  unidade_consumo_nome?: string;
+  hodometro_atual: number | string;
+
+  capacidade_carga_kg: number | string;
+  capacidade_pessoas: number;
+
+  tipo_locomocao: string; 
+  tipo_locomocao_nome?: string;
   
+  // IDs para referências
+  tipo_combustivel_id?: number | null;
+  tipo_veiculo_id?: number | null;
   secretaria_id?: number | null;
+  
+  // Campos de Leitura (Displays)
+  tipo_combustivel_nome?: string;
+  tipo_veiculo_nome?: string;
   secretaria_nome?: string;
   secretaria_sigla?: string;
-
-  ativo: boolean;
 }
 
 export interface Rota {
   id: number;
   nome: string;
+  distancia_km?: string | number;
+  ativa: boolean;
   tipo_locomocao: string;
   tipo_locomocao_nome?: string;
+
+  consumo_estimado_combustivel?: string | number;
+  consumo_estimado_oleo?: string | number;
 
   // IDs para referências
   secretaria_id?: number | null;
@@ -81,12 +88,7 @@ export interface Rota {
   secretaria_sigla?: string;
   instituicao_nome?: string;
 
-  distancia_km?: string | number;
-  consumo_estimado_combustivel?: string | number;
-  consumo_estimado_oleo?: string | number;
-
   detalhes?: string;
-  ativa: boolean;
 }
 
 // ==========================================

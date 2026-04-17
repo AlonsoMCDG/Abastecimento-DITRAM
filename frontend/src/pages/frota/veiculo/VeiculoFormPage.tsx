@@ -6,6 +6,8 @@ import { DynamicForm } from "../../../components/DynamicForm/DynamicForm";
 import { veiculoFormSchema } from "../../../schemas/veiculo.schema";
 import type { Veiculo } from "../../../types/models";
 import { getApiErrorMessage } from "../../../api/config/errorHandlers";
+import type { Path, PathValue, UseFormSetValue } from "react-hook-form";
+import { TIPO_VEICULO_BARCO_ID } from "../../../constants/constants";
 
 export default function VeiculoFormPage() {
   const navigate = useNavigate();
@@ -45,6 +47,24 @@ export default function VeiculoFormPage() {
     }
   }
 
+  // Escuta as mudanças do DynamicForm
+  const handleValuesChange = async (
+    changedField: { name: Path<Veiculo>; value: unknown },
+    _currentValues: Partial<Veiculo>,
+    setValue: UseFormSetValue<Veiculo>
+  ) => {
+    const { name, value } = changedField;  // nome do campo alterado e o novo valor dele
+    const numValue = Number(value) || 0;
+    
+    if (name === 'tipo_veiculo_id') {
+      
+      const novoTipoLocomocao = (numValue === TIPO_VEICULO_BARCO_ID) ? 'FLUVIAL' : 'TERRESTRE';
+      setValue('tipo_locomocao', novoTipoLocomocao as PathValue<Veiculo, "tipo_locomocao">, { shouldValidate: true })
+      
+      return;
+    }
+  };
+
   if (loading) return <div>Carregando dados do veículo...</div>;
 
   return (
@@ -53,6 +73,7 @@ export default function VeiculoFormPage() {
       subtitle={id ? `Editando registro #${id} - ${initialValues?.placa || ''}` : "Cadastre os dados de um novo veículo na frota."}
       schema={veiculoFormSchema}
       initialValues={initialValues}
+      onValuesChange={handleValuesChange}
       onSubmit={handleSubmit}
       submitLabel="💾 Salvar Veículo"
       onCancel={() => navigate(ROUTES.frota.veiculos.list)}

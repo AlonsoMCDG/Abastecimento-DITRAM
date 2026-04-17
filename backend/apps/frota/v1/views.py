@@ -70,8 +70,8 @@ class VeiculoViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
         # Otimização do Lookup: Mantém o join com tipo_combustivel pois a label usa ele
         queryset = queryset.select_related('tipo_combustivel').only(
             'id', 'modelo', 'placa', 'ativo',
-            'consumo_estimado_combustivel', 'unidade_consumo', 
-            'tipo_combustivel_id', 'tipo_combustivel__nome',
+            'consumo_estimado_combustivel', 'consumo_estimado_oleo', 
+            'unidade_consumo', 'tipo_combustivel_id', 'tipo_combustivel__nome',
             'secretaria_id', 'tipo_veiculo_id'
         )
 
