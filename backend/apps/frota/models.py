@@ -67,12 +67,21 @@ class Veiculo(models.Model):
 
 
 class RotaManager(models.Manager):
-    def get_by_natural_key(self, nome):
-        return self.get(nome=nome)
+    def get_by_natural_key(self, nome, instituicao_nome=None, secretaria_sigla=None):
+        if instituicao_nome:
+            return self.get(
+                nome=nome, 
+                instituicao__nome=instituicao_nome, 
+                instituicao__secretaria__sigla=secretaria_sigla
+            )
+        # Fallback caso a rota não tenha instituição (seja genérica da secretaria)
+        elif secretaria_sigla:
+            return self.get(nome=nome, instituicao__isnull=True, secretaria__sigla=secretaria_sigla)
+        
+        return self.get(nome=nome, instituicao__isnull=True, secretaria__isnull=True)
 
 class Rota(models.Model):
-    # O nome da rota deve ser único para a Natural Key funcionar
-    nome = models.CharField(max_length=100, unique=True)
+    nome = models.CharField(max_length=100)
     distancia_km = models.DecimalField(max_digits=8, decimal_places=2, default=0)
     tipo_locomocao = models.CharField(max_length=50, choices=TIPO_LOCOMOCAO_CHOICES, default='TERRESTRE')
     ativa = models.BooleanField(default=True)
@@ -89,9 +98,18 @@ class Rota(models.Model):
     class Meta:
         verbose_name = "Rota"
         verbose_name_plural = "Rotas"
+        # A combinação dos dois não pode se repetir
+        unique_together = ['nome', 'instituicao']
 
     def natural_key(self):
-        return (self.nome,)
+        # A chave natural agora repassa as chaves dos pais
+        if self.instituicao:
+            return (self.nome,) + self.instituicao.natural_key()
+        elif self.secretaria:
+            return (self.nome, None, self.secretaria.sigla)
+        return (self.nome, None, None)
 
+    natural_key.dependencies = ['organizacao.instituicao', 'organizacao.secretaria']
+    
     def __str__(self):
         return self.nome
