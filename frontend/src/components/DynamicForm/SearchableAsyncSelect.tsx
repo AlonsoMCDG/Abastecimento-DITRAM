@@ -34,7 +34,11 @@ export const SearchableAsyncSelect = <T extends FieldValues>({
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   
+  // NAVEGAÇÃO POR TECLADO
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
+  
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLUListElement>(null);
   const mounted = useRef(false);
 
   const fieldPath = field.name as Path<T>;
@@ -71,7 +75,7 @@ export const SearchableAsyncSelect = <T extends FieldValues>({
     return () => { isSubscribed = false; };
   }, [parentValue, field.endpoint, field.dependsOnParam, field.name]);
 
-  // 2. SINCRONIA VISUAL (ID salvo -> Label na tela)
+  // 2. SINCRONIA VISUAL
   useEffect(() => {
     if (currentValue === undefined || currentValue === null || currentValue === '') {
       if (!isOpen) setSearchTerm('');
@@ -83,7 +87,6 @@ export const SearchableAsyncSelect = <T extends FieldValues>({
     if (matchedOption) {
       if (!isOpen) setSearchTerm(matchedOption.label);
     } else if (field.creatable) {
-      // SE FOR CREATABLE: O próprio valor digitado e salvo atua como label
       if (!isOpen) setSearchTerm(String(currentValue));
     }
   }, [currentValue, options, isOpen, field.creatable]);
@@ -109,10 +112,8 @@ export const SearchableAsyncSelect = <T extends FieldValues>({
         
         if (!matched) {
           if (field.creatable && searchTerm.trim() !== '') {
-            // SE FOR CREATABLE: Salva o texto livre se o usuário clicar fora
             setValue(fieldPath, searchTerm.trim() as PathValue<T, Path<T>>, { shouldValidate: true, shouldDirty: true });
           } else {
-            // Limpa se clicou fora e não selecionou nada
             setSearchTerm('');
           }
         } else {
@@ -133,14 +134,64 @@ export const SearchableAsyncSelect = <T extends FieldValues>({
     );
   }, [options, searchTerm]);
 
+  const hasExactMatch = options.some(opt => opt.label.toLowerCase() === searchTerm.trim().toLowerCase());
+  const showCreatableOption = field.creatable && searchTerm.trim() !== '' && !hasExactMatch;
+
+  // 6. RESET DO ÍNDICE AO DIGITAR
+  useEffect(() => {
+    if (isOpen) {
+      // Sempre que a lista for filtrada, seleciona o primeiro item automaticamente
+      setHighlightedIndex(filteredOptions.length > 0 || showCreatableOption ? 0 : -1);
+    }
+  }, [searchTerm, filteredOptions.length, showCreatableOption, isOpen]);
+
+  // 7. ROLAGEM AUTOMÁTICA (Scroll Into View)
+  useEffect(() => {
+    if (isOpen && dropdownRef.current && highlightedIndex >= 0) {
+      const activeElement = dropdownRef.current.children[highlightedIndex] as HTMLElement;
+      if (activeElement) {
+        // 'nearest' garante que a tela só role o mínimo necessário
+        activeElement.scrollIntoView({ block: 'nearest' });
+      }
+    }
+  }, [highlightedIndex, isOpen]);
+
   const handleSelect = (valueToSave: string | number, labelToShow: string) => {
     setSearchTerm(labelToShow);
     setValue(fieldPath, valueToSave as PathValue<T, Path<T>>, { shouldValidate: true, shouldDirty: true });
     setIsOpen(false);
   };
 
-  // Verifica se o texto digitado já corresponde exatamente a uma opção existente
-  const hasExactMatch = options.some(opt => opt.label.toLowerCase() === searchTerm.trim().toLowerCase());
+  // 8. O MOTOR DO TECLADO
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const totalItems = filteredOptions.length + (showCreatableOption ? 1 : 0);
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (!isOpen) setIsOpen(true);
+      setHighlightedIndex((prev) => (prev < totalItems - 1 ? prev + 1 : prev));
+    } 
+    else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setHighlightedIndex((prev) => (prev > 0 ? prev - 1 : 0));
+    } 
+    else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (isOpen && highlightedIndex >= 0) {
+        if (highlightedIndex < filteredOptions.length) {
+          // Selecionou um item existente
+          const opt = filteredOptions[highlightedIndex];
+          handleSelect(opt.value, opt.label);
+        } else if (showCreatableOption) {
+          // Selecionou o "Criar Novo" (que sempre fica por último no array virtual)
+          handleSelect(searchTerm.trim(), searchTerm.trim());
+        }
+      }
+    } 
+    else if (e.key === 'Escape') {
+      setIsOpen(false);
+    }
+  };
 
   return (
     <div className={styles.comboWrapper} ref={wrapperRef}>
@@ -155,19 +206,24 @@ export const SearchableAsyncSelect = <T extends FieldValues>({
           if (!isOpen) setIsOpen(true);
         }}
         onClick={() => !field.disabled && !loading && setIsOpen(true)}
+        onKeyDown={handleKeyDown} // Vincula as ações do teclado
       />
       
       <span className={styles.comboChevron}>{isOpen ? "▲" : "▼"}</span>
 
-      {/* Input oculto que realmente guarda o valor/id para o React Hook Form */}
       <input type="hidden" {...register(fieldPath, { required: field.required })} />
 
       {isOpen && (
-        <ul className={styles.comboDropdown}>
-          {filteredOptions.map((opt) => (
+        <ul className={styles.comboDropdown} ref={dropdownRef}>
+          {filteredOptions.map((opt, index) => (
             <li
               key={opt.value}
-              className={`${styles.comboOption} ${String(opt.value) === String(currentValue) ? styles.comboSelected : ''}`}
+              className={`
+                ${styles.comboOption} 
+                ${String(opt.value) === String(currentValue) ? styles.comboSelected : ''}
+                ${index === highlightedIndex ? styles.comboHighlighted : ''} 
+              `}
+              onMouseEnter={() => setHighlightedIndex(index)} // Sincroniza o mouse com o teclado
               onClick={(e) => {
                 e.stopPropagation();
                 handleSelect(opt.value, opt.label);
@@ -177,13 +233,17 @@ export const SearchableAsyncSelect = <T extends FieldValues>({
             </li>
           ))}
 
-          {/* OPÇÃO "CRIAR NOVO": Aparece se for creatable e não houver match exato */}
-          {field.creatable && searchTerm.trim() !== '' && !hasExactMatch && (
+          {showCreatableOption && (
             <li
-              className={`${styles.comboOption} ${styles.comboOptionCreatable}`}
+              // O índice da opção de criação é sempre o final da lista
+              className={`
+                ${styles.comboOption} 
+                ${styles.comboOptionCreatable}
+                ${highlightedIndex === filteredOptions.length ? styles.comboHighlighted : ''}
+              `}
+              onMouseEnter={() => setHighlightedIndex(filteredOptions.length)}
               onClick={(e) => {
                 e.stopPropagation();
-                // Salva a própria string como valor
                 handleSelect(searchTerm.trim(), searchTerm.trim());
               }}
             >

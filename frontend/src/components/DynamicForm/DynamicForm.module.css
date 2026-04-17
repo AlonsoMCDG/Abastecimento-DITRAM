@@ -393,6 +393,11 @@
   background-color: #f8fafc;
 }
 
+.comboHighlighted {
+  background-color: #f1f5f9; /* Slate 100 - Exemplo de hover suave */
+  cursor: pointer;
+}
+
 /* Mensagem de erro global */
 .globalError {
   background-color: #fef2f2;
