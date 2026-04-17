@@ -9,7 +9,12 @@ from apps.organizacao.models import Secretaria, Instituicao
 class VeiculoWriteSerializer(serializers.ModelSerializer):
     secretaria_id = serializers.PrimaryKeyRelatedField(source='secretaria', queryset=Secretaria.objects.all())
     tipo_combustivel_id = serializers.PrimaryKeyRelatedField(source='tipo_combustivel', queryset=TipoCombustivel.objects.all())
-    tipo_veiculo_id = serializers.PrimaryKeyRelatedField(source='tipo_veiculo', queryset=TipoVeiculo.objects.all())
+    tipo_veiculo_id = serializers.PrimaryKeyRelatedField(
+        source='tipo_veiculo', 
+        queryset=TipoVeiculo.objects.all(),
+        required=False,
+        allow_null=True
+    )
 
     class Meta:
         model = Veiculo

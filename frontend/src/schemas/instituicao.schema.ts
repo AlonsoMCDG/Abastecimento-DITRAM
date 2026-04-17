@@ -14,7 +14,7 @@ export const instituicaoFormSchema: FormSchema = {
       type: "text",
       placeholder: "Ex: Escola Municipal João das Neves",
       colSpan: 3,
-      required: true
+      required: true,
     },
     {
       name: "tipo",
@@ -28,7 +28,7 @@ export const instituicaoFormSchema: FormSchema = {
         { value: 'OUTRO', label: 'Outro' },
       ],
       colSpan: 1,
-      required: true
+      required: false,
     },
     {
       name: "secretaria_id", // Bate com o ForeignKey do Django
@@ -36,14 +36,14 @@ export const instituicaoFormSchema: FormSchema = {
       type: "select",
       required: true,
       endpoint: ENDPOINTS.organizacao.secretariasLookup, // Usa o endpoint otimizado
-      colSpan: 3
+      colSpan: 3,
     },
     {
       name: "ativo",
       label: "Instituição Ativa (Em operação atual)",
       type: "checkbox",
       colSpan: 3,
-      required: false
+      required: false,
     }
   ]
 };

@@ -35,7 +35,7 @@ class Instituicao(models.Model):
     ]
 
     nome = models.CharField(max_length=100, verbose_name="Nome")
-    tipo = models.CharField(max_length=100, choices=TIPO_CHOICES, verbose_name="Tipo")
+    tipo = models.CharField(max_length=100, choices=TIPO_CHOICES, verbose_name="Tipo", null=True, blank=True)
     
     secretaria = models.ForeignKey(
         Secretaria, # Importado diretamente no topo
@@ -43,10 +43,13 @@ class Instituicao(models.Model):
         related_name="instituicoes"
     )
     
-    ativo = models.BooleanField(default=True, verbose_name="Ativa") # NOVO: Controle de inativação
+    ativo = models.BooleanField(default=True, verbose_name="Ativa")
 
     def __str__(self):
-        return f"{self.nome} ({self.get_tipo_display()})"
+        if self.tipo:
+            return f"{self.nome} ({self.get_tipo_display()})"
+        return self.nome
+        
 
     class Meta:
         verbose_name = "Instituição"

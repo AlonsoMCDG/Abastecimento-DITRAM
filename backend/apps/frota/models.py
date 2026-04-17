@@ -25,8 +25,8 @@ class Veiculo(models.Model):
     
     # FKs Obrigatórias
     secretaria = models.ForeignKey(Secretaria, on_delete=models.PROTECT, related_name="veiculos")
-    tipo_veiculo = models.ForeignKey(TipoVeiculo, on_delete=models.PROTECT, related_name="veiculos")
     tipo_combustivel = models.ForeignKey(TipoCombustivel, on_delete=models.PROTECT, related_name="veiculos")
+    tipo_veiculo = models.ForeignKey(TipoVeiculo, on_delete=models.PROTECT, related_name="veiculos", null=True, blank=True)
 
     # Campo obrigatório, mas com default para poupar o clique do usuário
     unidade_consumo = models.CharField(max_length=20, choices=UNIDADE_CONSUMO_CHOICES, default="KM_POR_L")
