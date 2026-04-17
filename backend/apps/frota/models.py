@@ -20,7 +20,7 @@ class Veiculo(models.Model):
     ]
 
     # === CAMPOS OBRIGATÓRIOS (O Mínimo Viável) ===
-    modelo = models.CharField(max_length=100)
+    modelo = models.CharField(max_length=200)
     hodometro_atual = models.FloatField(verbose_name="Hodômetro Inicial")
     
     # FKs Obrigatórias
