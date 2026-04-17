@@ -33,9 +33,12 @@ export const MASKS = {
   },
   
   // Máscara dinâmica para números inteiros (Permite campo vazio e remove letras/símbolos)
-  INTEIRO: (value: string) => {
-    if (!value) return ""; 
-    return value.replace(/\D/g, ''); 
+  INTEIRO: {
+    mask: Number,
+    scale: 0,               // Força ser inteiro (bloqueia vírgula/ponto)
+    thousandsSeparator: '', // Sem separador de milhar (ex: 50, não 5.0)
+    min: 0,                 // Impede números negativos
+    normalizeZeros: true,   // Remove zeros à esquerda indesejados (ex: "04" vira "4")
   },
 
   // Exemplo de strings simples
