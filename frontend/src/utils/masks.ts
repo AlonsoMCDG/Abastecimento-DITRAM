@@ -32,6 +32,12 @@ export const MASKS = {
     prepare: (char: string) => char.toUpperCase()
   },
   
+  // Máscara dinâmica para números inteiros (Permite campo vazio e remove letras/símbolos)
+  INTEIRO: (value: string) => {
+    if (!value) return ""; 
+    return value.replace(/\D/g, ''); 
+  },
+
   // Exemplo de strings simples
   CPF: '000.000.000-00',
   CNPJ: '00.000.000/0000-00',
