@@ -2,125 +2,96 @@ from django.db import models
 from apps.organizacao.models import Secretaria, Instituicao
 
 TIPO_LOCOMOCAO_CHOICES = [
-    ("TERRESTRE", "Terrestre"),
-    ("FLUVIAL", "Fluvial"),
+    ("TERRESTRE", "Terrestre"), ("FLUVIAL", "Fluvial"),
 ]
 
+class TipoManager(models.Manager):
+    def get_by_natural_key(self, nome):
+        return self.get(nome=nome)
+
 class TipoCombustivel(models.Model):
-    nome = models.CharField(max_length=50, unique=True) # Ex: Gasolina, Diesel S10
+    nome = models.CharField(max_length=50, unique=True)
     ativo = models.BooleanField(default=True)
+    
+    objects = TipoManager()
+    def natural_key(self): return (self.nome,)
+    def __str__(self): return self.nome
 
 class TipoVeiculo(models.Model):
-    nome = models.CharField(max_length=50, unique=True) # Ex: Ônibus, Carro, Moto
+    nome = models.CharField(max_length=50, unique=True)
+    
+    objects = TipoManager()
+    def natural_key(self): return (self.nome,)
+    def __str__(self): return self.nome
+
+# ---
+# ATENÇÃO SOBRE O VEÍCULO: Como a placa é opcional, 
+# a Natural Key do veículo precisa ser a união do modelo com a placa (se existir).
+# Não é a NK mais limpa do mundo, mas protege o barco e o carro.
+class VeiculoManager(models.Manager):
+    def get_by_natural_key(self, modelo, placa):
+        return self.get(modelo=modelo, placa=placa)
 
 class Veiculo(models.Model):
-    UNIDADE_CONSUMO_CHOICES = [
-        ("KM_POR_L", "km/L"),
-        ("L_POR_H", "L/h")
-    ]
+    UNIDADE_CONSUMO_CHOICES = [("KM_POR_L", "km/L"), ("L_POR_H", "L/h")]
 
-    # === CAMPOS OBRIGATÓRIOS (O Mínimo Viável) ===
     modelo = models.CharField(max_length=200)
     hodometro_atual = models.FloatField(verbose_name="Hodômetro Inicial")
-    
-    # FKs Obrigatórias
     secretaria = models.ForeignKey(Secretaria, on_delete=models.PROTECT, related_name="veiculos")
     tipo_combustivel = models.ForeignKey(TipoCombustivel, on_delete=models.PROTECT, related_name="veiculos")
     tipo_veiculo = models.ForeignKey(TipoVeiculo, on_delete=models.PROTECT, related_name="veiculos", null=True, blank=True)
-
-    # Campo obrigatório, mas com default para poupar o clique do usuário
     unidade_consumo = models.CharField(max_length=20, choices=UNIDADE_CONSUMO_CHOICES, default="KM_POR_L")
     ativo = models.BooleanField(default=True)
-
-    # === CAMPOS OPCIONAIS (Ficha Técnica e Casos Específicos) ===
     
-    # Placa (barqueiros não têm)
     placa = models.CharField(max_length=8, unique=True, null=True, blank=True)
-    
-    # Textos
     tipo_locomocao = models.CharField(max_length=50, choices=TIPO_LOCOMOCAO_CHOICES, blank=True)
+    capacidade_carga_kg = models.FloatField(null=True, blank=True)
+    capacidade_pessoas = models.IntegerField(null=True, blank=True)
     
-    # Numéricos
-    capacidade_carga_kg = models.FloatField(null=True, blank=True, verbose_name="Capacidade de Carga (kg)")
-    capacidade_pessoas = models.IntegerField(null=True, blank=True, verbose_name="Capacidade de Pessoas")
-    
-    consumo_estimado_combustivel = models.DecimalField(
-        max_digits=10, 
-        decimal_places=3, 
-        null=True,
-        blank=True,
-        verbose_name="Consumo Estimado (Combustível)"
-    )
-    consumo_estimado_oleo = models.DecimalField(
-        max_digits=10, 
-        decimal_places=3, 
-        null=True, 
-        blank=True,
-        verbose_name="Consumo Estimado (Óleo)"
-    )
+    consumo_estimado_combustivel = models.DecimalField(max_digits=10, decimal_places=3, null=True, blank=True)
+    consumo_estimado_oleo = models.DecimalField(max_digits=10, decimal_places=3, null=True, blank=True)
 
-    def __str__(self):
-        if self.placa:
-            return f"{self.modelo} - {self.placa}"
-        return self.modelo
+    objects = VeiculoManager()
 
     class Meta:
         verbose_name = "Veículo"
         verbose_name_plural = "Veículos"
+        unique_together = ['modelo', 'placa'] # Garante a integridade da Natural Key
 
-class Rota(models.Model):
-    # === CAMPOS OBRIGATÓRIO (O Mínimo Viável) ===
-    nome = models.CharField(max_length=100)
-
-    # === CAMPOS AUTOMÁTICOS (Não exigem esforço do usuário) ===
-    distancia_km = models.DecimalField(max_digits=8, decimal_places=2, default=0)
-    tipo_locomocao = models.CharField(
-        max_length=50,
-        choices=TIPO_LOCOMOCAO_CHOICES,
-        default='TERRESTRE'
-    )
-    ativa = models.BooleanField(default=True)
-
-    # === CAMPOS OPCIONAIS (Ficha Técnica e Organização) ===
-    
-    consumo_estimado_combustivel = models.DecimalField(
-        max_digits=10, 
-        decimal_places=3, 
-        null=True,            # Adicionado
-        blank=True,           # Adicionado
-        verbose_name="Consumo Estimado (Combustível)"
-    )
-    
-    consumo_estimado_oleo = models.DecimalField(
-        max_digits=10, 
-        decimal_places=3, 
-        null=True, 
-        blank=True,
-        verbose_name="Consumo Estimado (Óleo)"
-    )
-
-    detalhes = models.CharField(max_length=256, blank=True, null=True)
-    
-    # Filtros e Agrupamentos organizacionais
-    secretaria = models.ForeignKey(
-        Secretaria,
-        on_delete=models.PROTECT,
-        related_name="rotas",
-        null=True,
-        blank=True,
-    )
-
-    instituicao = models.ForeignKey(
-        Instituicao,
-        on_delete=models.PROTECT,
-        related_name="rotas",
-        null=True,
-        blank=True,
-    )
+    def natural_key(self):
+        return (self.modelo, self.placa)
 
     def __str__(self):
-        return self.nome
+        if self.placa: return f"{self.modelo} - {self.placa}"
+        return self.modelo
+
+
+class RotaManager(models.Manager):
+    def get_by_natural_key(self, nome):
+        return self.get(nome=nome)
+
+class Rota(models.Model):
+    # O nome da rota deve ser único para a Natural Key funcionar
+    nome = models.CharField(max_length=100, unique=True)
+    distancia_km = models.DecimalField(max_digits=8, decimal_places=2, default=0)
+    tipo_locomocao = models.CharField(max_length=50, choices=TIPO_LOCOMOCAO_CHOICES, default='TERRESTRE')
+    ativa = models.BooleanField(default=True)
+    
+    consumo_estimado_combustivel = models.DecimalField(max_digits=10, decimal_places=3, null=True, blank=True)
+    consumo_estimado_oleo = models.DecimalField(max_digits=10, decimal_places=3, null=True, blank=True)
+    detalhes = models.CharField(max_length=256, blank=True, null=True)
+    
+    secretaria = models.ForeignKey(Secretaria, on_delete=models.PROTECT, related_name="rotas", null=True, blank=True)
+    instituicao = models.ForeignKey(Instituicao, on_delete=models.PROTECT, related_name="rotas", null=True, blank=True)
+
+    objects = RotaManager()
 
     class Meta:
         verbose_name = "Rota"
         verbose_name_plural = "Rotas"
+
+    def natural_key(self):
+        return (self.nome,)
+
+    def __str__(self):
+        return self.nome

@@ -1,9 +1,8 @@
 from django.db import models
 
 class Pessoa(models.Model):
-    # Considera max_length=14 para suportar a máscara '000.000.000-00'
     cpf = models.CharField(
-        max_length=14, 
+        max_length=11, 
         unique=True, 
         null=True, 
         blank=True, 
@@ -17,22 +16,24 @@ class Pessoa(models.Model):
         verbose_name_plural = "Pessoas"
 
     def __str__(self):
-        if self.cpf:
-            return f"{self.nome} ({self.cpf})"
+        if self.cpf and len(self.cpf) == 11:
+            cpf_formatado = f"{self.cpf[:3]}.{self.cpf[3:6]}.{self.cpf[6:9]}-{self.cpf[9:]}"
+            return f"{self.nome} ({cpf_formatado})"
         return self.nome
 
     def save(self, *args, **kwargs):
         if self.nome:
             self.nome = " ".join(self.nome.split()).title()
         
-        # Tratamento para o UNIQUE=TRUE
         if self.cpf:
-            self.cpf = self.cpf.strip()
-            # Se após o strip() a string ficar vazia, converte para None
-            if self.cpf == "":
+            # Extrai apenas os números, removendo qualquer máscara que venha do frontend
+            cpf_limpo = ''.join(filter(str.isdigit, str(self.cpf)))
+            
+            if cpf_limpo == "":
                 self.cpf = None
+            else:
+                self.cpf = cpf_limpo
         else:
-            # Se vier vazio do frontend, garante que seja None e não ""
             self.cpf = None 
             
         super().save(*args, **kwargs)
