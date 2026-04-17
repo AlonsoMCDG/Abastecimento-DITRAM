@@ -25,4 +25,12 @@ export const coreApi = {
   backupSqlite() {
     return client.get(ENDPOINTS.core.backupSqlite, { responseType: "blob" });
   },
+
+  uploadSeedFiles: (formData: FormData) => {
+    return client.post(ENDPOINTS.core.uploadJson, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
 };

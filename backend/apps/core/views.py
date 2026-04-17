@@ -1,9 +1,11 @@
 import os
+import tempfile
 from datetime import datetime
 from io import StringIO
 
 from django.conf import settings
 from django.core.management import call_command
+from django.db import connection
 from django.http import FileResponse, HttpResponse
 from django.utils.timezone import now
 from rest_framework.decorators import api_view, permission_classes
@@ -20,6 +22,48 @@ class IsSuperAdmin(BasePermission):
             and request.user.is_authenticated
             and getattr(request.user, "is_superuser", False)
         )
+
+
+# ==========================================
+# Upload de JSON com Correção de PK
+# ==========================================
+@api_view(["POST"])
+@permission_classes([IsSuperAdmin])
+def upload_seed_files(request):
+    files = request.FILES.getlist("files")
+    if not files:
+        return Response({"detail": "Nenhum arquivo enviado."}, status=400)
+
+    try:
+        # Usa um diretório temporário para não deixar lixo no servidor
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_paths = []
+            
+            for f in files:
+                file_path = os.path.join(temp_dir, f.name)
+                with open(file_path, 'wb+') as destination:
+                    for chunk in f.chunks():
+                        destination.write(chunk)
+                temp_paths.append(file_path)
+
+            # Roda o loaddata passando a lista de arquivos
+            call_command("loaddata", *temp_paths, verbosity=0)
+
+            # Sincronização de Sequência (CRÍTICO para PostgreSQL com JSONs hardcoded)
+            if connection.vendor in ['postgresql', 'mysql', 'oracle']:
+                out = StringIO()
+                apps_to_reset = ['organizacao', 'frota', 'pessoas', 'operacao', 'usuarios']
+                call_command('sqlsequencereset', *apps_to_reset, stdout=out)
+                sql = out.getvalue()
+                
+                if sql:
+                    with connection.cursor() as cursor:
+                        cursor.execute(sql)
+
+        return Response({"detail": f"{len(files)} arquivo(s) processado(s) e IDs sincronizados!"})
+
+    except Exception as e:
+        return Response({"detail": f"Erro ao processar: {str(e)}"}, status=500)
 
 
 @api_view(["POST"])
@@ -52,9 +96,10 @@ def backup_dumpdata(request):
     out = StringIO()
     call_command(
         "dumpdata",
-        "cadastros",
+        "organizacao",
         "frota",
-        "abastecimento",
+        "pessoas",
+        "operacao",
         "usuarios",
         indent=2,
         stdout=out,
@@ -115,4 +160,3 @@ def db_stats(request):
             },
         }
     )
-

@@ -7,6 +7,7 @@ from .views import (
     flush_db_keep_superadmin,
     reset_db_and_seed_default_data,
     seed_default_data_force,
+    upload_seed_files
 )
 
 
@@ -17,5 +18,6 @@ urlpatterns = [
     path("db/seed-force/", seed_default_data_force, name="core_seed_force"),
     path("db/flush/", flush_db_keep_superadmin, name="core_db_flush"),
     path("db/reset-and-seed/", reset_db_and_seed_default_data, name="core_reset_and_seed"),
+    path('upload-json/', upload_seed_files, name='upload_seed_files'),
 ]
 

@@ -1,20 +1,12 @@
 import logging
 from django.apps import apps
-from django.db.models.signals import post_delete, post_migrate, post_save, m2m_changed
+from django.db.models.signals import post_delete, post_save, m2m_changed
 from django.dispatch import receiver
 
 from .cache import bump_model_cache_version
 
 # Configura o logger padrão do Django
 logger = logging.getLogger(__name__)
-
-@receiver(post_migrate)
-def seed_on_first_run(sender, **kwargs):
-    try:
-        from .seed import seed_if_empty
-        seed_if_empty(verbosity=0)
-    except Exception as e:
-        logger.error(f"Falha ao executar o seed do banco de dados: {e}")
 
 
 def _invalidate_model_cache(sender, **kwargs):
@@ -49,4 +41,3 @@ def connect_model_cache_invalidation_signals():
             weak=False, 
             dispatch_uid=f"cache_inv_m2m:{model._meta.label}"
         )
-

@@ -23,6 +23,7 @@ export const ENDPOINTS = {
     resetAndSeed: "/core/db/reset-and-seed/",
     backupDumpdata: "/core/db/backup/dumpdata/",
     backupSqlite: "/core/db/backup/sqlite/",
+    uploadJson: "/core/db/upload-json/",
   },
 
   // -----------------------

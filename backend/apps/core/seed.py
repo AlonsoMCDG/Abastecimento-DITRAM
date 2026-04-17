@@ -2,11 +2,9 @@ from django.core.management import call_command
 from django.contrib.auth import get_user_model
 from django.db import transaction
 
-
 DEFAULT_SUPERADMIN_CPF = "99999999999"
 DEFAULT_SUPERADMIN_PASSWORD = "admin"
 DEFAULT_FIXTURE_NAME = "default_data"
-
 
 @transaction.atomic
 def ensure_superadmin(
@@ -32,23 +30,15 @@ def ensure_superadmin(
     user.set_password(password)
     user.save()
 
-
 def load_default_data(fixture_name: str = DEFAULT_FIXTURE_NAME, verbosity: int = 1):
     call_command("loaddata", fixture_name, verbosity=verbosity)
 
-
 def seed_if_empty(verbosity: int = 1):
-    from apps.organizacao.models import Secretaria
-
-    if Secretaria.objects.exists():
-        return False
-
-    ensure_superadmin()
-    load_default_data(verbosity=verbosity)
-    return True
-
+    # CORREÇÃO: Desativado propositalmente!
+    # Isso impede que o Django recarregue os dados "escondido" após um comando flush.
+    # O controle de seed agora é 100% manual via interface (Database Danger Page).
+    return False
 
 def seed_force(verbosity: int = 1):
     ensure_superadmin()
     load_default_data(verbosity=verbosity)
-
