@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.db import transaction
 from apps.operacao.models import OperadorVeiculo, Guia, AlocacaoServico, TipoServico
 
 from apps.pessoas.models import Pessoa
@@ -286,3 +287,24 @@ class GuiaWriteSerializer(serializers.ModelSerializer):
             'pessoa_id', 'veiculo_id', 'rota_id', 'tipo_servico_id', 
             'secretaria_id', 'instituicao_id', 'tipo_veiculo_id', 'tipo_combustivel_id'
         ]
+
+    @transaction.atomic  # Garante que se o veículo falhar, a guia não é salva (e vice-versa)
+    def create(self, validated_data):
+        # Salva a Guia de Abastecimento normalmente no banco
+        guia = super().create(validated_data)
+
+        # Pega a instância do veículo que acabou de ser vinculado à guia
+        veiculo = guia.veiculo
+
+        # Lógica de Atualização do Hodômetro (Com Proteção!)
+        hodometro_informado = guia.hodometro_atual
+        
+        if hodometro_informado:
+            # Proteção contra erros de digitação: O hodômetro do veículo só avança, nunca retrocede.
+            # Se o carro tem 50.000km e o cara digitou 5.000 na guia por engano, não atualizamos o veículo.
+            if hodometro_informado > veiculo.hodometro_atual:
+                veiculo.hodometro_atual = hodometro_informado
+                # Usamos update_fields para ganhar performance e não re-salvar a placa, modelo, etc.
+                veiculo.save(update_fields=['hodometro_atual'])
+
+        return guia
