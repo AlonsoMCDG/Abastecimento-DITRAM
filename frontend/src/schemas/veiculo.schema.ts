@@ -17,7 +17,7 @@ export const veiculoFormSchema: FormSchema = {
       type: "select",
       endpoint: ENDPOINTS.frota.tiposVeiculoLookup,
       colSpan: 1,
-      required: true
+      required: false,
     },
     {
       name: "modelo",
@@ -25,7 +25,7 @@ export const veiculoFormSchema: FormSchema = {
       type: "text",
       placeholder: "Ex: Toyota Hilux",
       colSpan: 1,
-      required: true
+      required: true,
     },
     {
       name: "placa",
@@ -34,6 +34,7 @@ export const veiculoFormSchema: FormSchema = {
       placeholder: "ABC1234",
       visibleIf: (values: Partial<VeiculoCreatePayload>) => values.tipo_veiculo_id != TIPO_VEICULO_BARCO_ID,
       colSpan: 1,
+      required: true,
     },
     {
       name: "secretaria_id",
@@ -41,7 +42,7 @@ export const veiculoFormSchema: FormSchema = {
       type: "select",
       endpoint: ENDPOINTS.organizacao.secretariasLookup,
       colSpan: 3,
-      required: true
+      required: true,
     },
     {
       name: "tipo_locomocao",
@@ -52,7 +53,7 @@ export const veiculoFormSchema: FormSchema = {
         { value: "FLUVIAL", label: "Fluvial" }
       ],
       colSpan: 1,
-      required: true
+      required: true,
     },
     {
       name: "tipo_combustivel_id",
@@ -60,7 +61,7 @@ export const veiculoFormSchema: FormSchema = {
       type: "select",
       endpoint: ENDPOINTS.frota.tiposCombustivelLookup,
       colSpan: 1,
-      required: true
+      required: true,
     },
     {
       name: "unidade_consumo",
@@ -90,7 +91,7 @@ export const veiculoFormSchema: FormSchema = {
       placeholder: '0,0',
       colSpan: 1,
       visibleIf: (values: Partial<VeiculoCreatePayload>) => values.tipo_veiculo_id == TIPO_VEICULO_BARCO_ID,
-      required: false
+      required: false,
     },
     {
       name: "hodometro_atual",
@@ -100,7 +101,7 @@ export const veiculoFormSchema: FormSchema = {
       suffix: 'km',
       placeholder: '0,0',
       colSpan: 1,
-      required: true
+      required: true,
     },
     {
       name: "capacidade_carga_kg",
@@ -115,6 +116,7 @@ export const veiculoFormSchema: FormSchema = {
       name: "capacidade_pessoas",
       label: "Capacidade Pessoas",
       type: "number",
+      mask: MASKS.INTEIRO,
       colSpan: 1,
       placeholder: '0',
     },
@@ -123,7 +125,7 @@ export const veiculoFormSchema: FormSchema = {
       label: "Veículo Ativo (Disponível para uso)",
       type: "checkbox",
       colSpan: 3,
-      required: false
+      required: false,
     }
   ]
 };

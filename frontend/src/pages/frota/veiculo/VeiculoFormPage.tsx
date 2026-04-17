@@ -60,6 +60,9 @@ export default function VeiculoFormPage() {
       
       const novoTipoLocomocao = (numValue === TIPO_VEICULO_BARCO_ID) ? 'FLUVIAL' : 'TERRESTRE';
       setValue('tipo_locomocao', novoTipoLocomocao as PathValue<Veiculo, "tipo_locomocao">, { shouldValidate: true })
+
+      const novaUnidadeConsumo = (numValue === TIPO_VEICULO_BARCO_ID) ? 'L_POR_H' : 'KM_POR_L';
+      setValue('unidade_consumo', novaUnidadeConsumo as PathValue<Veiculo, "unidade_consumo">, { shouldValidate: true })
       
       return;
     }
