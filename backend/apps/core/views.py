@@ -46,6 +46,9 @@ def upload_seed_files(request):
                         destination.write(chunk)
                 temp_paths.append(file_path)
 
+            # Ordena os arquivos recebidos
+            temp_paths.sort()
+
             # Roda o loaddata passando a lista de arquivos
             call_command("loaddata", *temp_paths, verbosity=0)
 
