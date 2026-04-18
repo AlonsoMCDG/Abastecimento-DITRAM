@@ -2,12 +2,11 @@ import axios from "axios";
 
 // Utilitário para formatar valores de erro do DRF (geralmente arrays de strings)
 function stringifyValue(value: unknown): string {
-  if (value == null || value == undefined) return ""; // Cobre null e undefined
+  if (value == null || value == undefined) return ""; 
   if (Array.isArray(value)) return value.map(stringifyValue).join(", ");
   if (typeof value === "string") return value;
   
   // DRF pode retornar erros aninhados. Ex: perfil: { idade: ["Obrigatória"] }
-  // Extraímos os valores internos em vez de mostrar um JSON crú na tela.
   if (typeof value === "object") {
     return Object.values(value as Record<string, unknown>)
       .map(stringifyValue)
@@ -27,7 +26,7 @@ export function getApiErrorMessage(err: unknown, fallback: string = "Ocorreu um 
   if (!err.response) {
     const baseMsg = "Não foi possível conectar ao servidor. Verifique sua conexão com a internet.";
     
-    // DEBUG PARA DESENVOLVIMENTO: Só mostra o IP se estiver rodando localmente (npm run dev)
+    // DEBUG PARA DESENVOLVIMENTO
     if (import.meta.env.DEV) {
       return `${baseMsg}\n(Dev Info: Verifique se o backend em ${import.meta.env.VITE_API_URL} está rodando e acessível)`;
     }
@@ -38,22 +37,17 @@ export function getApiErrorMessage(err: unknown, fallback: string = "Ocorreu um 
   const status = err.response.status;
   const data = err.response.data as unknown;
 
-  // 2. Erros críticos do servidor (500+) ou respostas HTML (Django Debug Page)
-  // Usa Regex para pegar qualquer variação de página HTML de erro
-  if (status >= 500 || (typeof data === "string" && /<html/i.test(data))) {
+  // 2. Bloqueio imediato apenas para HTML (Ex: Página amarela de erro do Django ou Nginx 502)
+  if (typeof data === "string" && /<html/i.test(data)) {
     return "Erro interno no servidor. Nossa equipe já foi notificada. Tente novamente mais tarde.";
   }
 
-  // 3. Se a resposta for apenas uma string de erro simples (não HTML)
-  if (typeof data === "string") {
-    return data.trim() || fallback;
-  }
-
-  // 4. Tratamento de Erros de Validação do Django REST Framework (DRF)
+  // 3. Tratamento de Erros de Validação do Django REST Framework (DRF) e Erros Customizados
+  // Movido para cima! Ele intercepta nossos erros 400 e os 500 customizados antes do fallback genérico.
   if (data && typeof data === "object") {
     const anyData = data as Record<string, unknown>;
 
-    // Padrão de exceção explícita do DRF (ex: Autenticação falhou)
+    // Padrão de exceção explícita do DRF (ex: Autenticação falhou ou nosso {"detail": "..."})
     if (typeof anyData.detail === "string") {
       return anyData.detail;
     }
@@ -77,6 +71,17 @@ export function getApiErrorMessage(err: unknown, fallback: string = "Ocorreu um 
     if (parts.length > 0) {
       return parts.join("\n");
     }
+  }
+
+  // 4. Erros críticos do servidor (500+) não tratados
+  // Se passou pelo bloco de JSON e chegou aqui sendo 500+, exibe a mensagem genérica
+  if (status >= 500) {
+    return "Erro interno no servidor. Nossa equipe já foi notificada. Tente novamente mais tarde.";
+  }
+
+  // 5. Se a resposta for apenas uma string de erro simples (não HTML)
+  if (typeof data === "string") {
+    return data.trim() || fallback;
   }
 
   return fallback;
