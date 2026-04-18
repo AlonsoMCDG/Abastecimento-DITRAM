@@ -36,7 +36,7 @@ class Veiculo(models.Model):
     UNIDADE_CONSUMO_CHOICES = [("KM_POR_L", "km/L"), ("L_POR_H", "L/h")]
 
     modelo = models.CharField(max_length=200)
-    hodometro_atual = models.FloatField(verbose_name="Hodômetro Inicial")
+    hodometro_atual = models.FloatField(verbose_name="Hodômetro Inicial", default=0)
     secretaria = models.ForeignKey(Secretaria, on_delete=models.PROTECT, related_name="veiculos")
     tipo_combustivel = models.ForeignKey(TipoCombustivel, on_delete=models.PROTECT, related_name="veiculos")
     tipo_veiculo = models.ForeignKey(TipoVeiculo, on_delete=models.PROTECT, related_name="veiculos", null=True, blank=True)
