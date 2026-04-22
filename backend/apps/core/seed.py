@@ -15,10 +15,10 @@ def ensure_superadmin(
     if User.objects.filter(cpf=cpf).exists():
         return
 
-    user = User(
+    # Delega a criação para o seu manager customizado no models.py
+    User.objects.create_superuser(
         cpf=cpf,
-        is_staff=True,
-        is_superuser=True,
+        password=password,
         first_name="Super",
         last_name="Admin",
         can_write_cadastros=True,
@@ -27,8 +27,6 @@ def ensure_superadmin(
         can_edit_guia_abastecimento=True,
         can_delete_guia_abastecimento=True,
     )
-    user.set_password(password)
-    user.save()
 
 def load_default_data(fixture_name: str = DEFAULT_FIXTURE_NAME, verbosity: int = 1):
     call_command("loaddata", fixture_name, verbosity=verbosity)
