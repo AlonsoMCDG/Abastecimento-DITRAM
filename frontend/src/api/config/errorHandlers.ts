@@ -24,14 +24,18 @@ export function getApiErrorMessage(err: unknown, fallback: string = "Ocorreu um 
 
   // 1. Erro de Rede (Servidor fora do ar, CORS, ou IP errado)
   if (!err.response) {
-    const baseMsg = "Não foi possível conectar ao servidor. Verifique sua conexão com a internet.";
-    
+    // Captura o motivo exato da falha gerado pelo navegador/Axios
+    const axiosMessage = err.message || "Erro de rede desconhecido";
+    const axiosCode = err.code ? ` [${err.code}]` : "";
+    const erroReal = `${axiosMessage}${axiosCode}`;
+
     // DEBUG PARA DESENVOLVIMENTO
     if (import.meta.env.DEV) {
-      return `${baseMsg}\n(Dev Info: Verifique se o backend em ${import.meta.env.VITE_API_URL} está rodando e acessível)`;
+      return `Falha na requisição: ${erroReal}\n(Dev Info: Se for "Network Error", abra o Console do navegador (F12) e procure por bloqueios de CORS. Caso contrário, verifique se o servidor em ${import.meta.env.VITE_API_URL} está rodando e acessível na mesma rede.)`;
     }
     
-    return baseMsg;
+    // MENSAGEM PARA PRODUÇÃO
+    return `Não foi possível conectar ao servidor. Detalhe técnico: ${erroReal}. Verifique sua conexão com a internet.`;
   }
 
   const status = err.response.status;
