@@ -35,13 +35,21 @@ class Usuario(AbstractUser):
     can_delete_guia_abastecimento = models.BooleanField(default=False)
 
     USERNAME_FIELD = 'cpf' 
-    REQUIRED_FIELDS = ['email', 'first_name', 'last_name']
+    REQUIRED_FIELDS = ['first_name', 'last_name']
 
     objects = UsuarioManager()
 
     class Meta:
         verbose_name = "Usuário"
         verbose_name_plural = "Usuários"
+    
+    def clean(self):
+        if self.cpf:
+            self.cpf = ''.join(filter(str.isdigit, str(self.cpf)))
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.get_full_name() or self.cpf
