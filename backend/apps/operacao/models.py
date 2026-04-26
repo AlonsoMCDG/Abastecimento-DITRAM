@@ -127,6 +127,23 @@ class GuiaAbastecimento(models.Model):
         # Exibição aprimorada do código antigo
         identificador = self.veiculo.placa if self.veiculo else self.identificacao_avulsa or self.pessoa.nome
         return f"Guia #{self.id} - {identificador} - {self.data_hora.strftime('%d/%m/%Y')}"
+    
+    def clean(self):
+        """Validação lógica antes de salvar no banco"""
+        if self.modalidade == 'TERRESTRE' and not self.veiculo:
+            raise ValidationError("Para abastecimento terrestre, o veículo é obrigatório.")
+    
+    def save(self, *args, **kwargs):
+        # Transforma texto manual em Rota fixa
+        if self.rota_manual and not self.rota:
+            nova_rota, created = Rota.objects.get_or_create(
+                nome=self.rota_manual.strip().title(),
+                secretaria=self.secretaria
+            )
+            self.rota = nova_rota
+            self.rota_manual = None # Limpa o manual pois agora é oficial
+            
+        super().save(*args, **kwargs)
 
 
 class RegistroHodometroDiario(models.Model):
@@ -141,3 +158,11 @@ class RegistroHodometroDiario(models.Model):
         if self.distancia_percorrida < 0:
             raise ValidationError("Hodômetro final não pode ser menor que o inicial.")
         super().save(*args, **kwargs)
+
+        # Sincroniza com o cadastro do Veículo
+        if self.guia.veiculo:
+            veiculo = self.guia.veiculo
+            # Só atualiza se o novo hodômetro for maior que o atual (evita erro de lançamento retroativo)
+            if self.hodometro_final > veiculo.hodometro_atual:
+                veiculo.hodometro_atual = self.hodometro_final
+                veiculo.save()
