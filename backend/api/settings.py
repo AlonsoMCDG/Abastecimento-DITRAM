@@ -65,6 +65,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.postgres',
     'django_filters',
     'rest_framework',
     'rest_framework_simplejwt.token_blacklist',
@@ -262,7 +263,7 @@ AUTH_USER_MODEL = 'usuarios.Usuario'
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
-        "LOCATION": "abastecimento-seme",
+        "LOCATION": "abastecimento-ditram",
     }
 }
 

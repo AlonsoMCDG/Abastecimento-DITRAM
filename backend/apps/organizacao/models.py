@@ -35,31 +35,27 @@ class InstituicaoManager(models.Manager):
 
 class Instituicao(models.Model):
     TIPO_CHOICES = [
-        ('ESCOLA', 'Escola'), ('CRECHE', 'Creche'),
-        ('UPA', 'UPA'), ('HOSPITAL', 'Hospital'), ('OUTRO', 'Outro'),
+        ('ESCOLA', 'Escola'), ('UPA', 'UPA'), 
+        ('HOSPITAL', 'Hospital'), ('OUTRO', 'Outro'),
     ]
-
     nome = models.CharField(max_length=100, verbose_name="Nome")
-    tipo = models.CharField(max_length=100, choices=TIPO_CHOICES, verbose_name="Tipo", null=True, blank=True)
-    secretaria = models.ForeignKey(Secretaria, on_delete=models.PROTECT, related_name="instituicoes")
+    tipo = models.CharField(max_length=50, choices=TIPO_CHOICES, verbose_name="Tipo", null=True, blank=True)
+    secretaria = models.ForeignKey(Secretaria, on_delete=models.CASCADE, related_name="instituicoes")
     ativo = models.BooleanField(default=True, verbose_name="Ativa")
-
+    
     objects = InstituicaoManager()
 
     class Meta:
         verbose_name = "Instituição"
         verbose_name_plural = "Instituições"
-        # Evita cadastrar a mesma escola duas vezes na mesma secretaria
-        unique_together = ['nome', 'secretaria'] 
+        unique_together = ['nome', 'secretaria']
 
     def __str__(self):
-        if self.tipo:
-            return f"{self.nome} ({self.get_tipo_display()})"
-        return self.nome
+        return f"{self.nome} ({self.secretaria.sigla})"
 
     def natural_key(self):
-        # A chave natural depende da secretaria associada
         return (self.nome,) + self.secretaria.natural_key()
+    
     natural_key.dependencies = ['organizacao.secretaria']
 
     def save(self, *args, **kwargs):

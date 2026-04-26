@@ -1,0 +1,93 @@
+@startuml
+hide circle
+skinparam linetype ortho
+
+entity "Secretaria" as sec {
+  * id : INT <<PK>>
+  --
+  * sigla : VARCHAR(10)
+  nome : VARCHAR(100)
+}
+
+entity "Instituicao" as inst {
+  * id : INT <<PK>>
+  --
+  * nome : VARCHAR(100)
+  * secretaria_id : INT <<FK>>
+}
+
+' A "Atividade" administrativa (Endemias, Saúde, etc)
+entity "Tipo_Atividade" as tipo_ativ {
+  * id : INT <<PK>>
+  --
+  * nome : VARCHAR(100)
+}
+
+' Tabela de Rotas Sugeridas (O sistema aprende aqui)
+entity "Rota" as rota {
+  * id : INT <<PK>>
+  --
+  * nome : VARCHAR(255)
+  * secretaria_id : INT <<FK>>
+}
+
+entity "Pessoa" as pessoa {
+  * id : INT <<PK>>
+  --
+  * nome : VARCHAR(200)
+  * funcao : VARCHAR(50)
+  cpf : VARCHAR(11)
+}
+
+entity "Veiculo" as veic {
+  * id : INT <<PK>>
+  --
+  * placa : VARCHAR(8) <<UK>>
+  * modelo : VARCHAR(100)
+}
+
+entity "Guia_Abastecimento" as guia {
+  * id : INT <<PK>>
+  --
+  * data_hora : DATETIME
+  * modalidade : ENUM('Terrestre', 'Fluvial', 'Roçagem', 'Borrifação', 'Corote')
+  -- Relacionamentos --
+  * secretaria_id : INT <<FK>>
+  * tipo_atividade_id : INT <<FK>>
+  * pessoa_id : INT <<FK>>
+  veiculo_id : INT <<FK>> <<NULL>>
+  instituicao_id : INT <<FK>> <<NULL>>
+  
+  ' Rota vinculada (se selecionada da lista)
+  rota_id : INT <<FK>> <<NULL>>
+  ' Rota manual (se digitada na hora)
+  rota_texto_manual : VARCHAR(255) <<NULL>>
+  
+  -- Consumo --
+  * tipo_combustivel : VARCHAR(50)
+  * qtd_litros : DECIMAL(10,3)
+  qtd_oleo_lube : DECIMAL(10,3) <<NULL>>
+  periodo_uso_dias : INT <<NULL>> 
+  observacao : TEXT <<NULL>>
+}
+
+entity "Registro_Hodometro_Diario" as log_hodo {
+  * id : INT <<PK>>
+  --
+  * guia_id : INT <<FK>>
+  * data_referencia : DATE
+  * hodometro_inicial : DECIMAL(10,2)
+  * hodometro_final : DECIMAL(10,2)
+  distancia_percorrida : DECIMAL(10,2)
+}
+
+sec ||--o{ inst
+sec ||--o{ rota
+sec ||--o{ guia
+tipo_ativ ||--o{ guia
+rota |o--o{ guia
+pessoa ||--o{ guia
+veic |o--o{ guia
+inst |o--o{ guia
+guia ||--o{ log_hodo
+@enduml
