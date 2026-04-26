@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.validators import MinValueValidator
 from apps.organizacao.models import Secretaria
 
 class TipoCombustivelManager(models.Manager):
@@ -43,11 +44,13 @@ class Veiculo(models.Model):
 
     modelo = models.CharField(max_length=200)
     
-    placa = models.CharField(max_length=8, unique=True)
+    placa = models.CharField(max_length=9, unique=True)
     
     categoria = models.CharField(max_length=50, choices=CATEGORIA_CHOICES)
     
-    hodometro_atual = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="Hodômetro Atual")
+    hodometro_atual = models.DecimalField(max_digits=10, decimal_places=2, default=0, 
+                                          validators=[MinValueValidator(0.0)], 
+                                          verbose_name="Hodômetro Atual")
     
     unidade_consumo = models.CharField(max_length=20, choices=UNIDADE_CONSUMO_CHOICES, default="KM_POR_L")
     consumo_estimado_combustivel = models.DecimalField(max_digits=10, decimal_places=3, null=True, blank=True)
@@ -62,6 +65,15 @@ class Veiculo(models.Model):
     class Meta:
         verbose_name = "Veículo (Frota)"
         verbose_name_plural = "Veículos (Frota)"
+
+    def clean(self):
+        # Normaliza a placa: remove traços/espaços e passa a maiúsculas
+        if self.placa:
+            self.placa = ''.join(carater for carater in self.placa if carater.isalnum()).upper()
+
+    def save(self, *args, **kwargs):
+        self.clean() # Garante que o clean corre sempre antes de guardar
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.modelo} - {self.placa}"
@@ -83,7 +95,9 @@ class Rota(models.Model):
     secretaria = models.ForeignKey(Secretaria, on_delete=models.CASCADE, related_name="rotas_sugeridas")
     
     # Campos operacionais
-    distancia_km = models.DecimalField(max_digits=8, decimal_places=2, default=0, null=True, blank=True)
+    distancia_km = models.DecimalField(max_digits=8, decimal_places=2, 
+                                       validators=[MinValueValidator(0.0)], 
+                                       default=0, null=True, blank=True)
     detalhes = models.CharField(max_length=256, blank=True, null=True)
     ativa = models.BooleanField(default=True)
 
@@ -93,6 +107,14 @@ class Rota(models.Model):
         verbose_name = "Rota Sugerida"
         verbose_name_plural = "Rotas Sugeridas"
         unique_together = ['nome', 'secretaria']
+
+    def clean(self):
+        if self.nome:
+            self.nome = " ".join(self.nome.split()).title()
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.nome} ({self.secretaria.sigla})"
