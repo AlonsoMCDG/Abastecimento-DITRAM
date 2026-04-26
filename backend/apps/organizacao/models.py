@@ -14,19 +14,22 @@ class Secretaria(models.Model):
     class Meta:
         verbose_name = "Secretaria"
         verbose_name_plural = "Secretarias"
+    
+    def clean(self):
+        if self.nome:
+            self.nome = " ".join(self.nome.split())
+        if self.sigla:
+            self.sigla = "".join(self.sigla.split()).upper()
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.sigla
 
     def natural_key(self):
         return (self.sigla,)
-
-    def save(self, *args, **kwargs):
-        if self.nome:
-            self.nome = self.nome.strip()
-        if self.sigla:
-            self.sigla = self.sigla.strip().upper()
-        super().save(*args, **kwargs)
 
 
 class InstituicaoManager(models.Manager):
@@ -49,6 +52,14 @@ class Instituicao(models.Model):
         verbose_name = "Instituição"
         verbose_name_plural = "Instituições"
         unique_together = ['nome', 'secretaria']
+    
+    def clean(self):
+        if self.nome:
+            self.nome = " ".join(self.nome.split()).title()
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.nome} ({self.secretaria.sigla})"
@@ -57,8 +68,3 @@ class Instituicao(models.Model):
         return (self.nome,) + self.secretaria.natural_key()
     
     natural_key.dependencies = ['organizacao.secretaria']
-
-    def save(self, *args, **kwargs):
-        if self.nome:
-            self.nome = " ".join(self.nome.split())
-        super().save(*args, **kwargs)
