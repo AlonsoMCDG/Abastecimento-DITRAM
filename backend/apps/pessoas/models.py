@@ -23,23 +23,22 @@ class Pessoa(models.Model):
         verbose_name = "Pessoa"
         verbose_name_plural = "Pessoas"
 
-    def __str__(self):
-        return f"{self.nome} ({self.get_funcao_display()})"
-
-    def natural_key(self):
-        return (self.cpf,)
-    
-    def save(self, *args, **kwargs):
+    def clean(self):
         if self.nome:
             self.nome = " ".join(self.nome.split()).title()
         
         if self.cpf:
             cpf_limpo = ''.join(filter(str.isdigit, str(self.cpf)))
-            
             if len(cpf_limpo) != 11:
-                # Interrompe o salvamento corretamente
-                raise ValidationError({'cpf': 'O CPF deve conter exatamente 11 dígitos.'})
-            else:
-                self.cpf = cpf_limpo
-            
+                raise ValidationError({'cpf': 'O CPF deve conter exatamente 11 dígitos numéricos.'})
+            self.cpf = cpf_limpo
+    
+    def save(self, *args, **kwargs):
+        self.clean()
         super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.nome} ({self.get_funcao_display()})"
+
+    def natural_key(self):
+        return (self.cpf,)
