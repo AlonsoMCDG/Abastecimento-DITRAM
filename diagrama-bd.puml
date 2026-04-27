@@ -16,14 +16,12 @@ entity "Instituicao" as inst {
   * secretaria_id : INT <<FK>>
 }
 
-' A "Atividade" administrativa (Endemias, Saúde, etc)
 entity "Tipo_Atividade" as tipo_ativ {
   * id : INT <<PK>>
   --
   * nome : VARCHAR(100)
 }
 
-' Tabela de Rotas Sugeridas (O sistema aprende aqui)
 entity "Rota" as rota {
   * id : INT <<PK>>
   --
@@ -31,12 +29,24 @@ entity "Rota" as rota {
   * secretaria_id : INT <<FK>>
 }
 
+' Nova entidade para armazenar os cargos/funções possíveis
+entity "Funcao" as func {
+  * id : INT <<PK>>
+  --
+  * nome : VARCHAR(50) <<UK>>
+}
+
 entity "Pessoa" as pessoa {
   * id : INT <<PK>>
   --
   * nome : VARCHAR(200)
-  * funcao : VARCHAR(50)
-  cpf : VARCHAR(11)
+  * cpf : VARCHAR(11) <<UK>>
+}
+
+' Tabela associativa (N:M) para permitir múltiplas funções
+entity "Pessoa_Funcao" as pessoa_func {
+  * pessoa_id : INT <<FK>>
+  * funcao_id : INT <<FK>>
 }
 
 entity "Veiculo" as veic {
@@ -58,9 +68,7 @@ entity "Guia_Abastecimento" as guia {
   veiculo_id : INT <<FK>> <<NULL>>
   instituicao_id : INT <<FK>> <<NULL>>
   
-  ' Rota vinculada (se selecionada da lista)
   rota_id : INT <<FK>> <<NULL>>
-  ' Rota manual (se digitada na hora)
   rota_texto_manual : VARCHAR(255) <<NULL>>
   
   -- Consumo --
@@ -90,4 +98,9 @@ pessoa ||--o{ guia
 veic |o--o{ guia
 inst |o--o{ guia
 guia ||--o{ log_hodo
+
+' Relacionamentos da nova estrutura N:M
+pessoa ||--o{ pessoa_func
+func ||--o{ pessoa_func
+
 @enduml
