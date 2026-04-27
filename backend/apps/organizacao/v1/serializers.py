@@ -2,7 +2,7 @@ from rest_framework import serializers
 from apps.organizacao.models import Secretaria, Instituicao
 
 
-# --- SERIALIZERS DE Secretaria ---
+# --- SERIALIZERS DE SECRETARIA ---
 
 class SecretariaSerializer(serializers.ModelSerializer):
     class Meta:
@@ -15,17 +15,14 @@ class SecretariaLookupSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Secretaria
-        fields = [
-            'value',  
-            'label',  
-        ]
+        fields = ['value', 'label']
 
     def get_label(self, obj: Secretaria):
         # Formatação: "SEME - Secretaria Municipal de Educação"
         return f"{obj.sigla} - {obj.nome}"
 
 
-# --- SERIALIZERS DE ROTA ---
+# --- SERIALIZERS DE INSTITUIÇÃO ---
 
 # DTO de Escrita 
 class InstituicaoWriteSerializer(serializers.ModelSerializer):
@@ -55,12 +52,12 @@ class InstituicaoReadSerializer(serializers.ModelSerializer):
 class InstituicaoLookupSerializer(serializers.ModelSerializer):
     value = serializers.ReadOnlyField(source='id')
     label = serializers.SerializerMethodField()
-    secretaria_id = serializers.IntegerField(read_only=True) # Útil para o frontend filtrar dropdowns
-    
+    secretaria_id = serializers.IntegerField(read_only=True)
     class Meta:
         model = Instituicao
         fields = ['value', 'label', 'secretaria_id']
 
     def get_label(self, obj: Instituicao):
-        # Formatação limpa para o Select: "Escola - João das Neves"
-        return f"{obj.get_tipo_display()} - {obj.nome}"
+        if obj.tipo:
+            return f"{obj.nome} - {obj.get_tipo_display()}"
+        return obj.nome
