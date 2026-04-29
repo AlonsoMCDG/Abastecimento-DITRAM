@@ -9,7 +9,7 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Spacer, Par
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch, mm
 
-from apps.operacao.models import Guia 
+from apps.operacao.models import GuiaAbastecimento
 
 
 def _format_decimal(value):
@@ -63,7 +63,7 @@ def _draw_signature_line(pdf: canvas.Canvas, x_center: float, y: float, width_mm
     pdf.line(x1, y, x2, y)
 
 
-def _draw_guia_impressao_copy(pdf: canvas.Canvas, guia: Guia, y_bottom: float, y_top: float):
+def _draw_guia_impressao_copy(pdf: canvas.Canvas, guia: GuiaAbastecimento, y_bottom: float, y_top: float):
     page_w, _ = A4
     x_left = 18 * mm
     x_right = page_w - 18 * mm
@@ -201,7 +201,7 @@ def gerar_pdf_guia(guia_id):
     """
     try:
         # select_related atualizado para abranger todos os relacionamentos necessários na impressão
-        guia = Guia.objects.select_related(
+        guia = GuiaAbastecimento.objects.select_related(
             "veiculo",
             "rota",
             "instituicao",
@@ -211,7 +211,7 @@ def gerar_pdf_guia(guia_id):
             "tipo_servico",
             "tipo_combustivel"
         ).get(id=guia_id)
-    except Guia.DoesNotExist:
+    except GuiaAbastecimento.DoesNotExist:
         raise ValueError(f"Guia {guia_id} não encontrada")
 
     buf = BytesIO()
