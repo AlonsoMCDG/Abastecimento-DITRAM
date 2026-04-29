@@ -11,19 +11,10 @@ class UsuarioSerializer(serializers.ModelSerializer):
     class Meta:
         model = Usuario
         fields = (
-            "id",
-            "first_name",
-            "last_name",
-            "email",
-            "cpf",
-            "password",
-            "is_staff",
-            "is_superuser",
-            "can_write_cadastros",
-            "can_write_frota",
-            "can_create_guia_abastecimento",
-            "can_edit_guia_abastecimento",
-            "can_delete_guia_abastecimento",
+            "id", "first_name", "last_name", "email", "cpf", "password",
+            "is_staff", "is_superuser", "is_active",
+            "can_write_cadastros", "can_write_frota",
+            "can_create_guia_abastecimento", "can_edit_guia_abastecimento", "can_delete_guia_abastecimento",
         )
         read_only_fields = ("id", "is_superuser")
 
@@ -63,14 +54,7 @@ class UsuarioRegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Usuario
-        fields = (
-            "id",
-            "cpf",
-            "password",
-            "first_name",
-            "last_name",
-            "email",
-        )
+        fields = ("id", "cpf", "password", "first_name", "last_name", "email")
         read_only_fields = ("id",)
 
     def create(self, validated_data):
@@ -79,7 +63,6 @@ class UsuarioRegisterSerializer(serializers.ModelSerializer):
 
         user.is_staff = False
         user.is_superuser = False
-
         user.can_write_cadastros = False
         user.can_write_frota = False
         user.can_create_guia_abastecimento = True
@@ -99,18 +82,10 @@ class UsuarioPermissionsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Usuario
         fields = (
-            "id",
-            "cpf",
-            "first_name",
-            "last_name",
-            "email",
-            "is_staff",
-            "is_superuser",
-            "can_write_cadastros",
-            "can_write_frota",
-            "can_create_guia_abastecimento",
-            "can_edit_guia_abastecimento",
-            "can_delete_guia_abastecimento",
+            "id", "cpf", "first_name", "last_name", "email",
+            "is_staff", "is_superuser", "is_active",
+            "can_write_cadastros", "can_write_frota",
+            "can_create_guia_abastecimento", "can_edit_guia_abastecimento", "can_delete_guia_abastecimento",
         )
         read_only_fields = ("id", "cpf", "is_superuser")
 
@@ -119,19 +94,11 @@ class UsuarioSelfUpdateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Usuario
-        fields = (
-            "first_name",
-            "last_name",
-            "email",
-            "cpf",
-            "password",
-        )
-        # O usuário não pode mudar o próprio CPF (Username) sozinho
-        read_only_fields = ("cpf",)
+        fields = ("first_name", "last_name", "email", "cpf", "password")
+        read_only_fields = ("cpf",) # O usuário não pode mudar o próprio CPF (Username) sozinho
 
     def update(self, instance, validated_data):
         password = validated_data.pop("password", None)
-
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
 
@@ -144,3 +111,22 @@ class UsuarioSelfUpdateSerializer(serializers.ModelSerializer):
 
         instance.save()
         return instance
+
+
+# ==========================================
+# SERIALIZER PARA LOOKUP (SELECTS)
+# ==========================================
+
+class UsuarioLookupSerializer(serializers.ModelSerializer):
+    value = serializers.ReadOnlyField(source='id')
+    label = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Usuario
+        fields = ['value', 'label', 'cpf']
+
+    def get_label(self, obj: Usuario):
+        nome_completo = obj.get_full_name()
+        if nome_completo:
+            return f"{nome_completo} ({obj.cpf})"
+        return obj.cpf
