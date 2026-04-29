@@ -89,7 +89,7 @@ class AlocacaoServicoViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
             return AlocacaoServicoReadSerializer
         return AlocacaoServicoWriteSerializer
 
-    @action(detail=False, methods=['get'])
+    @action(detail=False, methods=['get'], serializer_class=AlocacaoServicoLookupSerializer)
     def lookup(self, request):
         queryset = self.filter_queryset(self.get_queryset())
         
@@ -102,21 +102,7 @@ class AlocacaoServicoViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
             'is_principal'
         )
         
-        serializer = AlocacaoServicoLookupSerializer(queryset, many=True)
-        return Response(serializer.data)
-        queryset = self.filter_queryset(self.get_queryset())
-        
-        # 1. select_related(None): Anula o 'tipo_servico' e 'pessoa' vindos do topo da classe.
-        # 2. select_related('pessoa'): Refaz o JOIN só com quem a gente precisa agora.
-        # 3. only(...): Filtra as colunas.
-        queryset = queryset.select_related(None).select_related('pessoa').only(
-            'id', 
-            'pessoa__nome',
-            'secretaria_id', 
-            'is_principal'
-        )
-        
-        serializer = AlocacaoServicoLookupSerializer(queryset, many=True)
+        serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
 

@@ -36,7 +36,7 @@ class PessoaViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
     ordering = ['-ativo', 'nome']
 
     def get_serializer_class(self):
-        if self.request.method in ['GET', 'HEAD', 'OPTIONS'] and self.action != 'lookup':
+        if self.request.method in ['GET', 'HEAD', 'OPTIONS']:
             return PessoaReadSerializer
         return PessoaWriteSerializer
 
@@ -45,7 +45,7 @@ class PessoaViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
         qs = super().filter_queryset(queryset)
         return qs.distinct()
 
-    @action(detail=False, methods=['get'])
+    @action(detail=False, methods=['get'], serializer_class=PessoaLookupSerializer)
     def lookup(self, request):
         queryset = self.filter_queryset(self.get_queryset()).prefetch_related('funcoes')
         
@@ -55,5 +55,5 @@ class PessoaViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
         # Otimização: Traz apenas o necessário. 
         queryset = queryset.only('id', 'nome', 'cpf')
         
-        serializer = PessoaLookupSerializer(queryset, many=True)
+        serializer = self.get_serializer_class(queryset, many=True)
         return Response(serializer.data)

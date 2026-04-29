@@ -34,7 +34,7 @@ class SecretariaViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
     ordering_fields = ['nome', 'sigla', 'ativo']
     ordering = ['-ativo', 'nome'] 
     
-    @action(detail=False, methods=['get'])
+    @action(detail=False, methods=['get'], serializer_class=SecretariaLookupSerializer)
     def lookup(self, request):
         queryset = self.filter_queryset(self.get_queryset())
         
@@ -45,7 +45,7 @@ class SecretariaViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
         # Otimização da query
         queryset = queryset.only('id', 'nome', 'sigla')
 
-        serializer = SecretariaLookupSerializer(queryset, many=True)
+        serializer = self.get_serializer_class(queryset, many=True)
         return Response(serializer.data)
 
 
@@ -74,7 +74,7 @@ class InstituicaoViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
             return InstituicaoReadSerializer
         return InstituicaoWriteSerializer
     
-    @action(detail=False, methods=['get'])
+    @action(detail=False, methods=['get'], serializer_class=InstituicaoLookupSerializer)
     def lookup(self, request):
         queryset = self.filter_queryset(self.get_queryset())
 
@@ -85,5 +85,5 @@ class InstituicaoViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
         # Otimiza a query
         queryset = queryset.only('id', 'nome', 'tipo', 'secretaria_id')
 
-        serializer = InstituicaoLookupSerializer(queryset, many=True)
+        serializer = self.get_serializer_class(queryset, many=True)
         return Response(serializer.data)
