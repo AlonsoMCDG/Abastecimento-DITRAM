@@ -7,45 +7,27 @@ from django_filters.rest_framework import DjangoFilterBackend
 from apps.core.viewset_cache import ModelViewSetCacheMixin
 from apps.usuarios.permissions import FrotaPermission
 
-from apps.frota.models import Veiculo, Rota, TipoCombustivel, TipoVeiculo
+from apps.frota.models import Veiculo, Rota, TipoCombustivel
 from .serializers import (
     VeiculoWriteSerializer, VeiculoReadSerializer, VeiculoLookupSerializer,
     RotaWriteSerializer, RotaReadSerializer, RotaLookupSerializer,
-    TipoCombustivelSerializer, TipoCombustivelLookupSerializer,
-    TipoVeiculoSerializer, TipoVeiculoLookupSerializer
+    TipoCombustivelSerializer, TipoCombustivelLookupSerializer
 )
 
 class VeiculoViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
-    queryset = Veiculo.objects.select_related(
-        'secretaria', 
-        'tipo_combustivel', 
-        'tipo_veiculo'
-    ).all()
-    
+    queryset = Veiculo.objects.all()
     permission_classes = [IsAuthenticated, FrotaPermission]
 
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
 
-    # Filtros Exatos: Corrigido para as chaves estrangeiras com _id
-    filterset_fields = [
-        'id', 'secretaria_id', 'tipo_locomocao', 
-        'tipo_combustivel_id', 'tipo_veiculo_id', 'ativo'
-    ]
+    # Filtro Exato
+    filterset_fields = ['id', 'categoria', 'ativo']
 
-    # Busca Textual: Busca robusta cruzando as tabelas
-    search_fields = [
-        'placa', 'modelo', 
-        'secretaria__nome', 'secretaria__sigla',
-        'tipo_combustivel__nome', 
-        'tipo_veiculo__nome'
-    ]
+    # Busca Textual
+    search_fields = ['placa', 'modelo']
 
     # Ordenação
-    ordering_fields = [
-        'id', 'placa', 'modelo', 'hodometro_atual',
-        'secretaria__nome', 'secretaria__sigla', 
-        'tipo_veiculo__nome', 'ativo'
-    ]
+    ordering_fields = ['id', 'placa', 'modelo', 'hodometro_atual', 'ativo']
     ordering = ['-ativo', 'modelo'] # Primeiro os ativos, ordem alfabética
 
     def get_queryset(self):
@@ -53,8 +35,8 @@ class VeiculoViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
         pessoa_id = self.request.query_params.get('pessoa_id')
 
         if pessoa_id:
-            # Filtra veículos associados ao motorista
-            queryset = queryset.filter(operadores__pessoa_id=pessoa_id)
+            # Filtra veículos associados ao motorista (Acessa a relação inversa de OperadorVeiculo do módulo operacao)
+            queryset = queryset.filter(operadores__pessoa_id=pessoa_id).distinct()
 
         return queryset
     
@@ -63,54 +45,30 @@ class VeiculoViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
             return VeiculoReadSerializer
         return VeiculoWriteSerializer
     
-    @action(detail=False, methods=['get'])
+    @action(detail=False, methods=['get'], serializer_class=VeiculoLookupSerializer)
     def lookup(self, request):
         queryset = self.filter_queryset(self.get_queryset())
 
-        # Otimização do Lookup: Mantém o join com tipo_combustivel pois a label usa ele
-        queryset = queryset.select_related('tipo_combustivel').only(
-            'id', 'modelo', 'placa', 'ativo',
-            'consumo_estimado_combustivel', 'consumo_estimado_oleo', 
-            'unidade_consumo', 'tipo_combustivel_id', 'tipo_combustivel__nome',
-            'secretaria_id', 'tipo_veiculo_id'
-        )
+        if 'ativo' not in request.query_params:
+            queryset = queryset.filter(ativo=True)
 
-        serializer = VeiculoLookupSerializer(queryset, many=True)
+        queryset = queryset.only('id', 'modelo', 'placa', 'categoria')
+
+        serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
 
 class RotaViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
-    # Performance: select_related duplo para as duas foreign keys da Rota
-    queryset = Rota.objects.select_related('secretaria', 'instituicao').all()
+    queryset = Rota.objects.select_related('secretaria').all()
     permission_classes = [IsAuthenticated, FrotaPermission]
 
-    filter_backends = [
-        DjangoFilterBackend, 
-        filters.SearchFilter, 
-        filters.OrderingFilter
-    ]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
 
-    # Filtros Exatos (?secretaria_id=3&instituicao_id=1)
-    filterset_fields = ['id', 'secretaria_id', 'instituicao_id', 'tipo_locomocao', 'ativa']
+    filterset_fields = ['id', 'secretaria_id', 'ativa']
     
-    # Busca Textual: Busca no próprio nome e nos nomes das entidades relacionadas
-    search_fields = [
-        'nome', 
-        'detalhes',
-        'tipo_locomocao',
-        'secretaria__nome', 
-        'secretaria__sigla',
-        'instituicao__nome', 
-    ]
+    search_fields = ['nome', 'detalhes', 'secretaria__nome', 'secretaria__sigla']
 
-    # Ordenação
-    ordering_fields = [
-        'id', 'nome', 'distancia_km', 
-        'secretaria__nome', 'secretaria__sigla',
-        'instituicao__nome', 'tipo_locomocao', 
-        'ativa'
-    ]
-    
+    ordering_fields = ['id', 'nome', 'distancia_km', 'secretaria__nome', 'secretaria__sigla', 'ativa']
     ordering = ['-ativa', 'nome'] 
 
     def get_serializer_class(self):
@@ -122,12 +80,11 @@ class RotaViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
     def lookup(self, request):
         queryset = self.filter_queryset(self.get_queryset())
         
-        # OTIMIZAÇÃO AQUI: 
-        # Limpa o select_related('secretaria', 'instituicao') vindo da classe
-        queryset = queryset.select_related(None).only(
-            'id', 'nome', 'distancia_km', 'tipo_locomocao', 'detalhes', 
-            'secretaria_id', 'instituicao_id'
-        )
+        if 'ativa' not in request.query_params:
+            queryset = queryset.filter(ativa=True)
+            
+        # OTIMIZAÇÃO: Limpa o select_related vindo da classe
+        queryset = queryset.select_related(None).only('id', 'nome', 'distancia_km', 'secretaria_id')
 
         serializer = RotaLookupSerializer(queryset, many=True)
         return Response(serializer.data)
@@ -138,63 +95,20 @@ class TipoCombustivelViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
     serializer_class = TipoCombustivelSerializer
     permission_classes = [IsAuthenticated]
 
-    # Habilitando os motores (Filtro Exato, Busca Textual, Ordenação)
-    filter_backends = [
-        DjangoFilterBackend, 
-        filters.SearchFilter, 
-        filters.OrderingFilter
-    ]
-
-    # Configuração do Busca Textual (?search=SME ou ?search=Saúde)
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_fields = ['id', 'ativo']
     search_fields = ['nome']
-
-    # Configuração do Filtro Exato (?sigla=SME)
-    filterset_fields = ['id']
-
-    # Configuração de Ordenação (?ordering=-id)
     ordering_fields = ['nome']
-    ordering = ['nome'] # Ordenação padrão alfabética
+    ordering = ['nome'] 
     
-    # endpoint customizado: /api/secretaria/lookup/
-    @action(detail=False, methods=['get'])
+    @action(detail=False, methods=['get'], serializer_class=TipoCombustivelLookupSerializer)
     def lookup(self, request):
-        # Usamos o .only() para otimizar a query no banco, já que o lookup precisa de poucos campos
-        queryset = self.get_queryset().only('nome')
+        queryset = self.filter_queryset(self.get_queryset())
+        
+        if 'ativo' not in request.query_params:
+            queryset = queryset.filter(ativo=True)
+            
+        queryset = queryset.only('id', 'nome')
 
-        # Usa o serializer leve para o Select
-        serializer = TipoCombustivelLookupSerializer(queryset, many=True)
-        return Response(serializer.data)
-
-
-
-class TipoVeiculoViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
-    queryset = TipoVeiculo.objects.all()
-    serializer_class = TipoVeiculoSerializer
-    permission_classes = [IsAuthenticated]
-
-    # Habilitando os motores (Filtro Exato, Busca Textual, Ordenação)
-    filter_backends = [
-        DjangoFilterBackend, 
-        filters.SearchFilter, 
-        filters.OrderingFilter
-    ]
-
-    # Configuração do Busca Textual (?search=SME ou ?search=Saúde)
-    search_fields = ['nome']
-
-    # Configuração do Filtro Exato (?sigla=SME)
-    filterset_fields = ['id']
-
-    # Configuração de Ordenação (?ordering=-id)
-    ordering_fields = ['nome']
-    ordering = ['nome'] # Ordenação padrão alfabética
-    
-    # endpoint customizado: /api/secretaria/lookup/
-    @action(detail=False, methods=['get'])
-    def lookup(self, request):
-        # Usamos o .only() para otimizar a query no banco, já que o lookup precisa de poucos campos
-        queryset = self.get_queryset().only('nome')
-
-        # Usa o serializer leve para o Select
-        serializer = TipoVeiculoLookupSerializer(queryset, many=True)
+        serializer = self.get_serializer_class(queryset, many=True)
         return Response(serializer.data)
