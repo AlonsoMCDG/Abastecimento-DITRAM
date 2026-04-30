@@ -120,8 +120,7 @@ class GuiaReadSerializer(serializers.ModelSerializer):
     pessoa_id = serializers.IntegerField(read_only=True)
     pessoa_nome = serializers.CharField(source='pessoa.nome', read_only=True)
 
-    veiculo_id = serializers.IntegerField(read_only=True)
-    veiculo_placa = serializers.CharField(source='veiculo.placa', read_only=True)
+    veiculo_display = serializers.CharField(source='veiculo_display', read_only=True)
 
     rota_id = serializers.IntegerField(read_only=True)
     rota_nome = serializers.CharField(source='rota.nome', read_only=True, default=None)
@@ -146,12 +145,11 @@ class GuiaReadSerializer(serializers.ModelSerializer):
         model = GuiaAbastecimento
         fields = [
             'id', 'data_hora', 'modalidade', 'modalidade_nome',
-            'quantidade_litros', 'quantidade_oleo', 'periodo_uso_dias', 
-            'observacao', 'identificacao_avulsa', 'rota_manual',
+            'quantidade_combustivel', 'quantidade_oleo', 'periodo_uso_dias', 
+            'observacao', 'rota_manual', 'veiculo_display',
             
             # FKs Mapeadas
             'pessoa_id', 'pessoa_nome',
-            'veiculo_id', 'veiculo_placa',
             'rota_id', 'rota_nome',
             'tipo_atividade_id', 'tipo_atividade_nome',
             'secretaria_id', 'secretaria_nome', 'secretaria_sigla',
@@ -174,11 +172,35 @@ class GuiaWriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = GuiaAbastecimento
         fields = [
-            'id', 'data_hora', 'modalidade', 'quantidade_litros', 'quantidade_oleo', 
-            'periodo_uso_dias', 'observacao', 'rota_manual', 'identificacao_avulsa',
-            'pessoa_id', 'veiculo_id', 'rota_id', 'tipo_atividade_id', 
-            'secretaria_id', 'instituicao_id', 'tipo_combustivel_id'
+            'id', 'data_hora', 'modalidade', 'quantidade_combustivel', 
+            'quantidade_oleo', 'periodo_uso_dias', 'observacao', 
+            'rota_manual', 
+            
+            'pessoa_id', 
+            'veiculo_id', 
+            'tipo_veiculo',
+            'veiculo_descricao',
+
+            'rota_id', 
+            'tipo_atividade_id', 
+            'secretaria_id', 
+            'instituicao_id', 
+            'tipo_combustivel_id'
         ]
+    
+    def validate(self, data):
+        veiculo = data.get("veiculo")
+        tipo_veiculo = data.get("tipo_veiculo")
+        descricao = data.get("veiculo_descricao")
+
+        preenchidos = [bool(veiculo), bool(tipo_veiculo), bool(descricao)]
+
+        if sum(preenchidos) != 1:
+            raise serializers.ValidationError(
+                "Informe exatamente um: veiculo, tipo_veiculo ou veiculo_descricao."
+            )
+
+        return data
 
 
 # ==========================================

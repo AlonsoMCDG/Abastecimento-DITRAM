@@ -114,17 +114,17 @@ class GuiaAbastecimentoViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
 
     filterset_fields = [
-        'modalidade', 'pessoa_id', 'veiculo_id', 'secretaria_id', 'rota_id', 
-        'tipo_atividade_id', 'instituicao_id', 'tipo_combustivel_id', 'usuario_id'
+        'modalidade', 'pessoa', 'veiculo', 'tipo_veiculo', 'secretaria', 'rota', 
+        'tipo_atividade', 'instituicao', 'tipo_combustivel', 'usuario'
     ]
 
     search_fields = [
-        'veiculo__placa', 'pessoa__nome', 'pessoa__cpf', 
+        'veiculo__placa', 'veiculo_descricao', 'pessoa__nome', 'pessoa__cpf', 
         'secretaria__sigla', 'instituicao__nome', 'tipo_atividade__nome',
         'identificacao_avulsa'
     ]
 
-    ordering_fields = ['data_hora', 'id', 'tipo_atividade__nome', 'secretaria__nome', 'pessoa__nome', 'quantidade_litros']
+    ordering_fields = ['data_hora', 'id', 'tipo_atividade__nome', 'secretaria__nome', 'pessoa__nome', 'quantidade_combustivel']
     ordering = ['-data_hora']
 
     def get_serializer_class(self):

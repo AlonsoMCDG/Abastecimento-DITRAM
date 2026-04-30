@@ -1,11 +1,21 @@
 from django.db import models, transaction
 from django.core.exceptions import ValidationError
+from django.db.models import Q
+
 from apps.pessoas.models import Pessoa
 from apps.frota.models import Veiculo, Rota, TipoCombustivel
 from apps.organizacao.models import Secretaria, Instituicao
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
+
+VEICULO_XOR_CONDITION = Q(
+    veiculo__isnull=False, tipo_veiculo__isnull=True, veiculo_descricao__isnull=True
+) | Q(
+    veiculo__isnull=True, tipo_veiculo__isnull=False, veiculo_descricao__isnull=True
+) | Q(
+    veiculo__isnull=True, tipo_veiculo__isnull=True, veiculo_descricao__isnull=False
+)
 
 class TipoAtividadeManager(models.Manager):
     def get_by_natural_key(self, nome):
@@ -88,6 +98,11 @@ class OperadorVeiculo(models.Model):
 # TRANSAÇÕES PRINCIPAIS
 # ==========================================
 class GuiaAbastecimento(models.Model):
+    TIPO_VEICULO_CHOICES = [
+        ('CARRO', 'Carro'), ('CAMINHONETE', 'Caminhonete'), ('ONIBUS', 'Ônibus'), ('MOTO', 'Moto'),
+        ('VAN', 'Van'), ('BARCO', 'Barco'), ('MAQUINA_PESADA', 'Máquina Pesada/Trator'),
+    ]
+
     MODALIDADE_CHOICES = [
         ('TERRESTRE', 'Terrestre'), ('FLUVIAL', 'Fluvial'),
         ('ROCAGEM', 'Roçagem'), ('BORRIFACAO', 'Borrifação'), ('COROTE', 'Corote'),
@@ -105,16 +120,19 @@ class GuiaAbastecimento(models.Model):
     rota_manual = models.CharField(max_length=255, null=True, blank=True)
 
     pessoa = models.ForeignKey(Pessoa, on_delete=models.PROTECT)
-    veiculo = models.ForeignKey(Veiculo, on_delete=models.PROTECT, null=True, blank=True)
-    identificacao_avulsa = models.CharField(max_length=100, null=True, blank=True)
+
+    # Identificação do veículo. Apenas 1 dos 3 campos a seguir deve ser preenchido por guia.
+    veiculo = models.ForeignKey(Veiculo, on_delete=models.PROTECT, null=True, blank=True)  # 1. Objeto Veiculo (salvo no banco)
+    tipo_veiculo = models.CharField(max_length=50, choices=TIPO_VEICULO_CHOICES, null=True, blank=True)  # 2. Para barqueiros, usa esse campo (usa "Barco" genericamente para todos os barqueiros)
+    veiculo_descricao = models.CharField(max_length=100, null=True, blank=True)  # 3. Descrição avulsa do veículo, quando os campos acima não são aplicáveis
 
     tipo_combustivel = models.ForeignKey(TipoCombustivel, on_delete=models.PROTECT)
-    quantidade_litros = models.DecimalField(max_digits=10, decimal_places=3)
+    quantidade_combustivel = models.DecimalField(max_digits=10, decimal_places=3)
     quantidade_oleo = models.DecimalField(max_digits=10, decimal_places=3, null=True, blank=True)
     periodo_uso_dias = models.PositiveIntegerField(null=True, blank=True)
     observacao = models.TextField(max_length=256, null=True, blank=True)
     
-    # Mantido do código antigo: Rastreabilidade de sistema
+    # Rastreabilidade de sistema
     criado_em = models.DateTimeField(auto_now_add=True)
     atualizado_em = models.DateTimeField(auto_now=True)
 
@@ -123,15 +141,33 @@ class GuiaAbastecimento(models.Model):
         verbose_name_plural = "Guias de Abastecimento"
         ordering = ['-data_hora'] # Ordenação mantida
 
-    def __str__(self):
-        # Exibição aprimorada do código antigo
-        identificador = self.veiculo.placa if self.veiculo else self.identificacao_avulsa or self.pessoa.nome
-        return f"Guia #{self.id} - {identificador} - {self.data_hora.strftime('%d/%m/%Y')}"
-    
+        constraints = [
+            models.CheckConstraint(
+                name="guia_um_tipo_veiculo",
+                constraints=VEICULO_XOR_CONDITION
+            )
+        ]
+
     def clean(self):
         """Validação lógica antes de salvar no banco"""
-        if self.modalidade == 'TERRESTRE' and not self.veiculo:
-            raise ValidationError("Para abastecimento terrestre, o veículo é obrigatório.")
+        preenchidos = [
+            bool(self.veiculo),
+            bool(self.tipo_veiculo),
+            bool(self.veiculo_descricao),
+        ]
+
+        if sum(preenchidos) != 1:
+            raise ValidationError(
+                "Informe exatamente um: veiculo, tipo_veiculo ou veiculo_descricao."
+            )
+    
+    @property
+    def veiculo_display(self):
+        if self.veiculo:
+            return str(self.veiculo)
+        if self.tipo_veiculo:
+            return self.get_tipo_veiculo_display()
+        return self.veiculo_descricao
     
     def save(self, *args, **kwargs):
         # Transforma texto manual em Rota fixa
@@ -144,6 +180,9 @@ class GuiaAbastecimento(models.Model):
             self.rota_manual = None # Limpa o manual pois agora é oficial
             
         super().save(*args, **kwargs)
+    
+    def __str__(self):
+        return f"Guia #{self.id}: {self.pessoa} - {self.veiculo_display} - {self.quantidade_combustivel}L"
 
 
 class RegistroHodometroDiario(models.Model):
