@@ -144,7 +144,7 @@ class GuiaAbastecimento(models.Model):
         constraints = [
             models.CheckConstraint(
                 name="guia_um_tipo_veiculo",
-                constraints=VEICULO_XOR_CONDITION
+                condition=VEICULO_XOR_CONDITION
             )
         ]
 
