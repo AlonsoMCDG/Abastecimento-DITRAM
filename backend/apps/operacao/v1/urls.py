@@ -1,18 +1,20 @@
 from rest_framework.routers import DefaultRouter
-from .views import OperadorVeiculoViewSet, GuiaAbastecimentoViewSet, TipoAtividadeViewSet, AlocacaoServicoViewSet
+from .views import GuiaAbastecimentoViewSet, TipoAtividadeViewSet
 
 router = DefaultRouter()
 
-# Rota final: /api/v1/tipos-servico/
-router.register(r'tipos-servico', TipoAtividadeViewSet, basename='tipo-servico')
+# =========================================================
+# OPERAÇÃO (CORE DOMAIN API)
+# =========================================================
+# Recursos principais:
+# - GuiaAbastecimento (transações)
+# - TipoAtividade (catálogo dinâmico com deduplicação)
+#
+# Endpoints auxiliares:
+# - /atividades/lookup/ (autocomplete frontend)
+# =========================================================
 
-# Rota final: /api/v1/alocacoes-servicos/
-router.register(r'alocacoes-servicos', AlocacaoServicoViewSet, basename='alocacao-servico')
-
-# Rota final: /api/v1/operadores-veiculos/
-router.register(r'operadores-veiculos', OperadorVeiculoViewSet, basename='operador-veiculo')
-
-# Rota final: /api/v1/guias/
+router.register(r'atividades', TipoAtividadeViewSet, basename='tipo-atividade')
 router.register(r'guias', GuiaAbastecimentoViewSet, basename='guia')
 
 urlpatterns = router.urls

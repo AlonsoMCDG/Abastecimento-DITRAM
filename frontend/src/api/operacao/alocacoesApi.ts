@@ -1,6 +1,6 @@
 import { client } from "../config/apiClient";
 import { ENDPOINTS } from "../config/endpoints";
-import type { AlocacaoServico } from "../../types/models";
+import type { AlocacaoPessoa } from "../../types/models";
 import type { PaginatedResponse } from "../../types/api";
 
 interface AlocacaoListParams {
@@ -23,19 +23,19 @@ interface AlocacaoCreatePayload {
 
 export const alocacoesApi = {
   listar(params?: AlocacaoListParams) {
-    return client.get<PaginatedResponse<AlocacaoServico>>(ENDPOINTS.operacao.alocacoesServico, { params });
+    return client.get<PaginatedResponse<AlocacaoPessoa>>(ENDPOINTS.operacao.alocacoesServico, { params });
   },
   
   buscar(id: number) {
-    return client.get<AlocacaoServico>(`${ENDPOINTS.operacao.alocacoesServico}${id}/`);
+    return client.get<AlocacaoPessoa>(`${ENDPOINTS.operacao.alocacoesServico}${id}/`);
   },
 
   criar(data: AlocacaoCreatePayload) {
-    return client.post<AlocacaoServico>(ENDPOINTS.operacao.alocacoesServico, data);
+    return client.post<AlocacaoPessoa>(ENDPOINTS.operacao.alocacoesServico, data);
   },
 
   atualizar(id: number, data: Partial<AlocacaoCreatePayload>) {
-    return client.patch<AlocacaoServico>(`${ENDPOINTS.operacao.alocacoesServico}${id}/`, data);
+    return client.patch<AlocacaoPessoa>(`${ENDPOINTS.operacao.alocacoesServico}${id}/`, data);
   },
 
   deletar(id: number) {

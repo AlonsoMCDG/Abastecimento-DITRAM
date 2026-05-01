@@ -101,7 +101,7 @@ export interface TipoServico {
   ativo: boolean;
 }
 
-export interface AlocacaoServico {
+export interface AlocacaoPessoa {
   id: number;
   
   // IDs para referências (Payload)

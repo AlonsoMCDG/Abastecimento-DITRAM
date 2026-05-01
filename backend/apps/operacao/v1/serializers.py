@@ -1,14 +1,13 @@
 from rest_framework import serializers
 from django.db import transaction
 from apps.operacao.models import (
-    TipoAtividade, AlocacaoServico, OperadorVeiculo, 
-    GuiaAbastecimento, RegistroHodometroDiario
+    TipoAtividade, GuiaAbastecimento, RegistroHodometroDiario
 )
 
 from apps.pessoas.models import Pessoa
 from apps.frota.models import Veiculo, Rota, TipoCombustivel
 from apps.organizacao.models import Secretaria, Instituicao
-
+from apps.operacao.services.sugestoes import get_sugestoes_pessoa
 
 # ==========================================
 # SERIALIZERS DE TIPO DE ATIVIDADE
@@ -25,90 +24,6 @@ class TipoAtividadeLookupSerializer(serializers.ModelSerializer):
     class Meta:
         model = TipoAtividade
         fields = ['value', 'label']
-
-
-# ==========================================
-# SERIALIZERS DE ALOCAÇÃO DE ATIVIDADE
-# ==========================================
-class AlocacaoServicoReadSerializer(serializers.ModelSerializer):
-    pessoa_id = serializers.IntegerField(read_only=True)
-    pessoa_nome = serializers.CharField(source='pessoa.nome', read_only=True)
-    
-    tipo_atividade_id = serializers.IntegerField(read_only=True)
-    tipo_atividade_nome = serializers.CharField(source='tipo_atividade.nome', read_only=True)
-    
-    secretaria_id = serializers.IntegerField(read_only=True)
-    secretaria_nome = serializers.CharField(source='secretaria.nome', read_only=True)
-    secretaria_sigla = serializers.CharField(source='secretaria.sigla', read_only=True)
-
-    class Meta:
-        model = AlocacaoServico
-        fields = [
-            'id', 
-            'pessoa_id', 'pessoa_nome', 
-            'tipo_atividade_id', 'tipo_atividade_nome', 
-            'secretaria_id', 'secretaria_nome', 'secretaria_sigla',
-            'is_principal'
-        ]
-
-class AlocacaoServicoWriteSerializer(serializers.ModelSerializer):
-    pessoa_id = serializers.PrimaryKeyRelatedField(source='pessoa', queryset=Pessoa.objects.all())
-    tipo_atividade_id = serializers.PrimaryKeyRelatedField(source='tipo_atividade', queryset=TipoAtividade.objects.all())
-    secretaria_id = serializers.PrimaryKeyRelatedField(source='secretaria', queryset=Secretaria.objects.all())
-
-    class Meta:
-        model = AlocacaoServico
-        fields = ['id', 'pessoa_id', 'tipo_atividade_id', 'secretaria_id', 'is_principal']
-
-class AlocacaoServicoLookupSerializer(serializers.ModelSerializer):
-    value = serializers.ReadOnlyField(source='id')
-    label = serializers.SerializerMethodField() 
-    secretaria_id = serializers.IntegerField(read_only=True)
-
-    class Meta:
-        model = AlocacaoServico
-        fields = ['value', 'label', 'secretaria_id', 'is_principal']
-
-    def get_label(self, obj):
-        return f"{obj.pessoa.nome} - {obj.tipo_atividade.nome}"
-
-
-# ==========================================
-# SERIALIZERS DE OPERADOR DE VEÍCULO
-# ==========================================
-class OperadorVeiculoReadSerializer(serializers.ModelSerializer):
-    pessoa_id = serializers.IntegerField(read_only=True)
-    pessoa_nome = serializers.CharField(source='pessoa.nome', read_only=True)
-    
-    veiculo_id = serializers.IntegerField(read_only=True)
-    veiculo_placa = serializers.CharField(source='veiculo.placa', read_only=True)
-    veiculo_modelo = serializers.CharField(source='veiculo.modelo', read_only=True)
-
-    class Meta:
-        model = OperadorVeiculo
-        fields = [
-            'id', 
-            'pessoa_id', 'pessoa_nome', 
-            'veiculo_id', 'veiculo_placa', 'veiculo_modelo', 
-            'is_principal'
-        ]
-
-class OperadorVeiculoWriteSerializer(serializers.ModelSerializer):
-    pessoa_id = serializers.PrimaryKeyRelatedField(source='pessoa', queryset=Pessoa.objects.all())
-    veiculo_id = serializers.PrimaryKeyRelatedField(source='veiculo', queryset=Veiculo.objects.all())
-
-    class Meta:
-        model = OperadorVeiculo
-        fields = ['id', 'pessoa_id', 'veiculo_id', 'is_principal']
-
-class OperadorVeiculoLookupSerializer(serializers.ModelSerializer):
-    value = serializers.ReadOnlyField(source='id')
-    label = serializers.ReadOnlyField(source='pessoa.nome')
-    secretaria_id = serializers.IntegerField(read_only=True)
-
-    class Meta:
-        model = OperadorVeiculo
-        fields = ['value', 'label', 'secretaria_id', 'is_principal']
 
 
 # ==========================================
@@ -161,46 +76,126 @@ class GuiaReadSerializer(serializers.ModelSerializer):
         ]
 
 class GuiaWriteSerializer(serializers.ModelSerializer):
-    pessoa_id = serializers.PrimaryKeyRelatedField(source='pessoa', queryset=Pessoa.objects.all())
-    veiculo_id = serializers.PrimaryKeyRelatedField(source='veiculo', queryset=Veiculo.objects.all(), required=False, allow_null=True)
-    secretaria_id = serializers.PrimaryKeyRelatedField(source='secretaria', queryset=Secretaria.objects.all())
-    instituicao_id = serializers.PrimaryKeyRelatedField(source='instituicao', queryset=Instituicao.objects.all(), required=False, allow_null=True)
-    tipo_atividade_id = serializers.PrimaryKeyRelatedField(source='tipo_atividade', queryset=TipoAtividade.objects.all())
-    tipo_combustivel_id = serializers.PrimaryKeyRelatedField(source='tipo_combustivel', queryset=TipoCombustivel.objects.all())
-    rota_id = serializers.PrimaryKeyRelatedField(source='rota', queryset=Rota.objects.all(), required=False, allow_null=True)
+    pessoa_id = serializers.PrimaryKeyRelatedField(
+        source='pessoa',
+        queryset=Pessoa.objects.all()
+    )
+
+    veiculo_id = serializers.PrimaryKeyRelatedField(
+        source='veiculo',
+        queryset=Veiculo.objects.all(),
+        required=False,
+        allow_null=True
+    )
+
+    secretaria_id = serializers.PrimaryKeyRelatedField(
+        source='secretaria',
+        queryset=Secretaria.objects.all()
+    )
+
+    instituicao_id = serializers.PrimaryKeyRelatedField(
+        source='instituicao',
+        queryset=Instituicao.objects.all(),
+        required=False,
+        allow_null=True
+    )
+
+    tipo_combustivel_id = serializers.PrimaryKeyRelatedField(
+        source='tipo_combustivel',
+        queryset=TipoCombustivel.objects.all()
+    )
+
+    rota_id = serializers.PrimaryKeyRelatedField(
+        source='rota',
+        queryset=Rota.objects.all(),
+        required=False,
+        allow_null=True
+    )
+
+    tipo_atividade_id = serializers.PrimaryKeyRelatedField(
+        source='tipo_atividade',
+        queryset=TipoAtividade.objects.all(),
+        required=False,
+        allow_null=True
+    )
+
+    tipo_atividade_nome = serializers.CharField(
+        write_only=True,
+        required=False,
+        allow_blank=True
+    )
 
     class Meta:
         model = GuiaAbastecimento
         fields = [
-            'id', 'data_hora', 'modalidade', 'quantidade_combustivel', 
-            'quantidade_oleo', 'periodo_uso_dias', 'observacao', 
-            'rota_manual', 
-            
-            'pessoa_id', 
-            'veiculo_id', 
+            'id', 'data_hora', 'modalidade', 'quantidade_combustivel',
+            'quantidade_oleo', 'periodo_uso_dias', 'observacao',
+            'rota_manual',
+
+            'pessoa_id',
+            'veiculo_id',
             'tipo_veiculo',
             'veiculo_descricao',
 
-            'rota_id', 
-            'tipo_atividade_id', 
-            'secretaria_id', 
-            'instituicao_id', 
+            'tipo_atividade_id',
+            'tipo_atividade_nome',
+
+            'rota_id',
+            'secretaria_id',
+            'instituicao_id',
             'tipo_combustivel_id'
         ]
-    
+
     def validate(self, data):
-        veiculo = data.get("veiculo")
-        tipo_veiculo = data.get("tipo_veiculo")
-        descricao = data.get("veiculo_descricao")
+        # -------------------------
+        # Regra do veículo (XOR)
+        # -------------------------
+        veiculo = bool(data.get("veiculo"))
+        tipo = bool(data.get("tipo_veiculo"))
+        desc = bool(data.get("veiculo_descricao"))
 
-        preenchidos = [bool(veiculo), bool(tipo_veiculo), bool(descricao)]
-
-        if sum(preenchidos) != 1:
+        if sum([veiculo, tipo, desc]) != 1:
             raise serializers.ValidationError(
-                "Informe exatamente um: veiculo, tipo_veiculo ou veiculo_descricao."
+                "Informe apenas um: veículo cadastrado, tipo de veículo ou descrição."
+            )
+
+        # -------------------------
+        # Regra da atividade (OU)
+        # -------------------------
+        tipo_atividade = data.get("tipo_atividade")
+        nome = self.initial_data.get("tipo_atividade_nome")
+
+        if not tipo_atividade and not nome:
+            raise serializers.ValidationError(
+                "Informe tipo_atividade_id ou tipo_atividade_nome."
+            )
+
+        if tipo_atividade and nome:
+            raise serializers.ValidationError(
+                "Informe apenas tipo_atividade_id OU tipo_atividade_nome."
             )
 
         return data
+
+    def create(self, validated_data):
+        from apps.operacao.services.guia_service import resolve_tipo_atividade
+
+        nome = validated_data.pop("tipo_atividade_nome", None)
+        tipo_obj = validated_data.get("tipo_atividade")
+
+        tipo_atividade_obj = resolve_tipo_atividade(
+            tipo_atividade=tipo_obj,
+            nome=nome
+        )
+
+        if not tipo_atividade_obj:
+            raise serializers.ValidationError(
+                "Informe tipo_atividade_id ou tipo_atividade_nome."
+            )
+
+        validated_data["tipo_atividade"] = tipo_atividade_obj
+
+        return super().create(validated_data)
 
 
 # ==========================================

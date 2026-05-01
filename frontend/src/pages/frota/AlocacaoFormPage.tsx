@@ -4,18 +4,18 @@ import { alocacoesApi } from "../../api/operacao/alocacoesApi";
 import { ROUTES } from "../../routes/routes";
 import { DynamicForm } from "../../components/DynamicForm/DynamicForm";
 import { alocacaoFormSchema } from "../../schemas/alocacao.schema";
-import type { AlocacaoServico } from "../../types/models";
+import type { AlocacaoPessoa } from "../../types/models";
 import { getApiErrorMessage } from "../../api/config/errorHandlers";
 
 export default function AlocacaoFormPage() {
   const navigate = useNavigate();
   const { id } = useParams();
 
-  const [initialValues, setInitialValues] = useState<Partial<AlocacaoServico> | undefined>(undefined);
+  const [initialValues, setInitialValues] = useState<Partial<AlocacaoPessoa> | undefined>(undefined);
   const [loading, setLoading] = useState(!!id);
 
   // Valores padrão para uma nova alocação
-  const defaultValues: Partial<AlocacaoServico> = {
+  const defaultValues: Partial<AlocacaoPessoa> = {
     is_principal: false,
   };
 
@@ -49,7 +49,7 @@ export default function AlocacaoFormPage() {
   if (loading) return <div>Carregando dados da alocação...</div>;
 
   return (
-    <DynamicForm<AlocacaoServico>
+    <DynamicForm<AlocacaoPessoa>
       title={id ? "Editar Alocação" : "Nova Alocação de Serviço"}
       subtitle="Vincule um funcionário a um tipo de serviço e defina sua lotação."
       schema={alocacaoFormSchema}

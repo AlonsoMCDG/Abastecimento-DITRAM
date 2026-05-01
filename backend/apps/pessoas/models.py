@@ -2,17 +2,6 @@ from django.db import models
 from django.core.exceptions import ValidationError
 
 
-class Funcao(models.Model):
-    nome = models.CharField(max_length=50, unique=True)
-    
-    def __str__(self):
-        return self.nome
-    # FUNCAO_CHOICES = [
-    #     ('MOTORISTA', 'Motorista'),
-    #     ('BARQUEIRO', 'Barqueiro'),
-    #     ('ROCADOR', 'Roçador'),
-    #     ('BORRIFADOR', 'Borrifador'),
-    # ]
 class PessoaManager(models.Manager):
     def get_by_natural_key(self, cpf):
         return self.get(cpf=cpf)
@@ -20,7 +9,6 @@ class PessoaManager(models.Manager):
 class Pessoa(models.Model):
     nome = models.CharField(max_length=200, verbose_name="Nome Completo")
     cpf = models.CharField(max_length=11, unique=True, verbose_name="CPF")
-    funcoes = models.ManyToManyField(Funcao, related_name='pessoas', verbose_name="Função")
     ativo = models.BooleanField(default=True, verbose_name="Ativo")
 
     objects = PessoaManager()
@@ -44,7 +32,7 @@ class Pessoa(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.nome} ({self.get_funcao_display()})"
+        return f"{self.nome} ({self.cpf})"
 
     def natural_key(self):
         return (self.cpf,)

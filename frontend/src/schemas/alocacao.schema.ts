@@ -1,6 +1,6 @@
 import type { FormSchema, TableSchema } from "../types/form";
 import { ENDPOINTS } from "../api/config/endpoints";
-import type { AlocacaoServico } from "../types/models";
+import type { AlocacaoPessoa } from "../types/models";
 import type { ViewSchema } from "../types/views";
 
 // --------------------------------------------------------
@@ -74,7 +74,7 @@ export const alocacaoListSchema: TableSchema = {
 // --------------------------------------------------------
 // MODAL DE QUICK VIEW
 // --------------------------------------------------------
-export const alocacaoViewSchema: ViewSchema<AlocacaoServico> = {
+export const alocacaoViewSchema: ViewSchema<AlocacaoPessoa> = {
   title: (item) => `Alocação #${item.id}`,
   fields: [
     { label: 'Motorista/Operador', key: 'pessoa_nome' },

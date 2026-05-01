@@ -8,7 +8,7 @@ import { useAuth } from "../../auth/AuthContext";
 import { Can } from "../../components/auth/Can";
 import { getApiErrorMessage } from "../../api/config/errorHandlers";
 
-import type { AlocacaoServico } from "../../types/models";
+import type { AlocacaoPessoa } from "../../types/models";
 import { alocacaoListSchema, alocacaoViewSchema } from "../../schemas/alocacao.schema";
 
 import "../../assets/css/ListPage.css";
@@ -18,11 +18,11 @@ export default function AlocacaoListPage() {
   const navigate = useNavigate();
   const { user: me } = useAuth();
 
-  const [alocacoes, setAlocacoes] = useState<AlocacaoServico[]>([]);
+  const [alocacoes, setAlocacoes] = useState<AlocacaoPessoa[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [viewItem, setViewItem] = useState<AlocacaoServico| null>(null);
+  const [viewItem, setViewItem] = useState<AlocacaoPessoa| null>(null);
 
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -58,7 +58,7 @@ export default function AlocacaoListPage() {
     }, 500);
   }, []);
 
-  async function handleDelete(item: AlocacaoServico) {
+  async function handleDelete(item: AlocacaoPessoa) {
     if (!item.id) return;
     try {
       await alocacoesApi.deletar(item.id);
@@ -102,7 +102,7 @@ export default function AlocacaoListPage() {
         rowClassName={(item) => item.is_principal ? "dt-row-highlight" : ""} 
       />
 
-      <QuickViewModal<AlocacaoServico>
+      <QuickViewModal<AlocacaoPessoa>
         isOpen={!!viewItem}
         onClose={() => setViewItem(null)}
         data={viewItem}

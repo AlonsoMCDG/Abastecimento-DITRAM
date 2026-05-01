@@ -15,8 +15,7 @@ from .serializers import (
 )
 
 class PessoaViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
-    # prefetch_related carrega todas as funções N:M de uma só vez, salvando o banco de dados
-    queryset = Pessoa.objects.prefetch_related('funcoes').all()
+    queryset = Pessoa.objects.all()
     permission_classes = [IsAuthenticated, CadastrosPermission]
 
     filter_backends = [
@@ -26,10 +25,10 @@ class PessoaViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
     ]
 
     # Filtros exatos
-    filterset_fields = ['ativo', 'id', 'cpf', 'funcoes', 'funcoes__nome']
+    filterset_fields = ['ativo', 'id', 'cpf']
 
     # Busca Textual
-    search_fields = ['nome', 'cpf', 'funcoes__nome']
+    search_fields = ['nome', 'cpf']
 
     # Ordenação
     ordering_fields = ['nome', 'cpf', 'id', 'ativo']
@@ -40,14 +39,9 @@ class PessoaViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
             return PessoaReadSerializer
         return PessoaWriteSerializer
 
-    def filter_queryset(self, queryset):
-        # Garante que as buscas textuais e os filtros em campos N:M não dupliquem a pessoa na lista
-        qs = super().filter_queryset(queryset)
-        return qs.distinct()
-
     @action(detail=False, methods=['get'], serializer_class=PessoaLookupSerializer)
     def lookup(self, request):
-        queryset = self.filter_queryset(self.get_queryset()).prefetch_related('funcoes')
+        queryset = self.get_queryset()
         
         if 'ativo' not in request.query_params:
             queryset = queryset.filter(ativo=True)

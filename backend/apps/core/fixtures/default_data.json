@@ -1242,7 +1242,7 @@
     }
   },
   {
-    "model": "operacao.alocacaoservico",
+    "model": "operacao.alocacaopessoa",
     "pk": 1,
     "fields": {
       "pessoa": 1,
@@ -1252,7 +1252,7 @@
     }
   },
   {
-    "model": "operacao.alocacaoservico",
+    "model": "operacao.alocacaopessoa",
     "pk": 2,
     "fields": {
       "pessoa": 2,
@@ -1262,7 +1262,7 @@
     }
   },
   {
-    "model": "operacao.alocacaoservico",
+    "model": "operacao.alocacaopessoa",
     "pk": 3,
     "fields": {
       "pessoa": 3,
@@ -1272,7 +1272,7 @@
     }
   },
   {
-    "model": "operacao.alocacaoservico",
+    "model": "operacao.alocacaopessoa",
     "pk": 4,
     "fields": {
       "pessoa": 4,
@@ -1282,7 +1282,7 @@
     }
   },
   {
-    "model": "operacao.alocacaoservico",
+    "model": "operacao.alocacaopessoa",
     "pk": 5,
     "fields": {
       "pessoa": 5,
@@ -1292,7 +1292,7 @@
     }
   },
   {
-    "model": "operacao.alocacaoservico",
+    "model": "operacao.alocacaopessoa",
     "pk": 6,
     "fields": {
       "pessoa": 6,
@@ -1302,7 +1302,7 @@
     }
   },
   {
-    "model": "operacao.alocacaoservico",
+    "model": "operacao.alocacaopessoa",
     "pk": 7,
     "fields": {
       "pessoa": 7,
@@ -1312,7 +1312,7 @@
     }
   },
   {
-    "model": "operacao.alocacaoservico",
+    "model": "operacao.alocacaopessoa",
     "pk": 8,
     "fields": {
       "pessoa": 8,
@@ -1322,7 +1322,7 @@
     }
   },
   {
-    "model": "operacao.alocacaoservico",
+    "model": "operacao.alocacaopessoa",
     "pk": 9,
     "fields": {
       "pessoa": 9,
@@ -1332,7 +1332,7 @@
     }
   },
   {
-    "model": "operacao.alocacaoservico",
+    "model": "operacao.alocacaopessoa",
     "pk": 10,
     "fields": {
       "pessoa": 10,
@@ -1342,7 +1342,7 @@
     }
   },
   {
-    "model": "operacao.alocacaoservico",
+    "model": "operacao.alocacaopessoa",
     "pk": 11,
     "fields": {
       "pessoa": 11,
@@ -1352,7 +1352,7 @@
     }
   },
   {
-    "model": "operacao.alocacaoservico",
+    "model": "operacao.alocacaopessoa",
     "pk": 12,
     "fields": {
       "pessoa": 12,
@@ -1362,7 +1362,7 @@
     }
   },
   {
-    "model": "operacao.alocacaoservico",
+    "model": "operacao.alocacaopessoa",
     "pk": 13,
     "fields": {
       "pessoa": 13,
@@ -1372,7 +1372,7 @@
     }
   },
   {
-    "model": "operacao.alocacaoservico",
+    "model": "operacao.alocacaopessoa",
     "pk": 14,
     "fields": {
       "pessoa": 14,
@@ -1382,7 +1382,7 @@
     }
   },
   {
-    "model": "operacao.alocacaoservico",
+    "model": "operacao.alocacaopessoa",
     "pk": 15,
     "fields": {
       "pessoa": 15,
@@ -1392,7 +1392,7 @@
     }
   },
   {
-    "model": "operacao.alocacaoservico",
+    "model": "operacao.alocacaopessoa",
     "pk": 16,
     "fields": {
       "pessoa": 1,
@@ -1402,7 +1402,7 @@
     }
   },
   {
-    "model": "operacao.alocacaoservico",
+    "model": "operacao.alocacaopessoa",
     "pk": 17,
     "fields": {
       "pessoa": 17,
@@ -1412,7 +1412,7 @@
     }
   },
   {
-    "model": "operacao.alocacaoservico",
+    "model": "operacao.alocacaopessoa",
     "pk": 18,
     "fields": {
       "pessoa": 18,
@@ -1422,7 +1422,7 @@
     }
   },
   {
-    "model": "operacao.alocacaoservico",
+    "model": "operacao.alocacaopessoa",
     "pk": 19,
     "fields": {
       "pessoa": 19,
@@ -1432,7 +1432,7 @@
     }
   },
   {
-    "model": "operacao.alocacaoservico",
+    "model": "operacao.alocacaopessoa",
     "pk": 20,
     "fields": {
       "pessoa": 20,

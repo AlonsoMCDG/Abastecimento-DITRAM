@@ -156,7 +156,7 @@ def db_stats(request):
     from apps.organizacao.models import Instituicao, Secretaria
     from apps.frota.models import Rota, Veiculo
     from apps.pessoas.models import Pessoa
-    from apps.operacao.models import Guia, OperadorVeiculo, AlocacaoServico, TipoServico
+    from apps.operacao.models import Guia, OperadorVeiculo, AlocacaoPessoa, TipoServico
     from django.contrib.auth import get_user_model
 
     User = get_user_model()
@@ -172,7 +172,7 @@ def db_stats(request):
                 "rotas": Rota.objects.count(),
                 "condutores": Pessoa.objects.count(),
                 "veiculos": Veiculo.objects.count(),
-                "lotacoes": AlocacaoServico.objects.count(),
+                "lotacoes": AlocacaoPessoa.objects.count(),
                 "guias": Guia.objects.count(),
                 "usuarios": User.objects.count(),
             },

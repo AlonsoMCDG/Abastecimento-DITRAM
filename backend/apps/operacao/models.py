@@ -45,56 +45,6 @@ class TipoAtividade(models.Model):
 
 
 # ==========================================
-# PREFERÊNCIAS / AUTO-PREENCHIMENTO
-# ==========================================
-class AlocacaoServico(models.Model):
-    pessoa = models.ForeignKey(Pessoa, on_delete=models.CASCADE, related_name='servicos_alocados')
-    tipo_atividade = models.ForeignKey(TipoAtividade, on_delete=models.PROTECT, related_name='pessoas_alocadas')
-    secretaria = models.ForeignKey(Secretaria, on_delete=models.PROTECT, related_name='pessoas_alocadas')
-    is_principal = models.BooleanField(default=False)
-
-    class Meta:
-        unique_together = ['pessoa', 'tipo_atividade']
-        verbose_name = "Alocação de Atividade"
-        verbose_name_plural = "Alocações de Atividades"
-
-    def __str__(self):
-        principal_str = "⭐ Principal" if self.is_principal else "Secundário"
-        return f"{self.pessoa.nome} -> {self.tipo_atividade.nome} [{principal_str}]"
-
-    @transaction.atomic
-    def save(self, *args, **kwargs):
-        if self.is_principal:
-            AlocacaoServico.objects.filter(pessoa=self.pessoa).exclude(pk=self.pk).update(is_principal=False)
-        elif not self.pk and not AlocacaoServico.objects.filter(pessoa=self.pessoa).exists():
-            self.is_principal = True
-        super().save(*args, **kwargs)
-
-
-class OperadorVeiculo(models.Model):
-    pessoa = models.ForeignKey(Pessoa, on_delete=models.CASCADE, related_name='veiculos_operados')
-    veiculo = models.ForeignKey(Veiculo, on_delete=models.CASCADE, related_name='operadores')
-    is_principal = models.BooleanField(default=False)
-
-    class Meta:
-        unique_together = ['pessoa', 'veiculo']
-        verbose_name = "Operador de Veículo"
-        verbose_name_plural = "Operadores de Veículos"
-
-    def __str__(self):
-        principal_str = "⭐ Principal" if self.is_principal else "Secundário"
-        return f"{self.pessoa.nome} -> {self.veiculo.modelo} [{principal_str}]"
-
-    @transaction.atomic
-    def save(self, *args, **kwargs):
-        if self.is_principal:
-            OperadorVeiculo.objects.filter(veiculo=self.veiculo).exclude(pk=self.pk).update(is_principal=False)
-        elif not self.pk and not OperadorVeiculo.objects.filter(veiculo=self.veiculo).exists():
-            self.is_principal = True
-        super().save(*args, **kwargs)
-
-
-# ==========================================
 # TRANSAÇÕES PRINCIPAIS
 # ==========================================
 class GuiaAbastecimento(models.Model):
@@ -103,13 +53,15 @@ class GuiaAbastecimento(models.Model):
         ('VAN', 'Van'), ('BARCO', 'Barco'), ('MAQUINA_PESADA', 'Máquina Pesada/Trator'),
     ]
 
+    data_hora = models.DateTimeField(verbose_name="Data e Hora")
+
+    # Categoria operacional do abastecimento
     MODALIDADE_CHOICES = [
         ('TERRESTRE', 'Terrestre'), ('FLUVIAL', 'Fluvial'),
         ('ROCAGEM', 'Roçagem'), ('BORRIFACAO', 'Borrifação'), ('COROTE', 'Corote'),
     ]
-
-    data_hora = models.DateTimeField(verbose_name="Data e Hora")
     modalidade = models.CharField(max_length=20, choices=MODALIDADE_CHOICES)
+    
     usuario = models.ForeignKey(User, on_delete=models.PROTECT, related_name='guias_emitidas')
 
     secretaria = models.ForeignKey(Secretaria, on_delete=models.PROTECT)
@@ -150,16 +102,10 @@ class GuiaAbastecimento(models.Model):
 
     def clean(self):
         """Validação lógica antes de salvar no banco"""
-        preenchidos = [
-            bool(self.veiculo),
-            bool(self.tipo_veiculo),
-            bool(self.veiculo_descricao),
-        ]
+        fields = [self.veiculo, self.tipo_veiculo, self.veiculo_descricao]
 
-        if sum(preenchidos) != 1:
-            raise ValidationError(
-                "Informe exatamente um: veiculo, tipo_veiculo ou veiculo_descricao."
-            )
+        if sum(bool(x) for x in fields) != 1:
+            raise ValidationError("Informe exatamente um tipo de veículo.")
     
     @property
     def veiculo_display(self):
