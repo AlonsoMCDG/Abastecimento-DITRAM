@@ -14,6 +14,9 @@ class Secretaria(models.Model):
     class Meta:
         verbose_name = "Secretaria"
         verbose_name_plural = "Secretarias"
+        indexes = [
+            models.Index(fields=['nome']),
+        ]
     
     def clean(self):
         if self.nome:
@@ -22,11 +25,11 @@ class Secretaria(models.Model):
             self.sigla = "".join(self.sigla.split()).upper()
 
     def save(self, *args, **kwargs):
-        self.clean()
+        self.full_clean()
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return self.sigla
+        return f"{self.sigla} - {self.nome}"
 
     def natural_key(self):
         return (self.sigla,)
@@ -34,7 +37,10 @@ class Secretaria(models.Model):
 
 class InstituicaoManager(models.Manager):
     def get_by_natural_key(self, nome, secretaria_sigla):
-        return self.get(nome=nome, secretaria__sigla=secretaria_sigla)
+        return self.select_related('secretaria').get(
+            nome=nome,
+            secretaria__sigla=secretaria_sigla
+        )
 
 class Instituicao(models.Model):
     TIPO_CHOICES = [
@@ -42,7 +48,7 @@ class Instituicao(models.Model):
         ('HOSPITAL', 'Hospital'), ('OUTRO', 'Outro'),
     ]
     nome = models.CharField(max_length=100, verbose_name="Nome")
-    tipo = models.CharField(max_length=50, choices=TIPO_CHOICES, verbose_name="Tipo", null=True, blank=True)
+    tipo = models.CharField(max_length=50, choices=TIPO_CHOICES, verbose_name="Tipo", default='OUTRO')
     secretaria = models.ForeignKey(Secretaria, on_delete=models.CASCADE, related_name="instituicoes")
     ativo = models.BooleanField(default=True, verbose_name="Ativa")
     
@@ -51,14 +57,23 @@ class Instituicao(models.Model):
     class Meta:
         verbose_name = "Instituição"
         verbose_name_plural = "Instituições"
-        unique_together = ['nome', 'secretaria']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['nome', 'secretaria'],
+                name='unique_instituicao_por_secretaria'
+            )
+        ]   
+        indexes = [
+            models.Index(fields=['nome', 'secretaria']),
+            models.Index(fields=['tipo']),
+        ]
     
     def clean(self):
         if self.nome:
             self.nome = " ".join(self.nome.split()).title()
 
     def save(self, *args, **kwargs):
-        self.clean()
+        self.full_clean()
         super().save(*args, **kwargs)
 
     def __str__(self):

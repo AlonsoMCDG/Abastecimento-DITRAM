@@ -14,7 +14,7 @@ from .serializers import (
 
 
 class SecretariaViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
-    queryset = Secretaria.objects.all()
+    queryset = Secretaria.objects.all().order_by('-ativo', 'nome')
     serializer_class = SecretariaSerializer
     permission_classes = [IsAuthenticated, CadastrosPermission]
 
@@ -45,7 +45,7 @@ class SecretariaViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
         # Otimização da query
         queryset = queryset.only('id', 'nome', 'sigla')
 
-        serializer = self.get_serializer_class(queryset, many=True)
+        serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
 
@@ -63,7 +63,7 @@ class InstituicaoViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
     filterset_fields = ['id', 'secretaria', 'tipo', 'ativo']
 
     # Busca Textual
-    search_fields = ['nome', 'tipo', 'secretaria__nome', 'secretaria__sigla']
+    search_fields = ['nome', 'secretaria__nome', 'secretaria__sigla']
     
     # Ordenação
     ordering_fields = ['nome', 'tipo', 'id', 'secretaria__sigla', 'ativo']
@@ -85,5 +85,5 @@ class InstituicaoViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
         # Otimiza a query
         queryset = queryset.only('id', 'nome', 'tipo', 'secretaria_id')
 
-        serializer = self.get_serializer_class(queryset, many=True)
+        serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)

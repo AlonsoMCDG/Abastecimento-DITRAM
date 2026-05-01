@@ -35,6 +35,26 @@ class InstituicaoWriteSerializer(serializers.ModelSerializer):
         model = Instituicao
         fields = ['id', 'nome', 'tipo', 'secretaria_id', 'ativo']
 
+    def validate(self, data):
+        nome = data.get('nome')
+        secretaria = data.get('secretaria')
+
+        if nome:
+            nome = " ".join(nome.split()).title()
+            data['nome'] = nome
+
+        qs = Instituicao.objects.filter(nome=nome, secretaria=secretaria)
+
+        if self.instance:
+            qs = qs.exclude(id=self.instance.id)
+
+        if qs.exists():
+            raise serializers.ValidationError(
+                "Já existe uma instituição com esse nome nessa secretaria."
+            )
+
+        return data
+
 # DTO de Leitura 
 class InstituicaoReadSerializer(serializers.ModelSerializer):
     secretaria_id = serializers.IntegerField(read_only=True)
