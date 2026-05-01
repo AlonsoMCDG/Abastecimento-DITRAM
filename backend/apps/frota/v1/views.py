@@ -37,7 +37,7 @@ class VeiculoViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
     ordering = ['-ativo', 'modelo'] # Primeiro os ativos, ordem alfabética
 
     def get_queryset(self):
-        queryset = super().get_queryset().select_related('tipo_combustivel').prefetch_related('guias')
+        queryset = super().get_queryset().select_related('tipo_combustivel')
         pessoa_id = self.request.query_params.get('pessoa_id')
 
         if pessoa_id:
@@ -75,7 +75,7 @@ class RotaViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
 
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
 
-    filterset_fields = ['id', 'secretaria_id', 'ativa']
+    filterset_fields = ['id', 'secretaria', 'ativa']
     
     search_fields = ['nome', 'detalhes', 'secretaria__nome', 'secretaria__sigla']
 
@@ -117,8 +117,8 @@ class TipoCombustivelViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
 
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     
-    filterset_fields = ['id', 'slug', 'ativo']
-    search_fields = ['nome', 'slug']
+    filterset_fields = ['id', 'ativo']
+    search_fields = ['nome']
     ordering_fields = ['nome']
     ordering = ['nome'] 
     

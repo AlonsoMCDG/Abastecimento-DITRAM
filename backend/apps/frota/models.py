@@ -17,12 +17,21 @@ class TipoCombustivel(models.Model):
     class Meta:
         verbose_name = "Tipo de Combustível"
         verbose_name_plural = "Tipos de Combustível"
+        indexes = [
+            models.Index(fields=['nome']),
+            models.Index(fields=['ativo']),
+        ]
 
     def __str__(self):
         return self.nome
     
-
+    def clean(self):
+        if self.nome:
+            self.nome = " ".join(self.nome.split()).title()
+            
     def save(self, *args, **kwargs):
+        self.full_clean()
+        
         if not self.slug:
             base_slug = slugify(self.nome)
             slug = base_slug
@@ -79,8 +88,14 @@ class Veiculo(models.Model):
     objects = VeiculoManager()
 
     class Meta:
-        verbose_name = "Veículo (Frota)"
-        verbose_name_plural = "Veículos (Frota)"
+        verbose_name = "Veículo"
+        verbose_name_plural = "Veículos"
+        indexes = [
+            models.Index(fields=['placa']),
+            models.Index(fields=['modelo']),
+            models.Index(fields=['ativo']),
+            models.Index(fields=['categoria']),
+        ]
 
     def clean(self):
         # Normaliza a placa: remove traços/espaços e passa a maiúsculas
@@ -88,7 +103,7 @@ class Veiculo(models.Model):
             self.placa = ''.join(carater for carater in self.placa if carater.isalnum()).upper()
 
     def save(self, *args, **kwargs):
-        self.clean() # Garante que o clean corre sempre antes de guardar
+        self.full_clean()
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -108,7 +123,7 @@ class Rota(models.Model):
     Serve apenas para sugerir caminhos conhecidos da secretaria e agilizar o preenchimento.
     """
     nome = models.CharField(max_length=255)
-    slug = models.SlugField(max_length=255)
+    slug = models.SlugField(max_length=255, editable=False)  # comentário: uso interno
     
     secretaria = models.ForeignKey(Secretaria, on_delete=models.CASCADE, related_name="rotas_sugeridas")
     
@@ -122,8 +137,8 @@ class Rota(models.Model):
     objects = RotaManager()
 
     class Meta:
-        verbose_name = "Rota Sugerida"
-        verbose_name_plural = "Rotas Sugeridas"
+        verbose_name = "Rota"
+        verbose_name_plural = "Rotass"
         unique_together = ['nome', 'secretaria']
 
         constraints = [
@@ -131,6 +146,11 @@ class Rota(models.Model):
                 fields=['slug', 'secretaria'],
                 name='unique_slug_por_secretaria'
             )
+        ]
+        indexes = [
+            models.Index(fields=['nome']),
+            models.Index(fields=['secretaria']),
+            models.Index(fields=['ativa']),
         ]
 
     def clean(self):
@@ -141,7 +161,7 @@ class Rota(models.Model):
     def save(self, *args, **kwargs):
         from django.utils.text import slugify
 
-        self.clean()
+        self.full_clean()
         
         if not self.slug:
             base_slug = slugify(self.nome)
