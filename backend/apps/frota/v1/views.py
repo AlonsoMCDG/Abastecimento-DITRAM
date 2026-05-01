@@ -14,6 +14,11 @@ from .serializers import (
     TipoCombustivelSerializer, TipoCombustivelLookupSerializer
 )
 
+
+# ==========================================
+# VEÍCULO
+# ==========================================
+
 class VeiculoViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
     queryset = Veiculo.objects.all()
     permission_classes = [IsAuthenticated, FrotaPermission]
@@ -21,22 +26,24 @@ class VeiculoViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
 
     # Filtro Exato
-    filterset_fields = ['id', 'categoria', 'ativo']
+    filterset_fields = ['id', 'categoria', 'ativo', 'tipo_combustivel']
+
 
     # Busca Textual
-    search_fields = ['placa', 'modelo']
+    search_fields = ['placa', 'modelo', 'tipo_combustivel__nome']
 
     # Ordenação
     ordering_fields = ['id', 'placa', 'modelo', 'hodometro_atual', 'ativo']
     ordering = ['-ativo', 'modelo'] # Primeiro os ativos, ordem alfabética
 
     def get_queryset(self):
-        queryset = super().get_queryset()
+        queryset = super().get_queryset().select_related('tipo_combustivel').prefetch_related('guias')
         pessoa_id = self.request.query_params.get('pessoa_id')
 
         if pessoa_id:
-            # Filtra veículos associados ao motorista (Acessa a relação inversa de OperadorVeiculo do módulo operacao)
-            queryset = queryset.filter(operadores__pessoa_id=pessoa_id).distinct()
+            queryset = queryset.filter(
+                guias__pessoa_id=pessoa_id
+            ).distinct()
 
         return queryset
     
@@ -58,6 +65,10 @@ class VeiculoViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
+# ==========================================
+# ROTA
+# ==========================================
+
 class RotaViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
     queryset = Rota.objects.select_related('secretaria').all()
     permission_classes = [IsAuthenticated, FrotaPermission]
@@ -68,7 +79,11 @@ class RotaViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
     
     search_fields = ['nome', 'detalhes', 'secretaria__nome', 'secretaria__sigla']
 
-    ordering_fields = ['id', 'nome', 'distancia_km', 'secretaria__nome', 'secretaria__sigla', 'ativa']
+    ordering_fields = [
+        'id', 'nome', 'distancia_km',
+        'secretaria__nome', 'secretaria__sigla',
+        'ativa'
+    ]
     ordering = ['-ativa', 'nome'] 
 
     def get_serializer_class(self):
@@ -83,12 +98,17 @@ class RotaViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
         if 'ativa' not in request.query_params:
             queryset = queryset.filter(ativa=True)
             
-        # OTIMIZAÇÃO: Limpa o select_related vindo da classe
-        queryset = queryset.select_related(None).only('id', 'nome', 'distancia_km', 'secretaria_id')
+        queryset = queryset.select_related(None).only(
+            'id', 'nome', 'distancia_km', 'secretaria_id'
+        )
 
         serializer = RotaLookupSerializer(queryset, many=True)
         return Response(serializer.data)
 
+
+# ==========================================
+# TIPO COMBUSTÍVEL
+# ==========================================
 
 class TipoCombustivelViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
     queryset = TipoCombustivel.objects.all()
@@ -96,8 +116,9 @@ class TipoCombustivelViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['id', 'ativo']
-    search_fields = ['nome']
+    
+    filterset_fields = ['id', 'slug', 'ativo']
+    search_fields = ['nome', 'slug']
     ordering_fields = ['nome']
     ordering = ['nome'] 
     
@@ -110,5 +131,5 @@ class TipoCombustivelViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
             
         queryset = queryset.only('id', 'nome')
 
-        serializer = self.get_serializer_class(queryset, many=True)
+        serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)

@@ -7,25 +7,44 @@ from apps.organizacao.models import Secretaria
 # ==========================================
 
 class VeiculoWriteSerializer(serializers.ModelSerializer):
+    tipo_combustivel = serializers.PrimaryKeyRelatedField(
+        queryset=TipoCombustivel.objects.filter(ativo=True)
+    )
+
     class Meta:
         model = Veiculo
         fields = [
-            'id', 'modelo', 'placa', 'categoria', 
-            'capacidade_carga_kg', 'capacidade_pessoas', 
-            'consumo_estimado_combustivel', 'unidade_consumo', 
-            'hodometro_atual', 'ativo'
+            'id', 'modelo', 'placa', 'categoria',
+            'capacidade_carga_kg', 'capacidade_pessoas',
+            'consumo_estimado_combustivel', 'consumo_estimado_oleo',
+            'unidade_consumo', 'hodometro_atual', 'ativo',
+            'tipo_combustivel',
         ]
+
+    def validate_placa(self, value):
+        return ''.join(c for c in value if c.isalnum()).upper()
 
 class VeiculoReadSerializer(serializers.ModelSerializer):
     categoria_nome = serializers.CharField(source='get_categoria_display', read_only=True)
     unidade_consumo_nome = serializers.CharField(source='get_unidade_consumo_display', read_only=True)
 
+    tipo_combustivel = serializers.PrimaryKeyRelatedField(read_only=True)
+    tipo_combustivel_nome = serializers.CharField(
+        source='tipo_combustivel.nome',
+        read_only=True
+    )
+
     class Meta:
         model = Veiculo
         fields = [
-            'id', 'modelo', 'placa', 'categoria', 'categoria_nome', 'ativo',
-            'consumo_estimado_combustivel', 'unidade_consumo', 'unidade_consumo_nome',
-            'hodometro_atual', 'capacidade_carga_kg', 'capacidade_pessoas'
+            'id', 'modelo', 'placa',
+            'categoria', 'categoria_nome',
+            'ativo',
+            'consumo_estimado_combustivel', 'consumo_estimado_oleo',
+            'unidade_consumo', 'unidade_consumo_nome',
+            'hodometro_atual',
+            'capacidade_carga_kg', 'capacidade_pessoas',
+            'tipo_combustivel', 'tipo_combustivel_nome',
         ]
 
 class VeiculoLookupSerializer(serializers.ModelSerializer):
@@ -36,7 +55,7 @@ class VeiculoLookupSerializer(serializers.ModelSerializer):
         model = Veiculo
         fields = ['value', 'label', 'categoria']
 
-    def get_label(self, obj: Veiculo):
+    def get_label(self, obj):
         return f"{obj.modelo} - {obj.placa}"
 
 
@@ -45,14 +64,17 @@ class VeiculoLookupSerializer(serializers.ModelSerializer):
 # ==========================================
 
 class RotaWriteSerializer(serializers.ModelSerializer):
-    secretaria_id = serializers.PrimaryKeyRelatedField(
-        source='secretaria', 
+    secretaria = serializers.PrimaryKeyRelatedField(
         queryset=Secretaria.objects.all()
     )
 
+    
     class Meta:
         model = Rota
-        fields = ['id', 'nome', 'distancia_km', 'secretaria_id', 'ativa', 'detalhes']
+        fields = ['id', 'nome', 'distancia_km', 'secretaria', 'ativa', 'detalhes']
+    
+    def validate_nome(self, value):
+        return " ".join(value.split())
 
 class RotaReadSerializer(serializers.ModelSerializer):
     secretaria_id = serializers.IntegerField(read_only=True)
@@ -84,12 +106,13 @@ class RotaLookupSerializer(serializers.ModelSerializer):
 class TipoCombustivelSerializer(serializers.ModelSerializer):
     class Meta:
         model = TipoCombustivel
-        fields = "__all__"
+        fields = ['id', 'nome', 'slug', 'ativo']
+        read_only_fields = ['slug']
 
 class TipoCombustivelLookupSerializer(serializers.ModelSerializer):
     value = serializers.ReadOnlyField(source='id')
     label = serializers.ReadOnlyField(source='nome')
-    
+
     class Meta:
         model = TipoCombustivel
         fields = ['value', 'label']

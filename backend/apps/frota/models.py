@@ -1,6 +1,7 @@
 from django.db import models
 from django.core.validators import MinValueValidator
 from apps.organizacao.models import Secretaria
+from django.utils.text import slugify
 
 class TipoCombustivelManager(models.Manager):
     def get_by_natural_key(self, nome):
@@ -9,7 +10,8 @@ class TipoCombustivelManager(models.Manager):
 class TipoCombustivel(models.Model):
     nome = models.CharField(max_length=50, unique=True)
     ativo = models.BooleanField(default=True)
-    
+    slug = models.SlugField(max_length=30, unique=True)  # Apelido padronizado para o nome
+
     objects = TipoCombustivelManager()
 
     class Meta:
@@ -18,6 +20,18 @@ class TipoCombustivel(models.Model):
 
     def __str__(self):
         return self.nome
+    
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            base_slug = slugify(self.nome)
+            slug = base_slug
+            counter = 1
+            while TipoCombustivel.objects.filter(slug=slug).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+            self.slug = slug
+        super().save(*args, **kwargs)
 
     def natural_key(self):
         return (self.nome,)
@@ -43,9 +57,7 @@ class Veiculo(models.Model):
     ]
 
     modelo = models.CharField(max_length=200)
-    
     placa = models.CharField(max_length=9, unique=True)
-    
     categoria = models.CharField(max_length=50, choices=CATEGORIA_CHOICES)
     
     hodometro_atual = models.DecimalField(max_digits=10, decimal_places=2, default=0, 
@@ -54,6 +66,10 @@ class Veiculo(models.Model):
     
     unidade_consumo = models.CharField(max_length=20, choices=UNIDADE_CONSUMO_CHOICES, default="KM_POR_L")
     consumo_estimado_combustivel = models.DecimalField(max_digits=10, decimal_places=3, null=True, blank=True)
+    consumo_estimado_oleo = models.DecimalField(max_digits=10, decimal_places=3, null=True, blank=True)
+
+    tipo_combustivel = models.ForeignKey(TipoCombustivel, on_delete=models.PROTECT, related_name="veiculos")
+    
     
     capacidade_carga_kg = models.FloatField(null=True, blank=True)
     capacidade_pessoas = models.IntegerField(null=True, blank=True)
@@ -92,6 +108,8 @@ class Rota(models.Model):
     Serve apenas para sugerir caminhos conhecidos da secretaria e agilizar o preenchimento.
     """
     nome = models.CharField(max_length=255)
+    slug = models.SlugField(max_length=255)
+    
     secretaria = models.ForeignKey(Secretaria, on_delete=models.CASCADE, related_name="rotas_sugeridas")
     
     # Campos operacionais
@@ -108,12 +126,34 @@ class Rota(models.Model):
         verbose_name_plural = "Rotas Sugeridas"
         unique_together = ['nome', 'secretaria']
 
+        constraints = [
+            models.UniqueConstraint(
+                fields=['slug', 'secretaria'],
+                name='unique_slug_por_secretaria'
+            )
+        ]
+
     def clean(self):
         if self.nome:
-            self.nome = " ".join(self.nome.split()).title()
+            self.nome = " ".join(self.nome.split())
+
 
     def save(self, *args, **kwargs):
+        from django.utils.text import slugify
+
         self.clean()
+        
+        if not self.slug:
+            base_slug = slugify(self.nome)
+            slug = base_slug
+            counter = 1
+            
+            while Rota.objects.filter(slug=slug, secretaria=self.secretaria).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+            
+            self.slug = slug
+
         super().save(*args, **kwargs)
 
     def __str__(self):
