@@ -71,10 +71,10 @@ class GuiaAbastecimento(models.Model):
     rota = models.ForeignKey(Rota, on_delete=models.PROTECT, null=True, blank=True)
     rota_manual = models.CharField(max_length=255, null=True, blank=True)
 
-    pessoa = models.ForeignKey(Pessoa, on_delete=models.PROTECT)
+    pessoa = models.ForeignKey(Pessoa, on_delete=models.PROTECT, related_name='guias')
 
     # Identificação do veículo. Apenas 1 dos 3 campos a seguir deve ser preenchido por guia.
-    veiculo = models.ForeignKey(Veiculo, on_delete=models.PROTECT, null=True, blank=True)  # 1. Objeto Veiculo (salvo no banco)
+    veiculo = models.ForeignKey(Veiculo, on_delete=models.PROTECT, null=True, blank=True, related_name='guias')  # 1. Objeto Veiculo (salvo no banco)
     tipo_veiculo = models.CharField(max_length=50, choices=TIPO_VEICULO_CHOICES, null=True, blank=True)  # 2. Para barqueiros, usa esse campo (usa "Barco" genericamente para todos os barqueiros)
     veiculo_descricao = models.CharField(max_length=100, null=True, blank=True)  # 3. Descrição avulsa do veículo, quando os campos acima não são aplicáveis
 
