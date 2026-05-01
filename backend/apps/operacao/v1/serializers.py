@@ -35,7 +35,7 @@ class GuiaReadSerializer(serializers.ModelSerializer):
     pessoa_id = serializers.IntegerField(read_only=True)
     pessoa_nome = serializers.CharField(source='pessoa.nome', read_only=True)
 
-    veiculo_display = serializers.CharField(source='veiculo_display', read_only=True)
+    veiculo_display = serializers.CharField(read_only=True)
 
     rota_id = serializers.IntegerField(read_only=True)
     rota_nome = serializers.CharField(source='rota.nome', read_only=True, default=None)
