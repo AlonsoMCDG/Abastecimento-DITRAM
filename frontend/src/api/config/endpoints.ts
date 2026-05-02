@@ -32,8 +32,6 @@ export const ENDPOINTS = {
   frota: {
     veiculos: "/v1/frota/veiculos/",
     veiculosLookup: "/v1/frota/veiculos/lookup/",
-    tiposVeiculo: "/v1/frota/tipos-veiculo/",
-    tiposVeiculoLookup: "/v1/frota/tipos-veiculo/lookup/",
     rotas: "/v1/frota/rotas/",
     rotasLookup: "/v1/frota/rotas/lookup/",
     tiposCombustivel: "/v1/frota/tipos-combustivel/",
@@ -62,11 +60,8 @@ export const ENDPOINTS = {
   // OPERAÇÃO
   // -----------------------
   operacao: {
-    tiposServico: "/v1/operacao/tipos-servico/",
-    tiposServicoLookup: "/v1/operacao/tipos-servico/lookup/",
-    alocacoesServico: "/v1/operacao/alocacoes-servicos/",
-    alocacoesServicoLookup: "/v1/operacao/alocacoes-servicos/lookup/",
-    operadoresVeiculos: "/v1/operacao/operadores-veiculos/",
+    tiposAtividade: "/v1/operacao/tipos-atividade/",
+    tiposAtividadeLookup: "/v1/operacao/tipos-atividade/lookup/",
     guias: "/v1/operacao/guias/",
   },
 }
