@@ -3,7 +3,7 @@ import type { UseFormSetValue, Path, PathValue } from 'react-hook-form';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 
 import { DynamicForm } from '../../../components/DynamicForm/DynamicForm'; 
-import { guiaAbastecimentoFormSchema } from '../../../schemas/guiaAbastecimento.schema';
+import { guiaAbastecimentoFormSchema } from '../../../schemas/operacao/guiaAbastecimento.schema';
 import { guiasApi } from '../../../api/operacao/guiasApi';
 import { rotaApi } from '../../../api/frota/rotasApi';
 import { veiculosApi } from '../../../api/frota/veiculosApi';

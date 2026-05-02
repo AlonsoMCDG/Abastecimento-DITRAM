@@ -1,12 +1,12 @@
-import { ENDPOINTS } from "../api/config/endpoints"
-import type { GuiaCreatePayload } from "../api/operacao/guiasApi"
-import { TIPO_SERVICO_BARQUEIRO_ID } from "../constants/constants"
-import type { FormSchema, TableSchema } from "../types/form"
-import type { GuiaAbastecimento } from "../types/models"
-import type { ViewSchema } from "../types/views"
-import { MASKS } from "../utils/masks"
-import { ROUTES } from "../routes/routes"
+import { ENDPOINTS } from "../../api/config/endpoints"
+import type { GuiaCreatePayload } from "../../api/operacao/guiasApi"
+import { TIPO_SERVICO_BARQUEIRO_ID } from "../../constants/constants"
+import type { FormSchema, TableSchema } from "../../types/form"
+import type { ViewSchema } from "../../types/views"
+import { MASKS } from "../../utils/masks"
+import { ROUTES } from "../../routes/routes"
 
+import type { GuiaAbastecimento } from "../../types/models"
 // --------------------------------------------------------
 // FORMULÁRIO DE CRIAÇÃO / EDIÇÃO (DynamicForm)
 // --------------------------------------------------------

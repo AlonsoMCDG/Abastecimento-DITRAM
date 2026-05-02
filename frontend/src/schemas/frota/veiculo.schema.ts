@@ -1,10 +1,10 @@
-import type { FormSchema, TableSchema } from "../types/form";
-import { ENDPOINTS } from "../api/config/endpoints";
-import { MASKS } from "../utils/masks";
-import type { ViewSchema } from "../types/views";
-import type { Veiculo } from "../types/models";
-import type { VeiculoCreatePayload } from "../api/frota/veiculosApi"
-import { TIPO_VEICULO_BARCO_ID } from "../constants/constants";
+import type { FormSchema, TableSchema } from "../../types/form";
+import { ENDPOINTS } from "../../api/config/endpoints";
+import { MASKS } from "../../utils/masks";
+import type { ViewSchema } from "../../types/views";
+import type { Veiculo } from "../../types/models";
+import type { VeiculoCreatePayload } from "../../api/frota/veiculosApi"
+import { TIPO_VEICULO_BARCO_ID } from "../../constants/constants";
 
 // --------------------------------------------------------
 // FORMULÁRIO

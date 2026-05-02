@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { veiculosApi } from "../../../api/frota/veiculosApi";
 import { ROUTES } from "../../../routes/routes";
 import { DynamicForm } from "../../../components/DynamicForm/DynamicForm";
-import { veiculoFormSchema } from "../../../schemas/veiculo.schema";
+import { veiculoFormSchema } from "../../../schemas/frota/veiculo.schema";
 import type { Veiculo } from "../../../types/models";
 import { getApiErrorMessage } from "../../../api/config/errorHandlers";
 import type { Path, PathValue, UseFormSetValue } from "react-hook-form";

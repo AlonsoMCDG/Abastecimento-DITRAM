@@ -161,6 +161,83 @@ export interface GuiaAbastecimento {
   rota_distancia_km?: number | null;
 }
 
+export interface GuiaAbastecimentoWrite {
+  data_hora: string;
+
+  modalidade: string;
+
+  pessoa_id: number;
+
+  veiculo_id?: number | null;
+  tipo_veiculo?: string | null;
+  veiculo_descricao?: string | null;
+
+  secretaria_id: number;
+
+  instituicao_id?: number | null;
+
+  rota_id?: number | null;
+  rota_manual?: string | null;
+
+  tipo_atividade_id?: number | null;
+  tipo_atividade_nome?: string;
+
+  tipo_combustivel_id: number;
+
+  quantidade_combustivel: number | string;
+  quantidade_oleo?: number | string | null;
+
+  periodo_uso_dias?: number | null;
+
+  observacao?: string | null;
+}
+
+export interface GuiaAbastecimentoRead {
+  id: number;
+  data_hora: string;
+
+  modalidade: string;
+  modalidade_nome?: string;
+
+  pessoa_id: number;
+  pessoa_nome?: string;
+
+  veiculo_id?: number | null;
+  veiculo_display?: string;
+
+  tipo_veiculo?: string | null;
+  veiculo_descricao?: string | null;
+
+  secretaria_id: number;
+  secretaria_nome?: string;
+  secretaria_sigla?: string;
+
+  instituicao_id?: number | null;
+  instituicao_nome?: string;
+
+  rota_id?: number | null;
+  rota_nome?: string | null;
+
+  tipo_atividade_id?: number | null;
+  tipo_atividade_nome?: string;
+
+  tipo_combustivel_id: number;
+  tipo_combustivel_nome?: string;
+
+  usuario_id?: number;
+  usuario_nome?: string;
+
+  quantidade_combustivel: number | string;
+  quantidade_oleo?: number | string | null;
+
+  periodo_uso_dias?: number | null;
+
+  observacao?: string | null;
+
+  criado_em?: string;
+  atualizado_em?: string;
+}
+
 export interface RegistroHodometroDiario {
   id: number;
   guia_id: number;
@@ -192,7 +269,7 @@ export interface Usuario {
 
   can_write_cadastros: boolean;
   can_write_frota: boolean;
-  
+
   can_create_guia_abastecimento: boolean;
   can_edit_guia_abastecimento: boolean;
   can_delete_guia_abastecimento: boolean;

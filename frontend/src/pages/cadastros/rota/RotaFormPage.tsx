@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { rotaApi } from "../../../api/frota/rotasApi";
 import { ROUTES } from "../../../routes/routes";
 import { DynamicForm } from "../../../components/DynamicForm/DynamicForm";
-import { rotaFormSchema } from "../../../schemas/rota.schema";
+import { rotaFormSchema } from "../../../schemas/frota/rota.schema";
 import type { Rota } from "../../../types/models";
 import { getApiErrorMessage } from "../../../api/config/errorHandlers";
 

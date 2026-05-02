@@ -1,8 +1,8 @@
-import { ENDPOINTS } from "../api/config/endpoints";
-import type { FormSchema, TableSchema } from "../types/form";
-import type { Rota } from "../types/models";
-import type { ViewSchema } from "../types/views";
-import { MASKS } from "../utils/masks";
+import { ENDPOINTS } from "../../api/config/endpoints";
+import type { FormSchema, TableSchema } from "../../types/form";
+import type { Rota } from "../../types/models";
+import type { ViewSchema } from "../../types/views";
+import { MASKS } from "../../utils/masks";
 
 // --------------------------------------------------------
 // FORMULÁRIO DE CRIAÇÃO / EDIÇÃO

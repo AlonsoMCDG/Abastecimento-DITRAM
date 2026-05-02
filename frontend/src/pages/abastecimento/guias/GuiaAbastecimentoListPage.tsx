@@ -9,7 +9,7 @@ import { Can } from "../../../components/auth/Can";
 import { getApiErrorMessage } from "../../../api/config/errorHandlers";
 
 import type { GuiaAbastecimento } from "../../../types/models";
-import { guiaAbastecimentoListSchema, guiaViewSchema } from "../../../schemas/guiaAbastecimento.schema";
+import { guiaAbastecimentoListSchema, guiaViewSchema } from "../../../schemas/operacao/guiaAbastecimento.schema";
 
 import "../../../assets/css/ListPage.css";
 import { QuickViewModal } from "../../../components/QuickViewModal";

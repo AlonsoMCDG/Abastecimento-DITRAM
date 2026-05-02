@@ -9,7 +9,7 @@ import { Can } from "../../../components/auth/Can";
 import { getApiErrorMessage } from "../../../api/config/errorHandlers";
 
 import type { Rota } from "../../../types/models";
-import { rotaListSchema, rotaViewSchema } from "../../../schemas/rota.schema";
+import { rotaListSchema, rotaViewSchema } from "../../../schemas/frota/rota.schema";
 
 import "../../../assets/css/ListPage.css";
 import { QuickViewModal } from "../../../components/QuickViewModal";

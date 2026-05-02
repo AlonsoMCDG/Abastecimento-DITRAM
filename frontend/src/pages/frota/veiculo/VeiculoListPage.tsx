@@ -9,7 +9,7 @@ import { Can } from "../../../components/auth/Can";
 import { getApiErrorMessage } from "../../../api/config/errorHandlers";
 
 import type { Veiculo } from "../../../types/models";
-import { veiculoListSchema, veiculoViewSchema } from "../../../schemas/veiculo.schema";
+import { veiculoListSchema, veiculoViewSchema } from "../../../schemas/frota/veiculo.schema";
 
 import "../../../assets/css/ListPage.css";
 import { QuickViewModal } from "../../../components/QuickViewModal";

@@ -1,7 +1,7 @@
-import type { FormSchema, TableSchema } from "../types/form";
-import { ENDPOINTS } from "../api/config/endpoints";
-import type { Instituicao } from "../types/models";
-import type { ViewSchema } from "../types/views";
+import type { FormSchema, TableSchema } from "../../types/form";
+import { ENDPOINTS } from "../../api/config/endpoints";
+import type { Instituicao } from "../../types/models";
+import type { ViewSchema } from "../../types/views";
 
 // --------------------------------------------------------
 // FORMULÁRIO DE CRIAÇÃO / EDIÇÃO

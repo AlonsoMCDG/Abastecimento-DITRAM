@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { instituicoesApi } from "../../../api/organizacao/instituicoesApi"; 
 import { ROUTES } from "../../../routes/routes";
 import { DynamicForm } from "../../../components/DynamicForm/DynamicForm";
-import { instituicaoFormSchema } from "../../../schemas/instituicao.schema";
+import { instituicaoFormSchema } from "../../../schemas/organizacao/instituicao.schema";
 import type { Instituicao } from "../../../types/models";
 import { getApiErrorMessage } from "../../../api/config/errorHandlers";
 
