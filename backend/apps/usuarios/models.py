@@ -18,8 +18,14 @@ class UsuarioManager(BaseUserManager):
         return user
 
     def create_superuser(self, cpf, password=None, **extra_fields):
-        extra_fields.setdefault('is_staff', True)
-        extra_fields.setdefault('is_superuser', True)
+        extra_fields['is_staff'] = True
+        extra_fields['is_superuser'] = True
+
+        if extra_fields.get('is_staff') is not True:
+            raise ValueError('Superuser precisa ter is_staff=True.')
+        if extra_fields.get('is_superuser') is not True:
+            raise ValueError('Superuser precisa ter is_superuser=True.')
+
         return self.create_user(cpf, password, **extra_fields)
 
 class Usuario(AbstractUser):
@@ -44,11 +50,15 @@ class Usuario(AbstractUser):
         verbose_name_plural = "Usuários"
     
     def clean(self):
+        super().clean()
         if self.cpf:
-            self.cpf = ''.join(filter(str.isdigit, str(self.cpf)))
+            from utils.validators import normalize_cpf
+
+            self.cpf = normalize_cpf(self.cpf)
+
 
     def save(self, *args, **kwargs):
-        self.clean()
+        self.full_clean()
         super().save(*args, **kwargs)
 
     def __str__(self):

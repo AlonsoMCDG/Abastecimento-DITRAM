@@ -47,6 +47,10 @@ class UsuarioSerializer(serializers.ModelSerializer):
 
         instance.save()
         return instance
+    
+    def validate_cpf(self, value):
+        from utils.validators import normalize_cpf
+        return normalize_cpf(value)
 
 
 class UsuarioRegisterSerializer(serializers.ModelSerializer):
@@ -76,6 +80,11 @@ class UsuarioRegisterSerializer(serializers.ModelSerializer):
         user.set_password(password)
         user.save()
         return user
+    
+    def validate_cpf(self, value):
+        from utils.validators import normalize_cpf
+        return normalize_cpf(value)
+
 
 
 class UsuarioPermissionsSerializer(serializers.ModelSerializer):
