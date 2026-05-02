@@ -35,10 +35,12 @@ class GuiaReadSerializer(serializers.ModelSerializer):
     pessoa_id = serializers.IntegerField(read_only=True)
     pessoa_nome = serializers.CharField(source='pessoa.nome', read_only=True)
 
+    veiculo_id = serializers.IntegerField(read_only=True)
     veiculo_display = serializers.CharField(read_only=True)
 
     rota_id = serializers.IntegerField(read_only=True)
     rota_nome = serializers.CharField(source='rota.nome', read_only=True, default=None)
+
 
     tipo_atividade_id = serializers.IntegerField(read_only=True)
     tipo_atividade_nome = serializers.CharField(source='tipo_atividade.nome', read_only=True)
@@ -163,7 +165,7 @@ class GuiaWriteSerializer(serializers.ModelSerializer):
         # Regra da atividade (OU)
         # -------------------------
         tipo_atividade = data.get("tipo_atividade")
-        nome = self.initial_data.get("tipo_atividade_nome")
+        nome = data.get("tipo_atividade_nome")
 
         if not tipo_atividade and not nome:
             raise serializers.ValidationError(
@@ -174,28 +176,41 @@ class GuiaWriteSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 "Informe apenas tipo_atividade_id OU tipo_atividade_nome."
             )
+        
+        # -------------------------
+        # Regra de rota <-> secretaria
+        # -------------------------
+        rota = data.get("rota")
+        secretaria = data.get("secretaria")
+
+        if rota and secretaria and rota.secretaria_id != secretaria.id:
+            raise serializers.ValidationError(
+                "A rota deve pertencer à mesma secretaria."
+            )
 
         return data
 
     def create(self, validated_data):
         from apps.operacao.services.guia_service import resolve_tipo_atividade
 
-        nome = validated_data.pop("tipo_atividade_nome", None)
-        tipo_obj = validated_data.get("tipo_atividade")
+        with transaction.atomic():
 
-        tipo_atividade_obj = resolve_tipo_atividade(
-            tipo_atividade=tipo_obj,
-            nome=nome
-        )
+            nome = validated_data.pop("tipo_atividade_nome", None)
+            tipo_obj = validated_data.get("tipo_atividade")
 
-        if not tipo_atividade_obj:
-            raise serializers.ValidationError(
-                "Informe tipo_atividade_id ou tipo_atividade_nome."
+            tipo_atividade_obj = resolve_tipo_atividade(
+                tipo_atividade=tipo_obj,
+                nome=nome
             )
 
-        validated_data["tipo_atividade"] = tipo_atividade_obj
+            if not tipo_atividade_obj:
+                raise serializers.ValidationError(
+                    "Informe tipo_atividade_id ou tipo_atividade_nome."
+                )
 
-        return super().create(validated_data)
+            validated_data["tipo_atividade"] = tipo_atividade_obj
+
+            return super().create(validated_data)
 
 
 # ==========================================

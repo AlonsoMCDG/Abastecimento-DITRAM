@@ -193,26 +193,26 @@ def _draw_guia_impressao_copy(pdf: canvas.Canvas, guia: GuiaAbastecimento, y_bot
     _draw_signature_line(pdf, x_center, y_sig_cond)
     pdf.drawCentredString(x_center, y_sig_cond - 6 * mm, f"Assinatura do {label_servico}")
 
-
-def gerar_pdf_guia(guia_id):
+def gerar_pdf_guia(guia=None, guia_id=None):
     """
     Gera um PDF de impressão no formato A4 com duas vias (metade superior e inferior).
     Retorna bytes do PDF.
     """
-    try:
-        # select_related atualizado para abranger todos os relacionamentos necessários na impressão
-        guia = GuiaAbastecimento.objects.select_related(
-            "veiculo",
-            "rota",
-            "instituicao",
-            "usuario",
-            "secretaria",
-            "pessoa",
-            "tipo_servico",
-            "tipo_combustivel"
-        ).get(id=guia_id)
-    except GuiaAbastecimento.DoesNotExist:
-        raise ValueError(f"Guia {guia_id} não encontrada")
+    if not guia:
+        try:
+            # select_related atualizado para abranger todos os relacionamentos necessários na impressão
+            guia = GuiaAbastecimento.objects.select_related(
+                "veiculo",
+                "rota",
+                "instituicao",
+                "usuario",
+                "secretaria",
+                "pessoa",
+                "tipo_servico",
+                "tipo_combustivel"
+            ).get(id=guia_id)
+        except GuiaAbastecimento.DoesNotExist:
+            raise ValueError(f"Guia {guia_id} não encontrada")
 
     buf = BytesIO()
     pdf = canvas.Canvas(buf, pagesize=A4)

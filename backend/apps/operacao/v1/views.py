@@ -12,7 +12,6 @@ from apps.operacao.services.sugestoes import get_sugestoes_pessoa
 from apps.core.viewset_cache import ModelViewSetCacheMixin
 from apps.usuarios.permissions import (
     GuiaAbastecimentoPermission,
-    FrotaPermission,
     CadastrosPermission
 )
 
@@ -126,7 +125,8 @@ class GuiaAbastecimentoViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
     @action(detail=True, methods=['get'])
     def pdf(self, request, pk=None):
         try:
-            pdf_bytes = gerar_pdf_guia(pk)
+            guia = self.get_object()
+            pdf_bytes = gerar_pdf_guia(guia)
             response = HttpResponse(pdf_bytes, content_type='application/pdf')
             response['Content-Disposition'] = (
                 f'inline; filename="guia_abastecimento_{pk}.pdf"'
@@ -151,8 +151,15 @@ class GuiaAbastecimentoViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
     # -----------------------------------------------------
     @action(detail=False, methods=["get"])
     def sugestoes(self, request):
-        pessoa = get_object_or_404(Pessoa, id=request.query_params["pessoa"])
-        return Response(get_sugestoes_pessoa(pessoa))
+        pessoa_id = request.query_params.get("pessoa")
+
+        if not pessoa_id:
+            return Response(
+                {"detail": "Parâmetro 'pessoa' é obrigatório."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        pessoa = get_object_or_404(Pessoa, id=pessoa_id)
 
 
 # =========================================================

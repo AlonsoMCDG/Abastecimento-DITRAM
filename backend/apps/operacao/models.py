@@ -101,11 +101,13 @@ class GuiaAbastecimento(models.Model):
         ]
 
     def clean(self):
-        """Validação lógica antes de salvar no banco"""
         fields = [self.veiculo, self.tipo_veiculo, self.veiculo_descricao]
 
         if sum(bool(x) for x in fields) != 1:
             raise ValidationError("Informe exatamente um tipo de veículo.")
+
+        if self.rota and self.rota.secretaria_id != self.secretaria_id:
+            raise ValidationError("A rota deve pertencer à mesma secretaria da guia.")
     
     @property
     def veiculo_display(self):
@@ -116,6 +118,8 @@ class GuiaAbastecimento(models.Model):
         return self.veiculo_descricao
     
     def save(self, *args, **kwargs):
+        self.full_clean()
+
         # Transforma texto manual em Rota fixa
         if self.rota_manual and not self.rota:
             nova_rota, created = Rota.objects.get_or_create(
@@ -123,7 +127,7 @@ class GuiaAbastecimento(models.Model):
                 secretaria=self.secretaria
             )
             self.rota = nova_rota
-            self.rota_manual = None # Limpa o manual pois agora é oficial
+            self.rota_manual = None
             
         super().save(*args, **kwargs)
     
@@ -139,15 +143,18 @@ class RegistroHodometroDiario(models.Model):
     distancia_percorrida = models.DecimalField(max_digits=10, decimal_places=2, editable=False)
 
     def save(self, *args, **kwargs):
-        self.distancia_percorrida = self.hodometro_final - self.hodometro_inicial
-        if self.distancia_percorrida < 0:
-            raise ValidationError("Hodômetro final não pode ser menor que o inicial.")
-        super().save(*args, **kwargs)
+        with transaction.atomic():
 
-        # Sincroniza com o cadastro do Veículo
-        if self.guia.veiculo:
-            veiculo = self.guia.veiculo
-            # Só atualiza se o novo hodômetro for maior que o atual (evita erro de lançamento retroativo)
-            if self.hodometro_final > veiculo.hodometro_atual:
-                veiculo.hodometro_atual = self.hodometro_final
-                veiculo.save()
+            self.distancia_percorrida = self.hodometro_final - self.hodometro_inicial
+
+            if self.distancia_percorrida < 0:
+                raise ValidationError("Hodômetro final não pode ser menor que o inicial.")
+
+            super().save(*args, **kwargs)
+
+            if self.guia.veiculo:
+                veiculo = self.guia.veiculo
+
+                if self.hodometro_final > veiculo.hodometro_atual:
+                    veiculo.hodometro_atual = self.hodometro_final
+                    veiculo.save()
