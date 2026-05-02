@@ -7,7 +7,7 @@ from apps.organizacao.models import Secretaria
 # ==========================================
 
 class VeiculoWriteSerializer(serializers.ModelSerializer):
-    tipo_combustivel = serializers.PrimaryKeyRelatedField(
+    tipo_combustivel_id = serializers.PrimaryKeyRelatedField(
         queryset=TipoCombustivel.objects.filter(ativo=True)
     )
 
@@ -18,7 +18,7 @@ class VeiculoWriteSerializer(serializers.ModelSerializer):
             'capacidade_carga_kg', 'capacidade_pessoas',
             'consumo_estimado_combustivel', 'consumo_estimado_oleo',
             'unidade_consumo', 'hodometro_atual', 'ativo',
-            'tipo_combustivel',
+            'tipo_combustivel_id',
         ]
 
     def validate_placa(self, value):
@@ -28,7 +28,7 @@ class VeiculoReadSerializer(serializers.ModelSerializer):
     categoria_nome = serializers.CharField(source='get_categoria_display', read_only=True)
     unidade_consumo_nome = serializers.CharField(source='get_unidade_consumo_display', read_only=True)
 
-    tipo_combustivel = serializers.PrimaryKeyRelatedField(read_only=True)
+    tipo_combustivel_id = serializers.PrimaryKeyRelatedField(read_only=True)
     tipo_combustivel_nome = serializers.CharField(
         source='tipo_combustivel.nome',
         read_only=True
@@ -44,7 +44,7 @@ class VeiculoReadSerializer(serializers.ModelSerializer):
             'unidade_consumo', 'unidade_consumo_nome',
             'hodometro_atual',
             'capacidade_carga_kg', 'capacidade_pessoas',
-            'tipo_combustivel', 'tipo_combustivel_nome',
+            'tipo_combustivel_id', 'tipo_combustivel_nome',
         ]
 
 class VeiculoLookupSerializer(serializers.ModelSerializer):
