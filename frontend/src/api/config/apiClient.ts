@@ -1,40 +1,63 @@
-import axios, { type InternalAxiosRequestConfig } from "axios";
-import { ACCESS_TOKEN_STORAGE_KEY, REFRESH_TOKEN_STORAGE_KEY, clearAuthTokens } from "../../auth/auth";
+import axios, { type InternalAxiosRequestConfig, type AxiosError } from "axios";
+
+import {
+  ACCESS_TOKEN_STORAGE_KEY,
+  REFRESH_TOKEN_STORAGE_KEY,
+  clearAuthTokens
+} from "../../auth/auth";
+
 import { ENDPOINTS } from "./endpoints";
+
+// =====================================================
+// TIPOS AUXILIARES
+// =====================================================
 
 // Fila de requisições retidas
 interface FailedQueueItem {
   resolve: (value: string | null) => void;
-  reject: (reason?: any) => void;
+  reject: (reason?: unknown) => void;
 }
-
 // Tipagem estendida para evitar erro de TS no `_retry`
 interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
   _retry?: boolean;
 }
 
+// =====================================================
+// INSTÂNCIA PRINCIPAL
+// =====================================================
+
 export const client = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: import.meta.env.VITE_API_URL.replace(/\/$/, ""),
   headers: {
     "Content-Type": "application/json",
   },
 });
 
+// =====================================================
+// REQUEST INTERCEPTOR (JWT automático)
+// =====================================================
+
 // Adiciona o token automaticamente em todas as chamadas
 client.interceptors.request.use((config) => {
   const token = localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
+
   if (token && config.headers) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+
   return config;
 });
 
-// Variáveis para gerenciar a fila de requisições
+// =====================================================
+// CONTROLE DE REFRESH TOKEN
+// =====================================================
+
 let isRefreshing = false;
 let failedQueue: FailedQueueItem[] = [];
 
 // Processa a fila de requisições (fornece um novo token para todos ou null)
-const processQueue = (error: any, token: string | null = null) => {
+
+const processQueue = (error: unknown, token: string | null = null) => {
   failedQueue.forEach((prom) => {
     if (error) {
       prom.reject(error);
@@ -42,25 +65,33 @@ const processQueue = (error: any, token: string | null = null) => {
       prom.resolve(token);
     }
   });
+
   failedQueue = [];
 };
+
+// =====================================================
+// RESPONSE INTERCEPTOR (REFRESH TOKEN)
+// =====================================================
 
 // Interceptor para tratar tokens expirados
 client.interceptors.response.use(
   (response) => response,
-  async (error) => {
+
+  async (error: AxiosError) => {
+    if (!error.config) {
+      return Promise.reject(error);
+    }
+
     const originalRequest = error.config as CustomAxiosRequestConfig;
-    const url = originalRequest.url || '';
+    const url = originalRequest.url || "";
 
     // Se o erro 401 aconteceu na tentativa de login ou refresh, não fazemos nada aqui. 
     // Deixamos o erro chegar no catch() do componente (evita recarregar a página)
-    if (url.includes('/login') || url.includes('/token/')) {
+    if (url.includes("/login") || url.includes("/token/")) {
       return Promise.reject(error);
     }
-    
-    // Deu erro de autorização (401) e é a primeira tentativa em uma rota comum
     if (error.response?.status === 401 && !originalRequest._retry) {
-      
+
       // Se já estamos renovando o token, coloca esta requisição na fila
       if (isRefreshing) {
         return new Promise<string | null>((resolve, reject) => {
@@ -80,28 +111,29 @@ client.interceptors.response.use(
 
       const refreshToken = localStorage.getItem(REFRESH_TOKEN_STORAGE_KEY);
 
-      // Se não tem o refresh, nem gasta rede. Corta direto.
+      // Sem refresh token → logout direto
       if (!refreshToken) {
         processQueue(new Error("Token de refresh inexistente"), null);
         clearAuthTokens();
-        localStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY); 
-        window.location.href = '/login';
+        window.location.href = ENDPOINTS.auth.login;
         isRefreshing = false;
         return Promise.reject(error);
       }
-      
+
       return new Promise((resolve, reject) => {
-        // Usa uma nova instância (axios.post) em vez do 'client' para não cair em loop infinito
-        const baseUrl = import.meta.env.VITE_API_URL.replace(/\/$/, "");  // usa regex para remover '/' no fim (se tiver)
-        const refreshUrl = `${baseUrl}${ENDPOINTS.auth.refresh}`;
         
+        const baseUrl = import.meta.env.VITE_API_URL.replace(/\/$/, "");
+        const refreshUrl = `${baseUrl}${ENDPOINTS.auth.refresh}`;
+
+        // Usa uma nova instância (axios.post) em vez do 'client' para não cair em loop infinito
         axios.post(refreshUrl, {
           refresh: refreshToken,
         })
           .then((res) => {
             const { access } = res.data;
+
             localStorage.setItem(ACCESS_TOKEN_STORAGE_KEY, access);
-            
+
             if (originalRequest.headers) {
               originalRequest.headers.Authorization = `Bearer ${access}`;
             }
