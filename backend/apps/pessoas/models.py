@@ -16,10 +16,23 @@ class Pessoa(models.Model):
     class Meta:
         verbose_name = "Pessoa"
         verbose_name_plural = "Pessoas"
+        ordering = ['-ativo', 'nome']
+        indexes = [
+            models.Index(fields=['nome']),   # comentário: melhora search
+            models.Index(fields=['cpf']),    # comentário: filtro frequente
+            models.Index(fields=['ativo']),  # comentário: lookup padrão
+        ]
+
+    def format_nome(nome):
+        palavras = ['da', 'de', 'do', 'das', 'dos']
+        return ' '.join(
+            w if w.lower() in palavras else w.capitalize()
+            for w in nome.split()
+        )
 
     def clean(self):
         if self.nome:
-            self.nome = " ".join(self.nome.split()).title()
+            self.nome = self.format_nome(self.nome)
         
         if self.cpf:
             cpf_limpo = ''.join(filter(str.isdigit, str(self.cpf)))
@@ -28,7 +41,7 @@ class Pessoa(models.Model):
             self.cpf = cpf_limpo
     
     def save(self, *args, **kwargs):
-        self.clean()
+        self.full_clean()
         super().save(*args, **kwargs)
 
     def __str__(self):

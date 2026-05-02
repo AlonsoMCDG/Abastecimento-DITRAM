@@ -25,7 +25,7 @@ class PessoaLookupSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Pessoa
-        fields = ['value', 'label', 'cpf'] 
+        fields = ['value', 'label']
 
     def get_label(self, obj: Pessoa):
-        return f"{obj.nome} ({obj.cpf})"
+        return f"{obj.nome}"
