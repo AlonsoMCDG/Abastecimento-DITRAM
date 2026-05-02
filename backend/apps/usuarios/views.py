@@ -16,7 +16,11 @@ from .serializers import (
 )
 
 class UsuarioViewSet(ModelViewSet):
-    queryset = Usuario.objects.all().order_by("id")
+    queryset = Usuario.objects.all().only(
+        "id", "cpf", "first_name", "last_name", "email",
+        "is_staff", "is_superuser", "is_active"
+    ).order_by("id")
+        
     permission_classes = [IsAdminUser]
     
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -132,4 +136,8 @@ def register(request):
     serializer = UsuarioRegisterSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     user = serializer.save()
-    return Response(UsuarioPermissionsSerializer(user).data, status=status.HTTP_201_CREATED)
+    return Response({
+        "id": user.id,
+        "cpf": user.cpf,
+        "nome": user.get_full_name(),
+    }, status=status.HTTP_201_CREATED)
