@@ -23,12 +23,12 @@ export interface Instituicao {
 }
 
 // ==========================================
-// 2. PESSOAS (Antigo Condutor)
+// 2. PESSOAS
 // ==========================================
 
 export interface Pessoa {
   id: number;
-  cpf?: string | null;
+  cpf: string;
   nome: string;
   ativo: boolean;
 }
@@ -42,151 +42,134 @@ export interface Veiculo {
   modelo: string;
   placa: string;
 
+  categoria: string;
+  categoria_nome?: string;
+
   ativo: boolean;
   
-  consumo_estimado_combustivel: number | string;
-  consumo_estimado_oleo?: number | string | null;
-  unidade_consumo: string; 
-  unidade_consumo_nome?: string;
   hodometro_atual: number | string;
 
-  capacidade_carga_kg: number | string;
-  capacidade_pessoas: number;
+  unidade_consumo: string; 
+  unidade_consumo_nome?: string;
 
-  tipo_locomocao: string; 
-  tipo_locomocao_nome?: string;
+  consumo_estimado_combustivel?: number | string | null;
+  consumo_estimado_oleo?: number | string | null;
+
+  capacidade_carga_kg?: number | null;
+  capacidade_pessoas?: number | null;
   
-  // IDs para referências
-  tipo_combustivel_id?: number | null;
-  tipo_veiculo_id?: number | null;
-  secretaria_id?: number | null;
-  
-  // Campos de Leitura (Displays)
+  tipo_combustivel_id: number;
   tipo_combustivel_nome?: string;
-  tipo_veiculo_nome?: string;
-  secretaria_nome?: string;
-  secretaria_sigla?: string;
 }
 
 export interface Rota {
   id: number;
   nome: string;
-  distancia_km?: string | number;
+
+  distancia_km?: number | string | null;
   ativa: boolean;
-  tipo_locomocao: string;
-  tipo_locomocao_nome?: string;
 
-  consumo_estimado_combustivel?: string | number;
-  consumo_estimado_oleo?: string | number;
-
-  // IDs para referências
-  secretaria_id?: number | null;
-  instituicao_id?: number | null;
-  
-  // Campos de Leitura (Displays)
+  secretaria_id: number;
   secretaria_nome?: string;
   secretaria_sigla?: string;
-  instituicao_nome?: string;
 
-  detalhes?: string;
+  detalhes?: string | null;
+}
+
+export interface TipoCombustivel {
+  id: number;
+  nome: string;
+  slug?: string | null;
+  ativo: boolean;
 }
 
 // ==========================================
 // 4. OPERAÇÃO
 // ==========================================
 
-export interface TipoServico {
+export interface AtividadeServico {
   id: number;
   nome: string;
   ativo: boolean;
 }
 
-export interface AlocacaoPessoa {
-  id: number;
-  
-  // IDs para referências (Payload)
-  pessoa_id: number;
-  tipo_servico_id: number;
-  secretaria_id: number;
-  
-  // Campos de Leitura (Displays vindos do DRF)
-  pessoa_nome?: string;
-  tipo_servico_nome?: string;
-  secretaria_nome?: string;
-  secretaria_sigla?: string;
-  
-  is_principal: boolean;
-}
-
-export interface OperadorVeiculo { 
-  id: number;
-  
-  // IDs (Payload)
-  pessoa_id: number;
-  veiculo_id: number;
-  
-  // Campos de Leitura (Displays vindos do DRF)
-  pessoa_nome?: string;
-  veiculo_placa?: string;
-  veiculo_modelo?: string;
-  
-  is_principal: boolean;
-}
-
 export interface GuiaAbastecimento {
   id: number;
   data_hora: string;
-  
+
   // ==========================================
-  // REFERÊNCIAS (Chaves Estrangeiras)
+  // MODALIDADE
   // ==========================================
-  tipo_servico_id: number; 
+  modalidade: string;
+  modalidade_nome?: string;
+
+  // ==========================================
+  // REFERÊNCIAS (FKs)
+  // ==========================================
   pessoa_id: number;
-  veiculo_id: number;
-  secretaria_id: number;
-  instituicao_id: number;
-  rota_id?: number | null;
-  tipo_combustivel_id: number;
-  tipo_veiculo_id: number;
-  
-  // ==========================================
-  // DADOS EXTRAS PARA VISUALIZAÇÃO (Read / Display)
-  // ==========================================
   pessoa_nome?: string;
-  veiculo_placa?: string;
-  instituicao_display?: string;
-  tipo_servico_nome?: string;
-  usuario_nome?: string;
+
+  veiculo_id?: number | null;
+  veiculo_display?: string;
+
+  tipo_veiculo?: string | null;
+  veiculo_descricao?: string | null;
+
+  secretaria_id: number;
+  secretaria_nome?: string | null;
+  secretaria_sigla?: string | null;
+
+  instituicao_id?: number | null;
+  instituicao_nome?: string;
+
+  rota_id?: number | null;
+  rota_nome?: string | null;
+
+  tipo_atividade_id?: number | null;
+  tipo_atividade_nome?: string;
+
+  tipo_combustivel_id: number;
   tipo_combustivel_nome?: string;
-  tipo_veiculo_id_display?: string;
-  rota_nome?: string;
-  
+
+  usuario_id?: number;
+  usuario_nome?: string;
+
   // ==========================================
-  // COMBUSTÍVEL E HODÔMETRO
+  // COMBUSTÍVEL
   // ==========================================
-  // Dica: Aceitar 'string' junto com 'number' aqui evita erros no TypeScript 
-  // se o IMask devolver uma string não convertida ou a API do Django enviar um Decimal como string.
   quantidade_combustivel: number | string;
   quantidade_oleo?: number | string | null;
-
-  hodometro_anterior?: number | string | null;
-  hodometro_atual?: number | string | null;
 
   periodo_uso_dias?: number | null;
 
   // ==========================================
-  // CAMPOS VIRTUAIS (Controle de Tela / Frontend)
+  // OUTROS CAMPOS
+  // ==========================================
+  observacao?: string | null;
+  rota_manual?: string | null;
+
+  // ==========================================
+  // CONTROLE
+  // ==========================================
+  criado_em?: string;
+  atualizado_em?: string;
+
+  // ==========================================
+  // CAMPOS DE TELA (frontend)
   // ==========================================
   distancia_percorrida?: number | null;
-  rota_distancia_km?: number | null; // <--- O campo oculto que guarda o padrão da rota
-  rota_consumo_combustivel?: number | null;
-  rota_consumo_oleo?: number | null;
-  
-  // ==========================================
-  // OUTROS
-  // ==========================================
-  observacao?: string;
-  usuario_id?: number;
+  rota_distancia_km?: number | null;
+}
+
+export interface RegistroHodometroDiario {
+  id: number;
+  guia_id: number;
+  data_referencia: string;
+
+  hodometro_inicial: number | string;
+  hodometro_final: number | string;
+
+  distancia_percorrida: number | string;
 }
 
 // ==========================================
@@ -196,16 +179,20 @@ export interface GuiaAbastecimento {
 export interface Usuario {
   id: number;
   cpf: string;
+
   email?: string;
   first_name?: string;
   last_name?: string;
+  
   password?: string;
 
   is_staff: boolean;
   is_superuser: boolean;
+  is_active: boolean;
 
   can_write_cadastros: boolean;
   can_write_frota: boolean;
+  
   can_create_guia_abastecimento: boolean;
   can_edit_guia_abastecimento: boolean;
   can_delete_guia_abastecimento: boolean;
