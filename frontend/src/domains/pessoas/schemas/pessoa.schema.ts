@@ -1,12 +1,12 @@
-import type { FormSchema, TableSchema } from "../types/form";
-import type { Pessoa } from "../types/models";
-import type { ViewSchema } from "../types/views";
-import { MASKS } from "../utils/masks"; // Assumindo que você tem as máscaras isoladas
+import type { FormSchema, TableSchema } from "../../../core/types/form";
+import type { ViewSchema } from "../../../core/types/views";
+import type { PessoaReadDTO } from "./pessoa.read.zod";
+import { MASKS } from "../../../core/utils/masks";
 
 // --------------------------------------------------------
-// FORMULÁRIO DE CRIAÇÃO / EDIÇÃO
+// FORMULÁRIO (UI SCHEMA)
 // --------------------------------------------------------
-export const pessoaFormSchema: FormSchema = {
+export const pessoaUISchema: FormSchema = {
   fields: [
     {
       name: "nome",
@@ -23,7 +23,7 @@ export const pessoaFormSchema: FormSchema = {
       mask: MASKS.CPF,
       placeholder: "000.000.000-00",
       colSpan: 1,
-      required: false
+      required: true
     },
     {
       name: "ativo",
@@ -48,7 +48,8 @@ export const pessoaListSchema: TableSchema = {
     { 
       key: "cpf", 
       label: "CPF", 
-      sortKey: "cpf" 
+      sortKey: "cpf",
+      format: (val: string) => val ? val.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4') : '-'
     },
     { 
       key: "ativo", 
@@ -62,11 +63,11 @@ export const pessoaListSchema: TableSchema = {
 // --------------------------------------------------------
 // MODAL DE QUICK VIEW
 // --------------------------------------------------------
-export const pessoaViewSchema: ViewSchema<Pessoa> = {
-  title: (item) => `Motorista/Operador #${item.id}`,
+export const pessoaViewSchema: ViewSchema<PessoaReadDTO> = {
+  title: (item) => `Pessoa #${item.id}`,
   fields: [
     { label: 'Nome', key: 'nome', fullWidth: true },
-    { label: 'CPF', key: 'cpf' },
+    { label: 'CPF', render: (item) => item.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4') },
     { label: 'Ativo', render: (item) => `${item.ativo ? 'Sim' : 'Não'}` },
   ]
 };
