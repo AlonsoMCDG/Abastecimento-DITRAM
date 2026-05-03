@@ -59,20 +59,10 @@ export const ROUTES = {
   // 4. OPERAÇÃO
   // -----------------------
   operacao: {
-    tiposServico: {
-      list: "/operacao/tipos-servico",
-      create: "/operacao/tipos-servico/criar",
-      edit: (id: number) => `/operacao/tipos-servico/editar/${id}`,
-    },
-    alocacoesServico: {
-      list: "/operacao/alocacoes",
-      create: "/operacao/alocacoes/criar",
-      edit: (id: number) => `/operacao/alocacoes/editar/${id}`,
-    },
-    operadoresVeiculo: {
-      list: "/operacao/operadores",
-      create: "/operacao/operadores/criar",
-      edit: (id: number) => `/operacao/operadores/editar/${id}`,
+    tiposAtividade: {
+      list: "/operacao/atividades",
+      create: "/operacao/atividades/criar",
+      edit: (id: number) => `/operacao/atividades/editar/${id}`,
     },
     guias: {
       list: "/operacao/guias",
