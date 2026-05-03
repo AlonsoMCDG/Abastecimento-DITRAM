@@ -1,12 +1,12 @@
 import type { FormSchema, TableSchema } from "../../../../core/types/form";
-import { ENDPOINTS } from "../../../../core/api/endpoints";
-import type { Instituicao } from "../../../../core/types/models";
 import type { ViewSchema } from "../../../../core/types/views";
+import { ENDPOINTS } from "../../../../core/api/endpoints";
+import type { InstituicaoReadDTO } from "./instituicao.read.zod";
 
 // --------------------------------------------------------
-// FORMULÁRIO DE CRIAÇÃO / EDIÇÃO
+// FORMULÁRIO (UI SCHEMA)
 // --------------------------------------------------------
-export const instituicaoFormSchema: FormSchema = {
+export const instituicaoUISchema: FormSchema = {
   fields: [
     {
       name: "nome",
@@ -28,14 +28,14 @@ export const instituicaoFormSchema: FormSchema = {
         { value: 'OUTRO', label: 'Outro' },
       ],
       colSpan: 1,
-      required: false,
+      required: true,
     },
     {
-      name: "secretaria_id", // Bate com o ForeignKey do Django
+      name: "secretaria_id",
       label: "Secretaria Vinculada",
       type: "select",
       required: true,
-      endpoint: ENDPOINTS.organizacao.secretariasLookup, // Usa o endpoint otimizado
+      endpoint: ENDPOINTS.organizacao.secretariasLookup,
       colSpan: 3,
     },
     {
@@ -80,10 +80,12 @@ export const instituicaoListSchema: TableSchema = {
 // --------------------------------------------------------
 // MODAL DE QUICK VIEW
 // --------------------------------------------------------
-export const instituicaoViewSchema: ViewSchema<Instituicao> = {
+export const instituicaoViewSchema: ViewSchema<InstituicaoReadDTO> = {
   title: (item) => `Instituição #${item.id}`,
   fields: [
     { label: 'Nome', key: 'nome', fullWidth: true },
+    { label: 'Secretaria', key: 'secretaria_nome' },
+    { label: 'Tipo', key: 'tipo_nome' },
     { label: 'Ativo', render: (item) => `${item.ativo ? 'Sim' : 'Não'}` },
   ]
 };

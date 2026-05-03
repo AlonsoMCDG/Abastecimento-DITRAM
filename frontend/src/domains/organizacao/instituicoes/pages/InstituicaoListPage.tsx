@@ -1,64 +1,54 @@
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import DataTable, { type DataTableParams } from "../../../../core/ui/data-display/DataTable";
-import { instituicoesApi } from "../instituicoes.api"; // Ajuste se o caminho for diferente
+import { QuickViewModal } from "../../../../core/ui/overlays/QuickViewModal";
+
+import { instituicoesApi } from "../instituicoes.api";
 import { ROUTES } from "../../../../core/routes/routes";
 import { useAuth } from "../../../../core/auth/AuthContext";
 import { Can } from "../../../../core/auth/components/Can";
 import { getApiErrorMessage } from "../../../../core/api/errorHandlers";
 
-import type { Instituicao } from "../../../../core/types/models";
+import type { InstituicaoReadDTO } from "../schemas/instituicao.read.zod";
 import { instituicaoListSchema, instituicaoViewSchema } from "../schemas/instituicao.schema";
 
-import "../../../assets/css/ListPage.css";
-import { QuickViewModal } from "../../../../core/ui/overlays/QuickViewModal";
+import "../../../../core/ui/layouts/ListPage.css";
 
 export default function InstituicaoListPage() {
   const navigate = useNavigate();
   const { user: me } = useAuth();
 
-  const [instituicoes, setInstituicoes] = useState<Instituicao[]>([]);
+  const [instituicoes, setInstituicoes] = useState<InstituicaoReadDTO[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [viewItem, setViewitem] = useState<Instituicao | null>(null);
-
-  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    return () => {
-      if (debounceTimer.current) clearTimeout(debounceTimer.current);
-    };
-  }, []);
+  const [viewItem, setViewItem] = useState<InstituicaoReadDTO | null>(null);
 
   const hasWritePermission = Boolean(me?.is_staff || me?.can_write_cadastros);
 
   const fetchInstituicoes = useCallback(async (params: DataTableParams) => {
-    if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    setLoading(true);
+    setErrorMessage(null);
+    try {
+      const res = await instituicoesApi.listar({
+        page: params.page,
+        page_size: params.pageSize,
+        search: params.search,
+        ordering: params.ordering || undefined,
+      });
 
-    debounceTimer.current = setTimeout(async () => {
-      setLoading(true);
-      setErrorMessage(null);
-      try {
-        const res = await instituicoesApi.listar({
-          page: params.page,
-          page_size: params.pageSize,
-          search: params.search,
-          ordering: params.ordering ?? undefined,
-        });
-
-        setInstituicoes(res.data.results || []);
-        setTotal(res.data.count || 0);
-      } catch (err) {
-        setErrorMessage("Erro ao buscar instituições no servidor.");
-      } finally {
-        setLoading(false);
-      }
-    }, 500);
+      setInstituicoes(res.results || []);
+      setTotal(res.count || 0);
+    } catch (err) {
+      setErrorMessage("Erro ao buscar instituições no servidor.");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  async function handleDelete(item: Instituicao) {
+  async function handleDelete(item: InstituicaoReadDTO) {
     if (!item.id) return;
     try {
       await instituicoesApi.deletar(item.id);
@@ -93,20 +83,20 @@ export default function InstituicaoListPage() {
         error={errorMessage}
         schema={instituicaoListSchema}
         onParamsChange={fetchInstituicoes}
-        onView={(item) => setViewitem(item)}
+        onView={(item) => setViewItem(item)}
         canEdit={hasWritePermission}
         canDelete={hasWritePermission}
-        onEdit={(item) => navigate(ROUTES.organizacao.instituicoes.edit(item.id!))}
+        onEdit={(item) => navigate(ROUTES.organizacao.instituicoes.edit(item.id))}
         onDelete={handleDelete}
         rowClassName={(i) => !i.ativo ? "dt-row-inactive" : ""}
       />
 
-      <QuickViewModal<Instituicao>
+      <QuickViewModal<InstituicaoReadDTO>
         isOpen={!!viewItem}
-        onClose={() => setViewitem(null)}
+        onClose={() => setViewItem(null)}
         data={viewItem}
         schema={instituicaoViewSchema}
-        onEdit={(item) => navigate(ROUTES.organizacao.instituicoes.edit(item.id!))}
+        onEdit={(item) => navigate(ROUTES.organizacao.instituicoes.edit(item.id))}
         canEdit={hasWritePermission}
       />
     </div>
