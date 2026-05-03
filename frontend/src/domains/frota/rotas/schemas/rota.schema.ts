@@ -1,90 +1,50 @@
 import { ENDPOINTS } from "../../../../core/api/endpoints";
 import type { FormSchema, TableSchema } from "../../../../core/types/form";
-import type { Rota } from "../../../../core/types/models";
 import type { ViewSchema } from "../../../../core/types/views";
 import { MASKS } from "../../../../core/utils/masks";
+import type { RotaReadDTO } from "./rota.read.zod";
 
 // --------------------------------------------------------
 // FORMULÁRIO DE CRIAÇÃO / EDIÇÃO
 // --------------------------------------------------------
-export const rotaFormSchema: FormSchema = {
+export const rotaUISchema: FormSchema = {
   fields: [
     {
       name: 'nome',
-      label: 'Nome curto',
-      placeholder: 'Ex.: "ROTA RIO BRANCO", "ROTA MERENDA"',
+      label: 'Nome da Rota',
+      placeholder: 'Ex.: "ROTA RIO BRANCO", "ROTA MERENDA ESCOLAR"',
       type: 'text',
-      colSpan: 2,
-      required: true,
-    },
-    {
-      name: 'tipo_locomocao',
-      label: 'Tipo de Locomoção',
-      type: 'select',
-      options: [
-        { value: 'TERRESTRE', label: 'Terrestre' },
-        { value: 'FLUVIAL', label: 'Fluvial' },
-      ],
-      colSpan: 1,
+      colSpan: 3,
       required: true,
     },
     {
       name: 'secretaria_id',
-      label: 'Secretaria',
+      label: 'Secretaria Vinculada',
       type: 'select',
       endpoint: ENDPOINTS.organizacao.secretariasLookup,
-      colSpan: 1,
-      required: true,
-    },
-    {
-      name: 'instituicao_id',
-      label: 'Instituição / Local',
-      type: 'select',
-      endpoint: ENDPOINTS.organizacao.instituicoesLookup,
-      placeholder: 'Selecione uma instituição...',
-      colSpan: 2,
+      colSpan: 3,
       required: true,
     },
     {
       name: 'distancia_km',
-      label: 'Distância do percurso (km)',
+      label: 'Distância do percurso',
       type: 'text',
       suffix: 'km',
       placeholder: '0,00',
-      colSpan: 1,
-      required: true,
-      mask: MASKS.DECIMAL,
-    },
-    {
-      name: 'consumo_estimado_combustivel',
-      label: 'Consumo estim. Combustível',
-      type: 'text',
-      suffix: 'Litros',
-      placeholder: '0,0',
-      colSpan: 1,
-      required: true,
-      mask: MASKS.DECIMAL,
-    },
-    {
-      name: 'consumo_estimado_oleo',
-      label: 'Consumo estim. Óleo',
-      type: 'text',
-      suffix: 'Litros',
-      placeholder: '0,0',
-      colSpan: 1,
-      required: true,
+      colSpan: 2,
+      required: false,
       mask: MASKS.DECIMAL,
     },
     {
       name: 'detalhes',
-      label: 'Outros detalhes (opcional)',
+      label: 'Detalhes ou pontos de referência (opcional)',
       type: 'textarea',
       colSpan: 3,
       required: false,
     },
     {
       name: 'ativa',
-      label: 'Rota Ativa',
+      label: 'Rota Ativa no sistema',
       type: 'checkbox',
       colSpan: 3,
       required: false,
@@ -99,13 +59,8 @@ export const rotaListSchema: TableSchema = {
   columns: [
     {
       key: 'nome',
-      label: 'Nome',
+      label: 'Nome da Rota',
       sortKey: 'nome',
-    },
-    {
-      key: 'tipo_locomocao_nome', 
-      label: 'Locomoção',
-      sortKey: 'tipo_locomocao',
     },
     {
       key: 'secretaria_sigla', 
@@ -113,9 +68,10 @@ export const rotaListSchema: TableSchema = {
       sortKey: 'secretaria__sigla',
     },
     {
-      key: 'instituicao_nome', 
-      label: 'Instituição Atendida',
-      sortKey: 'instituicao__nome',
+      key: 'distancia_km', 
+      label: 'Distância',
+      sortKey: 'distancia_km',
+      format: (val: number | null) => val ? `${val} km` : 'Não informada'
     },
     {
       key: 'ativa', 
@@ -129,22 +85,14 @@ export const rotaListSchema: TableSchema = {
 // --------------------------------------------------------
 // MODAL DE QUICK VIEW
 // --------------------------------------------------------
-export const rotaViewSchema: ViewSchema<Rota> = {
+export const rotaViewSchema: ViewSchema<RotaReadDTO> = {
   title: (item) => `Rota #${item.id}`,
   fields: [
-    { label: 'Rota', key: 'nome' },
-    { label: 'Instituição', key: 'instituicao_nome' },
+    { label: 'Nome da Rota', key: 'nome', fullWidth: true },
+    { label: 'Secretaria', key: 'secretaria_nome' },
     { 
       label: 'Distância Média', 
-      render: (item) => `${item.distancia_km} km` 
-    },
-    { 
-      label: 'Consumo de Combustível', 
-      render: (item) => `${item.consumo_estimado_combustivel} Litros` 
-    },
-    { 
-      label: 'Consumo de Óleo', 
-      render: (item) => `${item.consumo_estimado_oleo} Litros` 
+      render: (item) => item.distancia_km ? `${item.distancia_km} km` : 'Não informada' 
     },
     { label: 'Detalhes', key: 'detalhes', fullWidth: true },
   ]

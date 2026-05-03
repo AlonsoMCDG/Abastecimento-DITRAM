@@ -1,31 +1,34 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { rotaApi } from "../rotas.api";
+
+import { rotasApi } from "../rotas.api";
 import { ROUTES } from "../../../../core/routes/routes";
 import { DynamicForm } from "../../../../core/ui/forms/dynamic-form/DynamicForm";
-import { rotaFormSchema } from "../schemas/rota.schema";
-import type { Rota } from "../../../../core/types/models";
 import { getApiErrorMessage } from "../../../../core/api/errorHandlers";
+
+import { rotaUISchema } from "../schemas/rota.schema";
+import { rotaFormSchema, type RotaFormData } from "../schemas/rota.form.zod";
+import { mapReadToForm, mapFormToWriteDTO } from "../rotas.mapper";
 
 export default function RotaFormPage() {
   const navigate = useNavigate();
   const { id } = useParams();
 
-  const [initialValues, setInitialValues] = useState<Partial<Rota> | undefined>(undefined);
+  const [initialValues, setInitialValues] = useState<Partial<RotaFormData> | undefined>(undefined);
   const [loading, setLoading] = useState(!!id);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [globalError, setGlobalError] = useState<string | null>(null);
 
-  // Valores padrão para uma rota nova
-  const defaultValues: Partial<Rota> = {
+  const defaultValues: Partial<RotaFormData> = {
     ativa: true,
   };
 
   useEffect(() => {
     if (id) {
-      rotaApi.buscar(Number(id))
-        .then(res => setInitialValues(res.data))
+      rotasApi.buscar(Number(id))
+        .then(res => setInitialValues(mapReadToForm(res)))
         .catch(err => {
-          console.error(err);
-          alert("Erro ao carregar os dados da rota.");
+          setGlobalError(getApiErrorMessage(err, "Erro ao carregar os dados da rota."));
         })
         .finally(() => setLoading(false));
     } else {
@@ -33,32 +36,45 @@ export default function RotaFormPage() {
     }
   }, [id]);
 
-  async function handleSubmit(form: Rota) {
+  async function handleSubmit(data: RotaFormData) {
+    setIsSubmitting(true);
+    setGlobalError(null);
+
     try {
+      const payload = mapFormToWriteDTO(data);
+
       if (id) {
-        await rotaApi.atualizar(Number(id), form);
+        await rotasApi.atualizar(Number(id), payload);
       } else {
-        await rotaApi.criar(form);
+        await rotasApi.criar(payload);
       }
       navigate(ROUTES.frota.rotas.list);
     } catch (err: unknown) {
-      alert(getApiErrorMessage(err, "Erro ao salvar rota. Verifique os dados."));
+      setGlobalError(getApiErrorMessage(err, "Erro ao salvar rota. Verifique se já não existe uma rota com este nome para esta secretaria."));
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
   if (loading) return <div>Carregando dados da rota...</div>;
 
   return (
-    <DynamicForm<Rota>
-      title={id ? "Editar Rota" : "Nova Rota"}
-      subtitle={id ? `Editando registro #${id}` : "Preencha os dados de distância e consumo para estimativas."}
-      schema={rotaFormSchema}
-      initialValues={initialValues}
-      onSubmit={handleSubmit}
-      submitLabel="💾 Salvar Rota"
-      onCancel={() => navigate(ROUTES.frota.rotas.list)}
-      // Se no futuro você quiser adicionar um botão extra aqui (ex: "Ver no Mapa"), 
-      // basta passar a prop extraActions={...} assim como fizemos na Guia!
-    />
+    <div className="page-container">
+      <DynamicForm<RotaFormData>
+        title={id ? "Editar Rota" : "Nova Rota"}
+        subtitle={id ? `Atualize o trajeto ou os detalhes da rota.` : "Adicione caminhos e trajetos frequentes para auto-completar nas guias."}
+        
+        uiSchema={rotaUISchema}
+        zodSchema={rotaFormSchema}
+        
+        initialValues={initialValues}
+        globalError={globalError}
+        isLoading={isSubmitting}
+        
+        onSubmit={handleSubmit}
+        submitLabel="💾 Salvar Rota"
+        onCancel={() => navigate(ROUTES.frota.rotas.list)}
+      />
+    </div>
   );
 }

@@ -1,76 +1,61 @@
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import DataTable, { type DataTableParams } from "../../../../core/ui/data-display/DataTable";
-import { rotaApi } from "../rotas.api";
+import { QuickViewModal } from "../../../../core/ui/overlays/QuickViewModal";
+
+import { rotasApi } from "../rotas.api";
 import { ROUTES } from "../../../../core/routes/routes";
 import { useAuth } from "../../../../core/auth/AuthContext";
 import { Can } from "../../../../core/auth/components/Can";
 import { getApiErrorMessage } from "../../../../core/api/errorHandlers";
 
-import type { Rota } from "../../../../core/types/models";
+import type { RotaReadDTO } from "../schemas/rota.read.zod";
 import { rotaListSchema, rotaViewSchema } from "../schemas/rota.schema";
 
-import "../../../assets/css/ListPage.css";
-import { QuickViewModal } from "../../../../core/ui/overlays/QuickViewModal";
+import "../../../../core/ui/layouts/ListPage.css";
 
 export default function RotaListPage() {
   const navigate = useNavigate();
   const { user: me } = useAuth();
 
-  const [rotas, setRotas] = useState<Rota[]>([]);
+  const [rotas, setRotas] = useState<RotaReadDTO[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [viewItem, setViewItem] = useState<Rota | null>(null);
+  const [viewItem, setViewItem] = useState<RotaReadDTO | null>(null);
 
-  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  // Limpa o timer se o componente for desmontado (Prevenção de Memory Leak)
-  useEffect(() => {
-    return () => {
-      if (debounceTimer.current) clearTimeout(debounceTimer.current);
-    };
-  }, []);
-
-  // Padronizado para separar as permissões de edição e exclusão (mesmo que na sua regra atual sejam a mesma)
-  const canEdit = Boolean(me?.is_staff || me?.can_write_cadastros);
-  const canDelete = Boolean(me?.is_staff || me?.can_write_cadastros);
+  const hasWritePermission = Boolean(me?.is_staff || me?.can_write_cadastros);
 
   const fetchRotas = useCallback(async (params: DataTableParams) => {
-    if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    setLoading(true);
+    setErrorMessage(null);
+    try {
+      const res = await rotasApi.listar({
+        page: params.page,
+        page_size: params.pageSize,
+        search: params.search,
+        ordering: params.ordering || undefined,
+      });
 
-    debounceTimer.current = setTimeout(async () => {
-      setLoading(true);
-      setErrorMessage(null);
-      try {
-        const res = await rotaApi.listar({
-          page: params.page,
-          page_size: params.pageSize,
-          search: params.search,
-          ordering: params.ordering ?? undefined,
-          ativa: "", // Traz ativas e inativas
-        });
-
-        setRotas(res.data.results || []);
-        setTotal(res.data.count || 0);
-      } catch (err) {
-        setErrorMessage("Erro ao buscar rotas de transporte.");
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    }, 500);
+      setRotas(res.results || []);
+      setTotal(res.count || 0);
+    } catch (err) {
+      setErrorMessage("Erro ao buscar rotas de transporte no servidor.");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  async function handleDelete(item: Rota) {
+  async function handleDelete(item: RotaReadDTO) {
     if (!item.id) return;
     try {
-      await rotaApi.deletar(item.id);
+      await rotasApi.deletar(item.id);
       setErrorMessage(null);
       fetchRotas({ page: 1, pageSize: 10, search: "", ordering: null });
     } catch (err: unknown) {
-      setErrorMessage(getApiErrorMessage(err, "Falha ao excluir rota."));
+      setErrorMessage(getApiErrorMessage(err, "Falha ao excluir rota. Desative-a caso possua vínculos históricos."));
     }
   }
 
@@ -79,7 +64,7 @@ export default function RotaListPage() {
       <div className="list-header">
         <div>
           <h2 className="list-title">Rotas de Transporte</h2>
-          <p className="list-subtitle">Gerencie os percursos, distâncias e consumos estimados.</p>
+          <p className="list-subtitle">Gerencie os percursos padrão cadastrados por secretaria.</p>
         </div>
 
         <div className="list-actions">
@@ -99,18 +84,20 @@ export default function RotaListPage() {
         schema={rotaListSchema}
         onParamsChange={fetchRotas}
         onView={(item) => setViewItem(item)}
-        canEdit={canEdit}
-        canDelete={canDelete}
-        onEdit={(item) => navigate(ROUTES.frota.rotas.edit(item.id!))}
+        canEdit={hasWritePermission}
+        canDelete={hasWritePermission}
+        onEdit={(item) => navigate(ROUTES.frota.rotas.edit(item.id))}
         onDelete={handleDelete}
+        rowClassName={(r) => !r.ativa ? "dt-row-inactive" : ""}
       />
 
-      <QuickViewModal<Rota>
+      <QuickViewModal<RotaReadDTO>
         isOpen={!!viewItem}
         onClose={() => setViewItem(null)}
         data={viewItem}
         schema={rotaViewSchema}
-        onEdit={(item) => navigate(ROUTES.frota.rotas.edit(item.id!))}
+        onEdit={(item) => navigate(ROUTES.frota.rotas.edit(item.id))}
+        canEdit={hasWritePermission}
       />
     </div>
   );
