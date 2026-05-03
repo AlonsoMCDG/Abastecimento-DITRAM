@@ -1,38 +1,38 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import Layout from "./layouts/Layout";
-import Home from "./pages/Home";
+import Layout from "./core/ui/layouts/Layout";
+import Home from "./core/ui/pages/Home";
 
-import SecretariaFormPage from "./pages/cadastros/secretaria/SecretariaFormPage";
-import SecretariaListPage from "./pages/cadastros/secretaria/SecretariaListPage";
-import RotaListPage from "./pages/cadastros/rota/RotaListPage";
-import RotaFormPage from "./pages/cadastros/rota/RotaFormPage";
-import InstituicaoListPage from "./pages/cadastros/instituicao/InstituicaoListPage";
-import InstituicaoFormPage from "./pages/cadastros/instituicao/InstituicaoFormPage";
-import PessoaListPage from "./pages/frota/pessoa/PessoaListPage";
-import PessoaFormPage from "./pages/frota/pessoa/PessoaFormPage";
-import VeiculoListPage from "./pages/frota/veiculo/VeiculoListPage";
-import VeiculoFormPage from "./pages/frota/veiculo/VeiculoFormPage";
-import AlocacaoListPage from "./pages/frota/AlocacaoListPage";
-import AlocacaoFormPage from "./pages/frota/AlocacaoFormPage";
-import UsuarioListPage from "./pages/usuarios/UsuarioListPage";
-import UsuarioFormPage from "./pages/usuarios/UsuarioFormPage";
-import GuiaAbastecimentoListPage from "./pages/abastecimento/guias/GuiaAbastecimentoListPage";
-import { GuiaAbastecimentoFormPage } from "./pages/abastecimento/guias/GuiaAbastecimentoFormPage";
-import { LoginPage } from "./pages/login/LoginPage";
-import { RegisterPage } from "./pages/login/RegisterPage";
-import { PrivateRoute } from "./components/PrivateRoute";
-import { RequirePermission } from "./components/RequirePermission";
-import UsuariosPermissoesPage from "./pages/usuarios/UsuariosPermissoesPage";
-import PerfilPage from "./pages/perfil/PerfilPage";
-import PerfilEditPage from "./pages/perfil/PerfilEditPage";
-import DatabaseDangerPage from "./pages/sistema/DatabaseDangerPage";
-import OperadorListPage from "./pages/operacao/operadores/OperadorListPage";
-import OperadorFormPage from "./pages/operacao/operadores/OperadorFormPage";
-import TipoServicoListPage from "./pages/operacao/TipoServicoListPage";
-import TipoServicoFormPage from "./pages/operacao/TipoServicoFormPage";
+import SecretariaFormPage from "./domains/organizacao/secretarias/pages/SecretariaFormPage";
+import SecretariaListPage from "./domains/organizacao/secretarias/pages/SecretariaListPage";
+import RotaListPage from "./domains/frota/rotas/pages/RotaListPage";
+import RotaFormPage from "./domains/frota/rotas/pages/RotaFormPage";
+import InstituicaoListPage from "./domains/organizacao/instituicoes/pages/InstituicaoListPage";
+import InstituicaoFormPage from "./domains/organizacao/instituicoes/pages/InstituicaoFormPage";
+import PessoaListPage from "./domains/pessoas/page/PessoaListPage";
+import PessoaFormPage from "./domains/pessoas/page/PessoaFormPage";
+import VeiculoListPage from "./domains/frota/veiculos/pages/VeiculoListPage";
+import VeiculoFormPage from "./domains/frota/veiculos/pages/VeiculoFormPage";
+import AlocacaoListPage from "./core/ui/pages/frota/AlocacaoListPage";
+import AlocacaoFormPage from "./core/ui/pages/frota/AlocacaoFormPage";
+import UsuarioListPage from "./domains/sistema/usuarios/pages/UsuarioListPage";
+import UsuarioFormPage from "./domains/sistema/usuarios/pages/UsuarioFormPage";
+import GuiaAbastecimentoListPage from "./domains/operacao/guias/pages/GuiaAbastecimentoListPage";
+import { GuiaAbastecimentoFormPage } from "./domains/operacao/guias/pages/GuiaAbastecimentoFormPage";
+import { LoginPage } from "./core/auth/pages/LoginPage";
+import { RegisterPage } from "./core/auth/pages/RegisterPage";
+import { PrivateRoute } from "./core/auth/components/PrivateRoute";
+import { RequirePermission } from "./core/auth/components/RequirePermission";
+import UsuariosPermissoesPage from "./domains/sistema/usuarios/pages/UsuariosPermissoesPage";
+import PerfilPage from "./domains/sistema/perfil/pages/PerfilPage";
+import PerfilEditPage from "./domains/sistema/perfil/pages/PerfilEditPage";
+import DatabaseDangerPage from "./domains/system/database/pages/DatabaseDangerPage";
+import OperadorListPage from "./core/ui/pages/operacao/operadores/OperadorListPage";
+import OperadorFormPage from "./core/ui/pages/operacao/operadores/OperadorFormPage";
+import TipoServicoListPage from "./domains/operacao/servicos/pages/TipoServicoListPage";
+import TipoServicoFormPage from "./domains/operacao/servicos/pages/TipoServicoFormPage";
 
 // Novo componente de 404
-import NotFoundPage from "./pages/NotFoundPage";
+import NotFoundPage from "./core/ui/pages/NotFoundPage";
 
 function App() {
   return (
