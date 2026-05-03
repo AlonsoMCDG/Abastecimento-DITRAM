@@ -2,56 +2,40 @@ import type { FormSchema, TableSchema } from "../../../../core/types/form";
 import { ENDPOINTS } from "../../../../core/api/endpoints";
 import { MASKS } from "../../../../core/utils/masks";
 import type { ViewSchema } from "../../../../core/types/views";
-import type { Veiculo } from "../../../../core/types/models";
-import type { VeiculoCreatePayload } from "../veiculos.api"
-import { TIPO_VEICULO_BARCO_ID } from "../../../../constants/constants";
+import type { VeiculoReadDTO } from "./veiculo.read.zod";
+import type { VeiculoFormData } from "./veiculo.form.zod";
 
-// --------------------------------------------------------
-// FORMULÁRIO
-// --------------------------------------------------------
-export const veiculoFormSchema: FormSchema = {
+export const veiculoUISchema: FormSchema = {
   fields: [
     {
-      name: "tipo_veiculo_id",
-      label: "Tipo de Veículo",
+      name: "categoria",
+      label: "Categoria",
       type: "select",
-      endpoint: ENDPOINTS.frota.tiposVeiculoLookup,
+      options: [
+        { value: 'CARRO', label: 'Carro' },
+        { value: 'CAMINHONETE', label: 'Caminhonete' },
+        { value: 'ONIBUS', label: 'Ônibus' },
+        { value: 'MOTO', label: 'Moto' },
+        { value: 'VAN', label: 'Van' },
+        { value: 'MAQUINA_PESADA', label: 'Máquina Pesada/Trator' }
+      ],
       colSpan: 1,
-      required: false,
+      required: true,
     },
     {
       name: "modelo",
       label: "Modelo",
       type: "text",
       placeholder: "Ex: Toyota Hilux",
-      colSpan: 1,
+      colSpan: 2,
       required: true,
     },
     {
       name: "placa",
       label: "Placa",
       type: "text",
-      placeholder: "ABC1234",
-      visibleIf: (values: Partial<VeiculoCreatePayload>) => values.tipo_veiculo_id != TIPO_VEICULO_BARCO_ID,
-      colSpan: 1,
-      required: true,
-    },
-    {
-      name: "secretaria_id",
-      label: "Secretaria Vinculada",
-      type: "select",
-      endpoint: ENDPOINTS.organizacao.secretariasLookup,
-      colSpan: 3,
-      required: true,
-    },
-    {
-      name: "tipo_locomocao",
-      label: "Tipo de Locomoção",
-      type: "select",
-      options: [
-        { value: "TERRESTRE", label: "Terrestre" },
-        { value: "FLUVIAL", label: "Fluvial" }
-      ],
+      mask: MASKS.PLACA,
+      placeholder: "ABC-1234",
       colSpan: 1,
       required: true,
     },
@@ -60,7 +44,7 @@ export const veiculoFormSchema: FormSchema = {
       label: "Combustível",
       type: "select",
       endpoint: ENDPOINTS.frota.tiposCombustivelLookup,
-      colSpan: 1,
+      colSpan: 2,
       required: true,
     },
     {
@@ -72,6 +56,7 @@ export const veiculoFormSchema: FormSchema = {
         { value: "L_POR_H", label: "L/h" }
       ],
       colSpan: 1,
+      required: true,
     },
     {
       name: "consumo_estimado_combustivel",
@@ -79,7 +64,7 @@ export const veiculoFormSchema: FormSchema = {
       type: "text",
       mask: MASKS.DECIMAL,
       suffix: "Litros",
-      placeholder: '0,0',
+      placeholder: '0,00',
       colSpan: 1,
     },
     {
@@ -88,17 +73,16 @@ export const veiculoFormSchema: FormSchema = {
       type: "text",
       mask: MASKS.DECIMAL,
       suffix: "Litros",
-      placeholder: '0,0',
+      placeholder: '0,00',
       colSpan: 1,
-      visibleIf: (values: Partial<VeiculoCreatePayload>) => values.tipo_veiculo_id == TIPO_VEICULO_BARCO_ID,
-      required: false,
+      // Exibe consumo de óleo predominantemente para máquinas pesadas
+      visibleIf: (values: Partial<VeiculoFormData>) => values.categoria === 'MAQUINA_PESADA',
     },
     {
       name: "hodometro_atual",
       label: "Hodômetro / Horímetro Atual",
       type: "text",
       mask: MASKS.DECIMAL,
-      suffix: 'km',
       placeholder: '0,0',
       colSpan: 1,
       required: true,
@@ -109,16 +93,16 @@ export const veiculoFormSchema: FormSchema = {
       type: "text",
       mask: MASKS.DECIMAL,
       suffix: "kg",
-      placeholder: '0,0',
+      placeholder: '0,00',
       colSpan: 1,
     },
     {
       name: "capacidade_pessoas",
       label: "Capacidade Pessoas",
-      type: "number",
+      type: "text", // Usamos text aqui por conta do IMask
       mask: MASKS.INTEIRO,
-      colSpan: 1,
       placeholder: '0',
+      colSpan: 1,
     },
     {
       name: "ativo",
@@ -130,16 +114,12 @@ export const veiculoFormSchema: FormSchema = {
   ]
 };
 
-// --------------------------------------------------------
-// DATATABLE
-// --------------------------------------------------------
 export const veiculoListSchema: TableSchema = {
   columns: [
-    { key: "placa", label: "Placa", sortKey: "placa" },
+    { key: "placa", label: "Placa", sortKey: "placa", format: (v) => v || '-' },
     { key: "modelo", label: "Modelo", sortKey: "modelo" },
-    { key: "tipo_veiculo_nome", label: "Tipo", sortKey: "tipo_veiculo__nome" },
-    { key: "secretaria_sigla", label: "Secretaria", sortKey: "secretaria__sigla" },
-    { key: "tipo_combustivel_nome", label: "Combustível", sortKey: "tipo_combustivel__nome" },
+    { key: "categoria_nome", label: "Categoria", sortKey: "categoria" },
+    { key: "tipo_combustivel_nome", label: "Combustível" }, // ForeignKey não entra no sortKey padrão se não mapeado
     { 
       key: "ativo", 
       label: "Status", 
@@ -149,25 +129,23 @@ export const veiculoListSchema: TableSchema = {
   ]
 };
 
-// --------------------------------------------------------
-// MODAL DE QUICK VIEW
-// --------------------------------------------------------
-export const veiculoViewSchema: ViewSchema<Veiculo> = {
+export const veiculoViewSchema: ViewSchema<VeiculoReadDTO> = {
   title: (item) => `Veículo #${item.id}`,
   fields: [
-    { label: 'Modelo', key: 'modelo' },
+    { label: 'Modelo', key: 'modelo', fullWidth: true },
     { label: 'Placa', key: 'placa' },
+    { label: 'Categoria', key: 'categoria_nome' },
     { 
-      label: 'Hodômetro Atual', 
-      render: (item) => `${item.hodometro_atual} km` 
+      label: 'Hodômetro / Horímetro', 
+      render: (item) => `${item.hodometro_atual} ${item.unidade_consumo === 'L_POR_H' ? 'Horas' : 'km'}` 
     },
     { 
-      label: 'Consumo Médio de Combustível', 
-      render: (item) => `${item.consumo_estimado_combustivel} Litros` 
+      label: 'Consumo Médio (Combustível)', 
+      render: (item) => item.consumo_estimado_combustivel ? `${item.consumo_estimado_combustivel} ${item.unidade_consumo_nome}` : '-' 
     },
     { 
-      label: 'Consumo Médio de Óleo', 
-      render: (item) => `${item.consumo_estimado_oleo} Litros` 
+      label: 'Consumo Médio (Óleo)', 
+      render: (item) => item.consumo_estimado_oleo ? `${item.consumo_estimado_oleo} Litros` : '-' 
     },
     { label: 'Ativo', render: (item) => `${item.ativo ? 'Sim' : 'Não'}` },
   ]

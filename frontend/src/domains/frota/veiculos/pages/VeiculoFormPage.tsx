@@ -1,32 +1,36 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import type { Path, PathValue, UseFormSetValue } from "react-hook-form";
+
 import { veiculosApi } from "../veiculos.api";
 import { ROUTES } from "../../../../core/routes/routes";
 import { DynamicForm } from "../../../../core/ui/forms/dynamic-form/DynamicForm";
-import { veiculoFormSchema } from "../schemas/veiculo.schema";
-import type { Veiculo } from "../../../../core/types/models";
 import { getApiErrorMessage } from "../../../../core/api/errorHandlers";
-import type { Path, PathValue, UseFormSetValue } from "react-hook-form";
-import { TIPO_VEICULO_BARCO_ID } from "../../../../constants/constants";
+
+import { veiculoUISchema } from "../schemas/veiculo.schema";
+import { veiculoFormSchema, type VeiculoFormData } from "../schemas/veiculo.form.zod";
+import { mapReadToForm, mapFormToWriteDTO } from "../veiculos.mapper";
 
 export default function VeiculoFormPage() {
   const navigate = useNavigate();
   const { id } = useParams();
 
-  const [initialValues, setInitialValues] = useState<Partial<Veiculo> | undefined>(undefined);
+  const [initialValues, setInitialValues] = useState<Partial<VeiculoFormData> | undefined>(undefined);
   const [loading, setLoading] = useState(!!id);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [globalError, setGlobalError] = useState<string | null>(null);
 
-  const defaultValues: Partial<Veiculo> = {
+  const defaultValues: Partial<VeiculoFormData> = {
     ativo: true,
+    unidade_consumo: 'KM_POR_L'
   };
 
   useEffect(() => {
     if (id) {
       veiculosApi.buscar(Number(id))
-        .then(res => setInitialValues(res.data))
+        .then(res => setInitialValues(mapReadToForm(res)))
         .catch(err => {
-          console.error(err);
-          alert("Erro ao carregar os dados do veículo.");
+          setGlobalError(getApiErrorMessage(err, "Erro ao carregar os dados do veículo."));
         })
         .finally(() => setLoading(false));
     } else {
@@ -34,52 +38,60 @@ export default function VeiculoFormPage() {
     }
   }, [id]);
 
-  async function handleSubmit(form: any) {
+  async function handleSubmit(data: VeiculoFormData) {
+    setIsSubmitting(true);
+    setGlobalError(null);
+
     try {
+      const payload = mapFormToWriteDTO(data);
+
       if (id) {
-        await veiculosApi.atualizar(Number(id), form);
+        await veiculosApi.atualizar(Number(id), payload);
       } else {
-        await veiculosApi.criar(form);
+        await veiculosApi.criar(payload);
       }
       navigate(ROUTES.frota.veiculos.list);
     } catch (err: unknown) {
-      alert(getApiErrorMessage(err, "Erro ao salvar veículo. Verifique os dados."));
+      setGlobalError(getApiErrorMessage(err, "Erro ao salvar veículo. Verifique se a placa informada já não consta no sistema."));
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
-  // Escuta as mudanças do DynamicForm
+  // Intercepta mudanças para auto-preencher dados de máquinas pesadas
   const handleValuesChange = async (
-    changedField: { name: Path<Veiculo>; value: unknown },
-    _currentValues: Partial<Veiculo>,
-    setValue: UseFormSetValue<Veiculo>
+    changedField: { name: Path<VeiculoFormData>; value: unknown },
+    _currentValues: Partial<VeiculoFormData>,
+    setValue: UseFormSetValue<VeiculoFormData>
   ) => {
-    const { name, value } = changedField;  // nome do campo alterado e o novo valor dele
-    const numValue = Number(value) || 0;
+    const { name, value } = changedField;
     
-    if (name === 'tipo_veiculo_id') {
-      
-      const novoTipoLocomocao = (numValue === TIPO_VEICULO_BARCO_ID) ? 'FLUVIAL' : 'TERRESTRE';
-      setValue('tipo_locomocao', novoTipoLocomocao as PathValue<Veiculo, "tipo_locomocao">, { shouldValidate: true })
-
-      const novaUnidadeConsumo = (numValue === TIPO_VEICULO_BARCO_ID) ? 'L_POR_H' : 'KM_POR_L';
-      setValue('unidade_consumo', novaUnidadeConsumo as PathValue<Veiculo, "unidade_consumo">, { shouldValidate: true })
-      
-      return;
+    if (name === 'categoria') {
+      const novaUnidadeConsumo = (value === 'MAQUINA_PESADA') ? 'L_POR_H' : 'KM_POR_L';
+      setValue('unidade_consumo', novaUnidadeConsumo as PathValue<VeiculoFormData, "unidade_consumo">, { shouldValidate: true })
     }
   };
 
   if (loading) return <div>Carregando dados do veículo...</div>;
 
   return (
-    <DynamicForm<Veiculo>
-      title={id ? "Editar Veículo" : "Novo Veículo"}
-      subtitle={id ? `Editando registro #${id} - ${initialValues?.placa || ''}` : "Cadastre os dados de um novo veículo na frota."}
-      schema={veiculoFormSchema}
-      initialValues={initialValues}
-      onValuesChange={handleValuesChange}
-      onSubmit={handleSubmit}
-      submitLabel="💾 Salvar Veículo"
-      onCancel={() => navigate(ROUTES.frota.veiculos.list)}
-    />
+    <div className="page-container">
+      <DynamicForm<VeiculoFormData>
+        title={id ? "Editar Veículo" : "Novo Veículo"}
+        subtitle={id ? `Editando veículo: Placa ${initialValues?.placa || ''}` : "Cadastre os dados de um novo veículo na frota."}
+        
+        uiSchema={veiculoUISchema}
+        zodSchema={veiculoFormSchema}
+        
+        initialValues={initialValues}
+        globalError={globalError}
+        isLoading={isSubmitting}
+        
+        onValuesChange={handleValuesChange}
+        onSubmit={handleSubmit}
+        submitLabel="💾 Salvar Veículo"
+        onCancel={() => navigate(ROUTES.frota.veiculos.list)}
+      />
+    </div>
   );
 }
