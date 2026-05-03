@@ -23,10 +23,11 @@ interface SearchableAsyncSelectProps<T extends FieldValues> {
   setValue: UseFormSetValue<T>;
   register: UseFormRegister<T>;
   error?: any;
+  disabled?: boolean;
 }
 
 export const SearchableAsyncSelect = <T extends FieldValues>({ 
-  field, control, setValue, register, error
+  field, control, setValue, register, error, disabled
 }: SearchableAsyncSelectProps<T>) => {
   const [options, setOptions] = useState<Option[]>([]);
   const [loading, setLoading] = useState(false);
@@ -200,12 +201,12 @@ export const SearchableAsyncSelect = <T extends FieldValues>({
         className={`${styles.input} ${error ? styles.inputError : ''} ${styles.comboInput}`}
         placeholder={loading ? "Carregando..." : field.placeholder || "Selecione ou digite..."}
         value={searchTerm}
-        disabled={loading || field.disabled}
+        disabled={loading || field.disabled || disabled}
         onChange={(e) => {
           setSearchTerm(e.target.value);
           if (!isOpen) setIsOpen(true);
         }}
-        onClick={() => !field.disabled && !loading && setIsOpen(true)}
+        onClick={() => !loading && !field.disabled && !disabled && setIsOpen(true)}
         onKeyDown={handleKeyDown} // Vincula as ações do teclado
       />
       

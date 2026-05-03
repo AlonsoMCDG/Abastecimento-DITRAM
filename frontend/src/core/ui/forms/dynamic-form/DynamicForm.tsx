@@ -9,45 +9,55 @@ import {
   type FieldValues, 
   type Path,
 } from 'react-hook-form';
+
+import type { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+
 import type { FormSchema, FormField } from '../../../types/form';
 import styles from './DynamicForm.module.css';
 
 import { SearchableAsyncSelect } from '../SearchableAsyncSelect';
 import { SearchableSelect } from '../SearchableSelect';
 
+
 interface DynamicFormProps<T extends FieldValues> {
-  title?: string;
-  subtitle?: string;
-  schema: FormSchema;
-  initialValues?: DefaultValues<T>;
-  onValuesChange?: (
+  title?: string;               // Título principal exibido no topo do formulário
+  subtitle?: string;            // Texto descritivo ou de apoio abaixo do título
+  uiSchema: FormSchema;         // Estrutura visual (inputs, opções, endpoints, colunas)
+  zodSchema: z.ZodType<any, any, any>;  // Motor de validação de dados e tipagem rigorosa (Zod)
+  initialValues?: DefaultValues<T>; // Dados pré-preenchidos (útil para edição de registros)
+  onValuesChange?: (            // Disparado quando qualquer input muda (útil para side-effects e auto-fill)
     changedField: { name: Path<T>; value: unknown },
     currentValues: Partial<T>,
     setValue: UseFormSetValue<T>
   ) => void;
-  warnings?: Record<string, string>;
-  globalError?: string | null; // Recebe o erro da página
-  submitLabel?: string; 
-  onSubmit: SubmitHandler<T>;
-  cancelLabel?: string;
-  onCancel?: () => void;
-  extraActions?: React.ReactNode; 
+  warnings?: Record<string, string>; // Alertas visuais por campo que não impedem o envio (ex: "Consumo alto")
+  globalError?: string | null;  // Mensagem de erro geral da página (ex: "Servidor offline")
+  isLoading?: boolean;          // Estado de carregamento para desativar inputs e botões
+  submitLabel?: string;         // Texto customizado para o botão de salvar principal
+  onSubmit: SubmitHandler<T>;   // Função acionada apenas quando o formulário passa na validação do Zod
+  cancelLabel?: string;         // Texto customizado para o botão de cancelar
+  onCancel?: () => void;        // Função acionada pelo botão de cancelar (geralmente um redirect)
+  extraActions?: React.ReactNode; // Elementos/Botões extras (ex: "Salvar e Imprimir") renderizados ao lado das ações
 }
 
 export const DynamicForm = <T extends FieldValues>({
   title,
   subtitle,
-  schema, 
+  uiSchema,      // <-- Usando uiSchema
+  zodSchema,     // <-- Usando zodSchema
   initialValues, 
   onSubmit,
   onValuesChange,
   warnings = {},
   globalError = null,
   submitLabel = "Salvar",
+  isLoading = false,
   cancelLabel = "Cancelar",
   onCancel,
   extraActions
 }: DynamicFormProps<T>) => {
+  
   const { 
     register, 
     handleSubmit, 
@@ -57,7 +67,9 @@ export const DynamicForm = <T extends FieldValues>({
     reset, 
     formState: { errors }
   } = useForm<T>({
+    resolver: zodResolver(zodSchema), // Conecta o Zod ao formulário!
     defaultValues: initialValues,
+    mode: "onChange", // Permite que os erros de XOR e outros sumam instantaneamente ao digitar
   });
 
   // Captura o estado global do formulário para a renderização condicional
@@ -115,7 +127,6 @@ export const DynamicForm = <T extends FieldValues>({
           key={fieldConfig.name}
           name={fieldPath}
           control={control}
-          rules={{ required: fieldConfig.required }}
           render={({ field: { onChange, onBlur, value, ref } }) => (
             <IMaskInput
               {...maskProps}
@@ -139,11 +150,11 @@ export const DynamicForm = <T extends FieldValues>({
     
     // CASO PADRÃO: Props base para inputs
     const commonProps = {
-      ...register(fieldPath, { required: fieldConfig.required }),
+      ...register(fieldPath),
       id: fieldConfig.name,
       className: `${styles.input} ${hasError ? styles.inputError : ''}`,
       placeholder: fieldConfig.placeholder,
-      disabled: fieldConfig.disabled,
+      disabled: fieldConfig.disabled || isLoading,
     };
 
     // ROTEAMENTO DE COMPONENTES
@@ -160,11 +171,12 @@ export const DynamicForm = <T extends FieldValues>({
         const SelectComponent = fieldConfig.endpoint ? (
           // Se tem endpoint -> Busca da API (SearchableAsyncSelect)
           <SearchableAsyncSelect
-            field={fieldConfig} 
-            control={control} 
-            setValue={setValue} 
-            register={register} 
-            error={errors[fieldPath]} 
+            field={fieldConfig}
+            control={control}
+            setValue={setValue}
+            register={register}
+            error={errors[fieldPath]}
+            disabled={isLoading}
           />
         ) : (
           // Se não tem endpoint (tem options locais) -> Select Customizado Síncrono
@@ -172,14 +184,13 @@ export const DynamicForm = <T extends FieldValues>({
             key={fieldConfig.name}
             name={fieldPath}
             control={control}
-            rules={{ required: fieldConfig.required }}
             render={({ field: { onChange, value } }) => (
               <SearchableSelect
                 options={fieldConfig.options || []}
-                value={(value as string | number) ?? ""} 
+                value={(value as string | number) ?? ""}
                 onChange={onChange}
                 placeholder={fieldConfig.placeholder}
-                disabled={fieldConfig.disabled || fieldConfig.readOnly} 
+                disabled={fieldConfig.disabled || fieldConfig.readOnly || isLoading}
               />
             )}
           />
@@ -210,6 +221,12 @@ export const DynamicForm = <T extends FieldValues>({
     }
   };
 
+  // Previne multiplos submits via botão ou enter
+  const onSafeSubmit: SubmitHandler<T> = (data, event) => {
+    if (isLoading) return;
+    onSubmit(data, event);
+  };
+
   return (
     <div className={styles.layoutContainer}>
       {(title || subtitle) && (
@@ -226,8 +243,8 @@ export const DynamicForm = <T extends FieldValues>({
         </div>
       )}
 
-      <form onSubmit={handleSubmit(onSubmit)} onKeyDown={handleFormKeyDown} className={styles.formContainer}>
-        {schema.fields.map((field) => {
+      <form onSubmit={handleSubmit(onSafeSubmit)} onKeyDown={handleFormKeyDown} className={styles.formContainer}>
+        {uiSchema.fields.map((field) => {
           // VISIBILIDADE CONDICIONAL
           if (field.visibleIf && !field.visibleIf(currentValues)) {
             return null; // Não renderiza o campo se a condição não for satisfeita
@@ -290,8 +307,12 @@ export const DynamicForm = <T extends FieldValues>({
         <div className={styles.formActions}>
           {/* Oculta o botão primário caso o submitLabel seja vazio (ex: tela de visualização) */}
           {submitLabel && (
-            <button type="submit" className={styles.submitButton}>
-              {submitLabel}
+            <button
+              type="submit"
+              className={styles.submitButton}
+              disabled={isLoading}
+            >
+              {isLoading ? 'Processando...' : submitLabel}
             </button>
           )}
           
@@ -302,6 +323,7 @@ export const DynamicForm = <T extends FieldValues>({
               type="button" 
               className={styles.btnCancel} 
               onClick={onCancel}
+              disabled={isLoading}
             >
               {cancelLabel}
             </button>
