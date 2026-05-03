@@ -28,8 +28,8 @@ import PerfilEditPage from "./domains/sistema/perfil/pages/PerfilEditPage";
 import DatabaseDangerPage from "./domains/system/database/pages/DatabaseDangerPage";
 import OperadorListPage from "./core/ui/pages/operacao/operadores/OperadorListPage";
 import OperadorFormPage from "./core/ui/pages/operacao/operadores/OperadorFormPage";
-import TipoServicoListPage from "./domains/operacao/servicos/pages/TipoServicoListPage";
-import TipoServicoFormPage from "./domains/operacao/servicos/pages/TipoServicoFormPage";
+import TipoServicoListPage from "./domains/operacao/tipos-atividade/pages/TipoAtividadeListPage";
+import TipoServicoFormPage from "./domains/operacao/tipos-atividade/pages/TipoAtividadeFormPage";
 
 // Novo componente de 404
 import NotFoundPage from "./core/ui/pages/NotFoundPage";

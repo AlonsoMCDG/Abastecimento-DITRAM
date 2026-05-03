@@ -1,65 +1,54 @@
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import DataTable, { type DataTableParams } from "../../../../core/ui/data-display/DataTable";
-import { secretariaApi } from "../secretarias.api"; // Ajuste o caminho se necessário
+import { QuickViewModal } from "../../../../core/ui/overlays/QuickViewModal";
+
+import { secretariaApi } from "../secretarias.api";
 import { ROUTES } from "../../../../core/routes/routes";
 import { useAuth } from "../../../../core/auth/AuthContext";
 import { Can } from "../../../../core/auth/components/Can";
 import { getApiErrorMessage } from "../../../../core/api/errorHandlers";
 
-import type { Secretaria } from "../../../../core/types/models";
-import { secretariaListSchema, secretariaViewSchema } from "../../../schemas/secretaria.schema";
+import type { SecretariaReadDTO } from "../schemas/secretaria.read.zod";
+import { secretariaListSchema, secretariaViewSchema } from "../schemas/secretaria.schema";
 
-import "../../../assets/css/ListPage.css";
-import { QuickViewModal } from "../../../../core/ui/overlays/QuickViewModal";
+import "../../../../core/ui/layouts/ListPage.css";
 
 export default function SecretariaListPage() {
   const navigate = useNavigate();
   const { user: me } = useAuth();
 
-  const [secretarias, setSecretarias] = useState<Secretaria[]>([]);
+  const [secretarias, setSecretarias] = useState<SecretariaReadDTO[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [viewItem, setViewItem] = useState<Secretaria | null>(null);
-
-  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    return () => {
-      if (debounceTimer.current) clearTimeout(debounceTimer.current);
-    };
-  }, []);
+  const [viewItem, setViewItem] = useState<SecretariaReadDTO | null>(null);
 
   const hasWritePermission = Boolean(me?.is_staff || me?.can_write_cadastros);
 
   const fetchSecretarias = useCallback(async (params: DataTableParams) => {
-    if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    setLoading(true);
+    setErrorMessage(null);
+    try {
+      const res = await secretariaApi.listar({
+        page: params.page,
+        page_size: params.pageSize,
+        search: params.search,
+        ordering: params.ordering || undefined,
+      });
 
-    debounceTimer.current = setTimeout(async () => {
-      setLoading(true);
-      setErrorMessage(null);
-      try {
-        const res = await secretariaApi.listar({
-          page: params.page,
-          page_size: params.pageSize,
-          search: params.search,
-          ordering: params.ordering ?? undefined,
-          // Deixe 'ativo' em branco para listar tanto as ativas quanto as inativas na gerência
-        });
-
-        setSecretarias(res.data.results || []);
-        setTotal(res.data.count || 0);
-      } catch (err) {
-        setErrorMessage("Erro ao buscar secretarias no servidor.");
-      } finally {
-        setLoading(false);
-      }
-    }, 500);
+      setSecretarias(res.results || []);
+      setTotal(res.count || 0);
+    } catch (err) {
+      setErrorMessage("Erro ao buscar secretarias no servidor.");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  async function handleDelete(item: Secretaria) {
+  async function handleDelete(item: SecretariaReadDTO) {
     if (!item.id) return;
     try {
       await secretariaApi.deletar(item.id);
@@ -97,17 +86,17 @@ export default function SecretariaListPage() {
         onView={(item) => setViewItem(item)}
         canEdit={hasWritePermission}
         canDelete={hasWritePermission}
-        onEdit={(item) => navigate(ROUTES.organizacao.secretarias.edit(item.id!))}
+        onEdit={(item) => navigate(ROUTES.organizacao.secretarias.edit(item.id))}
         onDelete={handleDelete}
         rowClassName={(s) => !s.ativo ? "dt-row-inactive" : ""}
       />
 
-      <QuickViewModal<Secretaria>
+      <QuickViewModal<SecretariaReadDTO>
         isOpen={!!viewItem}
         onClose={() => setViewItem(null)}
         data={viewItem}
         schema={secretariaViewSchema}
-        onEdit={(item) => navigate(ROUTES.organizacao.secretarias.edit(item.id!))}
+        onEdit={(item) => navigate(ROUTES.organizacao.secretarias.edit(item.id))}
         canEdit={hasWritePermission}
       />
     </div>

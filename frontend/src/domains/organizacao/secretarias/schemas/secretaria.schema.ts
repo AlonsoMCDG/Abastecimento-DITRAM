@@ -1,18 +1,18 @@
-import type { FormSchema, TableSchema } from "../types/form";
-import type { Secretaria } from "../types/models";
-import type { ViewSchema } from "../types/views";
+import type { FormSchema, TableSchema } from "../../../../core/types/form";
+import type { ViewSchema } from "../../../../core/types/views";
+import type { SecretariaReadDTO } from "./secretaria.read.zod";
 
 // --------------------------------------------------------
-// FORMULÁRIO DE CRIAÇÃO / EDIÇÃO
+// FORMULÁRIO (UI SCHEMA)
 // --------------------------------------------------------
-export const secretariaFormSchema: FormSchema = {
+export const secretariaUISchema: FormSchema = {
   fields: [
     {
       name: "sigla",
       label: "Sigla",
       type: "text",
       placeholder: "Ex: SEME",
-      colSpan: 1, // Fica mais estreito na tela
+      colSpan: 1,
       required: true
     },
     {
@@ -20,7 +20,7 @@ export const secretariaFormSchema: FormSchema = {
       label: "Nome da Secretaria",
       type: "text",
       placeholder: "Ex: Secretaria Municipal de Educação",
-      colSpan: 3, // Ocupa o resto do espaço
+      colSpan: 3,
       required: true
     },
     {
@@ -60,7 +60,7 @@ export const secretariaListSchema: TableSchema = {
 // --------------------------------------------------------
 // MODAL DE QUICK VIEW
 // --------------------------------------------------------
-export const secretariaViewSchema: ViewSchema<Secretaria> = {
+export const secretariaViewSchema: ViewSchema<SecretariaReadDTO> = {
   title: (item) => `Secretaria #${item.id}`,
   fields: [
     { label: 'Nome', key: 'nome', fullWidth: true},
