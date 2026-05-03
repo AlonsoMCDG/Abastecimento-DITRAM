@@ -52,6 +52,11 @@ export const ROUTES = {
       list: "/frota/rotas",
       create: "/frota/rotas/criar",
       edit: (id: number) => `/frota/rotas/editar/${id}`,
+    },
+    tiposCombustivel: {
+      list: "/frota/rotas",
+      create: "/frota/rotas/criar",
+      edit: (id: number) => `/frota/rotas/editar/${id}`,
     }
   },
 
