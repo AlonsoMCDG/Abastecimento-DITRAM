@@ -4,10 +4,21 @@ import type { ViewSchema } from "../../../../core/types/views"
 import type { GuiaAbastecimentoReadDTO } from "./guia.read.zod"
 
 // --------------------------------------------------------
-// FORMULÁRIO
+// FORMULÁRIO (UI SCHEMA)
 // --------------------------------------------------------
-export const guiaAbastecimentoFormSchema: FormSchema = {
+export const guiaAbastecimentoUISchema: FormSchema = {
   fields: [
+    {
+      name: 'modalidade',
+      label: 'Modalidade',
+      type: 'select',
+      options: [
+        { label: 'GUIA DE ABASTECIMENTO - PADRÃO', value: 'PADRAO' },
+        { label: 'GUIA DE ABASTECIMENTO - BARQUEIRO', value: 'BARQUEIRO' },
+        { label: 'GUIA DE ABASTECIMENTO - COROTE', value: 'COROTE' }
+      ],
+      required: true,
+    },
     {
       name: 'secretaria_id',
       label: 'Secretaria',
@@ -17,7 +28,7 @@ export const guiaAbastecimentoFormSchema: FormSchema = {
     },
     {
       name: 'tipo_atividade',
-      label: 'Serviço',
+      label: 'Atividade / Serviço prestado',
       type: 'select',
       endpoint: ENDPOINTS.operacao.tiposAtividadeLookup,
       required: true,
@@ -27,10 +38,11 @@ export const guiaAbastecimentoFormSchema: FormSchema = {
       name: 'data_hora',
       label: 'Data e Hora',
       type: "datetime-local",
+      required: true,
     },
     {
       name: 'pessoa_id',
-      label: 'Motorista',
+      label: 'Motorista / Barqueiro',
       type: 'select',
       endpoint: ENDPOINTS.pessoas.lookup,
       required: true,
@@ -46,7 +58,7 @@ export const guiaAbastecimentoFormSchema: FormSchema = {
       endpoint: ENDPOINTS.frota.veiculosLookup,
     },
     {
-      name: 'categoria',
+      name: 'tipo_veiculo',
       label: 'Tipo de Veículo',
       type: 'select',
       options: [

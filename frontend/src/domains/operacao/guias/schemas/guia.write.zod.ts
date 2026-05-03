@@ -37,7 +37,7 @@ export const guiaAbastecimentoWriteSchema = z.object({
   
   // XOR VEÍCULO
   const fields = [
-    data.veiculo_id != null,
+    data.veiculo_id != null && data.veiculo_id > 0,
     !!data.tipo_veiculo,
     !!data.veiculo_descricao
   ]
