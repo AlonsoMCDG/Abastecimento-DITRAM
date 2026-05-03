@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import type { TableSchema } from "../../types/form";
 import { getApiErrorMessage } from "../../api/errorHandlers";
 import "./DataTable.css"
@@ -19,7 +19,7 @@ interface Props<T> {
   onParamsChange: (params: DataTableParams) => void;
   onEdit?: (item: T) => void;
   onDelete?: (item: T) => void | Promise<void>;
-  onView?: (item: T) => void; // Prop para Modal Rápido
+  onView?: (item: T) => void; 
   onPdf?: (item: T, action: 'open' | 'print') => void | Promise<void>;
   canEdit?: boolean;
   canDelete?: boolean;
@@ -59,6 +59,12 @@ export default function DataTable<T extends { id: number }>({
 
   const hasActions = Boolean(onPdf || onView || canEdit || canDelete);
 
+  // Blindagem contra Loop Infinito do onParamsChange ao usar useRef
+  const onParamsChangeRef = useRef(onParamsChange);
+  useEffect(() => {
+    onParamsChangeRef.current = onParamsChange;
+  }, [onParamsChange]);
+
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
       setParams((prev) => {
@@ -70,14 +76,14 @@ export default function DataTable<T extends { id: number }>({
   }, [searchTerm]);
 
   useEffect(() => {
-    onParamsChange(params);
-  }, [params, onParamsChange]);
+    onParamsChangeRef.current(params);
+  }, [params]);
 
   const handlePageChange = (newPage: number) => {
     setParams((prev) => ({ ...prev, page: newPage }));
   };
 
-  const handleSort = (col: any) => {
+  const handleSort = (col: { sortable?: boolean; sortKey?: string; key: string }) => {
     if (col.sortable === false) return;
 
     const columnKey = col.sortKey || col.key;
@@ -120,7 +126,7 @@ export default function DataTable<T extends { id: number }>({
     }
   };
 
-  function renderCell(value: any, col: any, item: T) {
+  function renderCell(value: unknown, col: any, item: T) {
     if (col.format) return col.format(value, item);
     if (typeof value === "boolean") {
       return (
@@ -159,16 +165,25 @@ export default function DataTable<T extends { id: number }>({
                 const targetKey = col.sortKey || col.key;
                 const isSorted = params.ordering?.replace("-", "") === targetKey;
                 const isDescending = params.ordering?.startsWith("-");
+                const isSortable = col.sortable !== false;
 
                 return (
-                  <th
-                    key={col.key}
-                    onClick={() => handleSort(col)}
-                    className={col.sortable !== false ? "sortable-th" : ""}
-                  >
-                    {col.label}
-                    {isSorted && (
-                      <span className="sort-icon">{isDescending ? " ▼" : " ▲"}</span>
+                  <th key={col.key} className={isSortable ? "sortable-th" : ""}>
+                    {/* Acessibilidade no clique do Header */}
+                    {isSortable ? (
+                      <button 
+                        type="button" 
+                        onClick={() => handleSort(col)}
+                        className="dt-sort-btn"
+                        aria-label={`Ordenar por ${col.label}`}
+                      >
+                        {col.label}
+                        {isSorted && (
+                          <span className="sort-icon">{isDescending ? " ▼" : " ▲"}</span>
+                        )}
+                      </button>
+                    ) : (
+                      col.label
                     )}
                   </th>
                 );
@@ -189,7 +204,7 @@ export default function DataTable<T extends { id: number }>({
                     </td>
 
                     {schema.columns.map((col) => {
-                      const value = (item as any)[col.key];
+                      const value = (item as Record<string, unknown>)[col.key];
                       return (
                         <td key={col.key}>
                           {renderCell(value, col, item)}
@@ -210,24 +225,14 @@ export default function DataTable<T extends { id: number }>({
                             </button>
                           )}
                           {onPdf && (
-                            <>
-                              {/* <button
-                                className="dt-btn pdf"
-                                onClick={() => handlePdfClick(item, 'open')}
-                                title="Visualizar PDF"
-                                disabled={actionLoading?.id === item.id}
-                              >
-                                {actionLoading?.id === item.id && actionLoading.action === 'open' ? '⏳' : '👁️'}
-                              </button> */}
-                              <button
-                                className="dt-btn pdf"
-                                onClick={() => handlePdfClick(item, 'print')}
-                                title="Imprimir PDF"
-                                disabled={actionLoading?.id === item.id}
-                              >
-                                {actionLoading?.id === item.id && actionLoading.action === 'print' ? '⏳' : '🖨️'}
-                              </button>
-                            </>
+                            <button
+                              className="dt-btn pdf"
+                              onClick={() => handlePdfClick(item, 'print')}
+                              title="Imprimir PDF"
+                              disabled={actionLoading?.id === item.id}
+                            >
+                              {actionLoading?.id === item.id && actionLoading.action === 'print' ? '⏳' : '🖨️'}
+                            </button>
                           )}
                           {canEdit && onEdit && (
                             <button className="dt-btn edit" onClick={() => onEdit(item)} title="Editar" disabled={actionLoading?.id === item.id}>✏️</button>
