@@ -60,8 +60,8 @@ export const ENDPOINTS = {
   // OPERAÇÃO
   // -----------------------
   operacao: {
-    tiposAtividade: "/v1/operacao/tipos-atividade/",
-    tiposAtividadeLookup: "/v1/operacao/tipos-atividade/lookup/",
+    tiposAtividade: "/v1/operacao/atividades/",
+    tiposAtividadeLookup: "/v1/operacao/atividades/lookup/",
     guias: "/v1/operacao/guias/",
   },
 }
