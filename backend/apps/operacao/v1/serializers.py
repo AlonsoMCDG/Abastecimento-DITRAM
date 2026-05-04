@@ -63,9 +63,10 @@ class GuiaReadSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'data_hora', 'modalidade', 'modalidade_nome',
             'quantidade_combustivel', 'quantidade_oleo', 'periodo_uso_dias', 
-            'observacao', 'rota_manual', 'veiculo_display',
+            'observacao', 'rota_manual', 
             
             # FKs Mapeadas
+            'veiculo_id', 'veiculo_display',
             'pessoa_id', 'pessoa_nome',
             'rota_id', 'rota_nome',
             'tipo_atividade_id', 'tipo_atividade_nome',
