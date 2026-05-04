@@ -131,11 +131,13 @@ export const SearchableAsyncSelect = <T extends FieldValues>({
     if (!searchTerm) return options;
     const lowerSearch = searchTerm.toLowerCase();
     return options.filter((opt) =>
-      opt.label.toLowerCase().includes(lowerSearch)
+      String(opt.label || "").toLowerCase().includes(lowerSearch)
     );
   }, [options, searchTerm]);
 
-  const hasExactMatch = options.some(opt => opt.label.toLowerCase() === searchTerm.trim().toLowerCase());
+  const hasExactMatch = options.some(opt => 
+    String(opt.label || "").toLowerCase() === String(searchTerm || "").trim().toLowerCase()
+  );
   const showCreatableOption = field.creatable && searchTerm.trim() !== '' && !hasExactMatch;
 
   // 6. RESET DO ÍNDICE AO DIGITAR
@@ -200,19 +202,23 @@ export const SearchableAsyncSelect = <T extends FieldValues>({
         type="text"
         className={`${styles.input} ${error ? styles.inputError : ''} ${styles.comboInput}`}
         placeholder={loading ? "Carregando..." : field.placeholder || "Selecione ou digite..."}
-        value={searchTerm}
+        value={searchTerm ?? ""} 
         disabled={loading || field.disabled || disabled}
         onChange={(e) => {
           setSearchTerm(e.target.value);
           if (!isOpen) setIsOpen(true);
         }}
         onClick={() => !loading && !field.disabled && !disabled && setIsOpen(true)}
-        onKeyDown={handleKeyDown} // Vincula as ações do teclado
+        onKeyDown={handleKeyDown} 
       />
       
       <span className={styles.comboChevron}>{isOpen ? "▲" : "▼"}</span>
 
-      <input type="hidden" {...register(fieldPath, { required: field.required })} />
+      <input 
+        type="hidden" 
+        {...register(fieldPath, { required: field.required })} 
+        value={currentValue ?? ""} 
+      />
 
       {isOpen && (
         <ul className={styles.comboDropdown} ref={dropdownRef}>
@@ -236,7 +242,6 @@ export const SearchableAsyncSelect = <T extends FieldValues>({
 
           {showCreatableOption && (
             <li
-              // O índice da opção de criação é sempre o final da lista
               className={`
                 ${styles.comboOption} 
                 ${styles.comboOptionCreatable}
