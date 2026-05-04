@@ -6,8 +6,8 @@ import { useAuth } from "../../../../core/auth/AuthContext";
 import DataTable, { type DataTableParams } from "../../../../core/ui/data-display/DataTable";
 import type { TableSchema } from "../../../../core/types/form";
 
-import "../../assets/css/ListPage.css";
-import "../../assets/css/DataTable.css";
+import "../../../../core/ui/layouts/ListPage.css"
+import "../../../../core/ui/data-display/DataTable.css";
 
 type EditedMap = Record<number, Partial<UsuarioReadDTO>>;
 type PermissionKey =

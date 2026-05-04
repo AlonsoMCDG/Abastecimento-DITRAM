@@ -2,12 +2,12 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { usuarioApi } from "../../usuarios/usuarios.api";
 import { getApiErrorMessage } from "../../../../core/api/errorHandlers";
-import type { Usuario } from "../../../../core/types/models";
-import "../../assets/css/FormPage.css";
+import type { UsuarioReadDTO } from "../../usuarios/schemas/usuario.read.zod";
+import "../../../../core/ui/layouts/FormPage.css"
 
 export default function PerfilPage() {
   const location = useLocation();
-  const [me, setMe] = useState<Usuario | null>(null);
+  const [me, setMe] = useState<UsuarioReadDTO | null>(null);
   const [errorMsg, setErrorMsg] = useState("");
 
   useEffect(() => {

@@ -95,9 +95,7 @@ export default function Layout() {
                 </button>
                 <div className={`nav-dropdown ${openDropdown === "operacao" ? "mobile-open" : ""}`}>
                   <Link to={ROUTES.operacao.guias.list} className="nav-dropdown-link" onClick={closeDropdowns}>Histórico de Guias</Link>
-                  <Link to={ROUTES.operacao.alocacoesServico.list} className="nav-dropdown-link" onClick={closeDropdowns}>Alocações de Serviço</Link>
-                  <Link to={ROUTES.operacao.operadoresVeiculo.list} className="nav-dropdown-link" onClick={closeDropdowns}>Operadores de Veículo</Link>
-                  <Link to={ROUTES.operacao.tiposServico.list} className="nav-dropdown-link" onClick={closeDropdowns}>Tipos de Serviço</Link>
+                  <Link to={ROUTES.operacao.tiposAtividade.list} className="nav-dropdown-link" onClick={closeDropdowns}>Tipos de Serviço</Link>
                 </div>
               </li>
 

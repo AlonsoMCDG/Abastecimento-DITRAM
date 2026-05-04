@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import "../../assets/css/FormPage.css";
+import "../../../../core/ui/layouts/FormPage.css"
 import { coreApi } from "../../system.api";
 import { getApiErrorMessage } from "../../../../core/api/errorHandlers";
 import { useAuth } from "../../../../core/auth/AuthContext";

@@ -16,8 +16,7 @@ import { guiaAbastecimentoUISchema } from '../schemas/guia.schema';
 import { guiaAbastecimentoFormSchema, type GuiaAbastecimentoFormData } from '../schemas/guia.form.zod';
 import { mapReadToForm, mapFormToWriteDTO } from '../guias.mapper';
 
-// Caso você tenha estilos específicos para os botões extra
-import styles from '../../../../core/ui/components/DynamicForm/DynamicForm.module.css';
+import styles from '../../../../core/ui/forms/dynamic-form/DynamicForm.module.css';
 
 export const GuiaAbastecimentoFormPage: React.FC = () => {
   const navigate = useNavigate();
@@ -168,8 +167,8 @@ export const GuiaAbastecimentoFormPage: React.FC = () => {
     if (name === 'veiculo_id') {
       try {
         const res = await veiculosApi.buscar(Number(value));
-        if (res.data.tipo_combustivel_id) {
-          setValue('tipo_combustivel_id', res.data.tipo_combustivel_id, { shouldValidate: true });
+        if (res.tipo_combustivel_id) {
+          setValue('tipo_combustivel_id', res.tipo_combustivel_id, { shouldValidate: true });
         }
       } catch (err) {
         console.error("Erro ao buscar veículo", err);
