@@ -70,6 +70,8 @@ class InstituicaoViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
     ordering = ['-ativo', 'nome'] # Ativas no topo, depois alfabético
 
     def get_serializer_class(self):
+        if self.action == 'lookup':
+            return InstituicaoLookupSerializer
         if self.request.method in ['GET', 'HEAD', 'OPTIONS']:
             return InstituicaoReadSerializer
         return InstituicaoWriteSerializer

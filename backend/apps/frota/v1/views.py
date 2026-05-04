@@ -48,6 +48,8 @@ class VeiculoViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
         return queryset
     
     def get_serializer_class(self):
+        if self.action == 'lookup':
+            return VeiculoLookupSerializer
         if self.request.method in ['GET', 'HEAD', 'OPTIONS']:
             return VeiculoReadSerializer
         return VeiculoWriteSerializer
@@ -59,7 +61,7 @@ class VeiculoViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
         if 'ativo' not in request.query_params:
             queryset = queryset.filter(ativo=True)
 
-        queryset = queryset.only('id', 'modelo', 'placa', 'categoria')
+        queryset = queryset.select_related(None).only('id', 'modelo', 'placa', 'categoria')
 
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
@@ -87,6 +89,8 @@ class RotaViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
     ordering = ['-ativa', 'nome'] 
 
     def get_serializer_class(self):
+        if self.action == 'lookup':
+            return RotaLookupSerializer
         if self.request.method in ['GET', 'HEAD', 'OPTIONS']:
             return RotaReadSerializer
         return RotaWriteSerializer

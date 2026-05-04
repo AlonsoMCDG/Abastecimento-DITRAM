@@ -43,6 +43,9 @@ class UsuarioViewSet(ModelViewSet):
             if self.request.method in ['PUT', 'PATCH']:
                 return UsuarioSelfUpdateSerializer
             return UsuarioPermissionsSerializer
+        
+        if self.action == 'lookup':
+            return UsuarioLookupSerializer
             
         if self.action in ['permissions_list', 'permissions_update']:
             return UsuarioPermissionsSerializer
