@@ -2,7 +2,7 @@ from django.db import models
 from django.core.validators import MinValueValidator
 from apps.organizacao.models import Secretaria
 from django.utils.text import slugify
-
+from decimal import Decimal
 class TipoCombustivelManager(models.Manager):
     def get_by_natural_key(self, nome):
         return self.get(nome=nome)
@@ -70,7 +70,7 @@ class Veiculo(models.Model):
     categoria = models.CharField(max_length=50, choices=CATEGORIA_CHOICES)
     
     hodometro_atual = models.DecimalField(max_digits=10, decimal_places=2, default=0, 
-                                          validators=[MinValueValidator(0.0)], 
+                                          validators=[MinValueValidator(Decimal('0.0'))], 
                                           verbose_name="Hodômetro Atual")
     
     unidade_consumo = models.CharField(max_length=20, choices=UNIDADE_CONSUMO_CHOICES, default="KM_POR_L")
@@ -129,7 +129,7 @@ class Rota(models.Model):
     
     # Campos operacionais
     distancia_km = models.DecimalField(max_digits=8, decimal_places=2, 
-                                       validators=[MinValueValidator(0.0)], 
+                                       validators=[MinValueValidator(Decimal('0.0'))], 
                                        default=0, null=True, blank=True)
     detalhes = models.CharField(max_length=256, blank=True, null=True)
     ativa = models.BooleanField(default=True)
