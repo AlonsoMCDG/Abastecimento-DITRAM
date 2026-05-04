@@ -8,6 +8,7 @@ from apps.organizacao.models import Secretaria
 
 class VeiculoWriteSerializer(serializers.ModelSerializer):
     tipo_combustivel_id = serializers.PrimaryKeyRelatedField(
+        source='tipo_combustivel',
         queryset=TipoCombustivel.objects.filter(ativo=True)
     )
 
