@@ -10,7 +10,7 @@ class TipoCombustivelManager(models.Manager):
 class TipoCombustivel(models.Model):
     nome = models.CharField(max_length=50, unique=True)
     ativo = models.BooleanField(default=True)
-    slug = models.SlugField(max_length=30, unique=True)  # Apelido padronizado para o nome
+    slug = models.SlugField(max_length=30, unique=True, blank=True)  # Apelido padronizado para o nome
 
     objects = TipoCombustivelManager()
 
@@ -35,10 +35,10 @@ class TipoCombustivel(models.Model):
         if not self.slug:
             base_slug = slugify(self.nome)
             slug = base_slug
-            counter = 1
-            while TipoCombustivel.objects.filter(slug=slug).exists():
-                slug = f"{base_slug}-{counter}"
-                counter += 1
+            # counter = 1
+            # while TipoCombustivel.objects.filter(slug=slug).exists():
+            #     slug = f"{base_slug}-{counter}"
+            #     counter += 1
             self.slug = slug
         super().save(*args, **kwargs)
 
