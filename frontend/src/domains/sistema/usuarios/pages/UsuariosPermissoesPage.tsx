@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { usuarioApi } from "../usuarios.api";
-import type { Usuario } from "../../../../core/types/models";
+import type { UsuarioReadDTO } from "../schemas/usuario.read.zod";
 import { useAuth } from "../../../../core/auth/AuthContext";
 
 import DataTable, { type DataTableParams } from "../../../../core/ui/data-display/DataTable";
@@ -9,7 +9,7 @@ import type { TableSchema } from "../../../../core/types/form";
 import "../../assets/css/ListPage.css";
 import "../../assets/css/DataTable.css";
 
-type EditedMap = Record<number, Partial<Usuario>>;
+type EditedMap = Record<number, Partial<UsuarioReadDTO>>;
 type PermissionKey =
   | "is_staff"
   | "can_write_cadastros"
@@ -21,7 +21,7 @@ type PermissionKey =
 export default function UsuariosPermissoesPage() {
   const { user: me } = useAuth();
 
-  const [users, setUsers] = useState<Usuario[]>([]);
+  const [users, setUsers] = useState<UsuarioReadDTO[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -29,7 +29,7 @@ export default function UsuariosPermissoesPage() {
 
   const canEditAdmins = Boolean(me?.is_superuser);
 
-  const canEditUser = (u: Usuario) => {
+  const canEditUser = (u: UsuarioReadDTO) => {
     if (u.is_superuser) return false;
     if (u.is_staff && !canEditAdmins) return false;
     return true;
@@ -64,7 +64,7 @@ export default function UsuariosPermissoesPage() {
     });
   };
 
-  const save = async (u: Usuario) => {
+  const save = async (u: UsuarioReadDTO) => {
     if (!u.id) return;
     const patch = edited[u.id];
     if (!patch || Object.keys(patch).length === 0) return;
@@ -84,7 +84,7 @@ export default function UsuariosPermissoesPage() {
   };
 
   // Helper para renderizar os checkboxes centralizados e com a lógica amarrada
-  const renderCheckbox = (u: Usuario, field: PermissionKey, superOnly = false) => {
+  const renderCheckbox = (u: UsuarioReadDTO, field: PermissionKey, superOnly = false) => {
     const patch = u.id ? edited[u.id] : undefined;
     const isChecked = Boolean((patch?.[field] ?? u[field]) as boolean | undefined);
     const disabled = !canEditUser(u) || (superOnly && !canEditAdmins);
@@ -110,19 +110,19 @@ export default function UsuariosPermissoesPage() {
         key: "first_name",
         label: "Nome Completo",
         sortKey: "first_name",
-        format: (_, u: Usuario) => `${u.first_name || ""} ${u.last_name || ""}`.trim()
+        format: (_, u: UsuarioReadDTO) => `${u.first_name || ""} ${u.last_name || ""}`.trim()
       },
-      { key: "is_staff", label: "👑 Admin", sortable: false, format: (_, u: Usuario) => renderCheckbox(u, "is_staff", true) },
-      { key: "can_write_cadastros", label: "📝 Cadastros", sortable: false, format: (_, u: Usuario) => renderCheckbox(u, "can_write_cadastros") },
-      { key: "can_write_frota", label: "🚗 Frota", sortable: false, format: (_, u: Usuario) => renderCheckbox(u, "can_write_frota") },
-      { key: "can_create_guia_abastecimento", label: "⛽ Criar Guia", sortable: false, format: (_, u: Usuario) => renderCheckbox(u, "can_create_guia_abastecimento") },
-      { key: "can_edit_guia_abastecimento", label: "✏️ Editar Guia", sortable: false, format: (_, u: Usuario) => renderCheckbox(u, "can_edit_guia_abastecimento") },
-      { key: "can_delete_guia_abastecimento", label: "🗑️ Excluir Guia", sortable: false, format: (_, u: Usuario) => renderCheckbox(u, "can_delete_guia_abastecimento") },
+      { key: "is_staff", label: "👑 Admin", sortable: false, format: (_, u: UsuarioReadDTO) => renderCheckbox(u, "is_staff", true) },
+      { key: "can_write_cadastros", label: "📝 Cadastros", sortable: false, format: (_, u: UsuarioReadDTO) => renderCheckbox(u, "can_write_cadastros") },
+      { key: "can_write_frota", label: "🚗 Frota", sortable: false, format: (_, u: UsuarioReadDTO) => renderCheckbox(u, "can_write_frota") },
+      { key: "can_create_guia_abastecimento", label: "⛽ Criar Guia", sortable: false, format: (_, u: UsuarioReadDTO) => renderCheckbox(u, "can_create_guia_abastecimento") },
+      { key: "can_edit_guia_abastecimento", label: "✏️ Editar Guia", sortable: false, format: (_, u: UsuarioReadDTO) => renderCheckbox(u, "can_edit_guia_abastecimento") },
+      { key: "can_delete_guia_abastecimento", label: "🗑️ Excluir Guia", sortable: false, format: (_, u: UsuarioReadDTO) => renderCheckbox(u, "can_delete_guia_abastecimento") },
       {
         key: "custom_actions", // Nossa coluna customizada de ação que substitui a nativa
         label: "Ação",
         sortable: false,
-        format: (_, u: Usuario) => {
+        format: (_, u: UsuarioReadDTO) => {
           const patch = u.id ? edited[u.id] : undefined;
           const dirty = Boolean(patch && Object.keys(patch).length > 0);
           

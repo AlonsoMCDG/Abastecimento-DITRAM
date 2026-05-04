@@ -1,64 +1,82 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+
 import { usuarioApi } from "../usuarios.api";
 import { ROUTES } from "../../../../core/routes/routes";
 import { DynamicForm } from "../../../../core/ui/forms/dynamic-form/DynamicForm";
-import { usuarioFormSchema } from "../schemas/usuario.schema";
-import type { Usuario } from "../../../../core/types/models";
 import { getApiErrorMessage } from "../../../../core/api/errorHandlers";
+
+import { usuarioUISchema } from "../schemas/usuario.schema";
+import { usuarioFormSchema, type UsuarioFormData } from "../schemas/usuario.form.zod";
+import { mapReadToForm, mapFormToWriteDTO } from "../usuarios.mapper";
 
 export default function UsuarioFormPage() {
   const navigate = useNavigate();
   const { id } = useParams();
 
-  const [initialValues, setInitialValues] = useState<Partial<Usuario> | undefined>(undefined);
+  const [initialValues, setInitialValues] = useState<Partial<UsuarioFormData> | undefined>(undefined);
   const [loading, setLoading] = useState(!!id);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [globalError, setGlobalError] = useState<string | null>(null);
 
   useEffect(() => {
     if (id) {
       usuarioApi.buscar(Number(id))
-        .then(res => setInitialValues(res.data))
+        .then(res => setInitialValues(mapReadToForm(res)))
         .catch(err => {
-          console.error(err);
-          alert("Erro ao carregar os dados do usuário.");
+          setGlobalError(getApiErrorMessage(err, "Erro ao carregar os dados do usuário."));
         })
         .finally(() => setLoading(false));
+    } else {
+      setInitialValues({});
     }
   }, [id]);
 
-  async function handleSubmit(form: any) {
+  async function handleSubmit(data: UsuarioFormData) {
+    setIsSubmitting(true);
+    setGlobalError(null);
+
     try {
-      // Como a senha no backend não pode ir vazia na criação, mas pode ir vazia na edição:
-      const payload = { ...form };
-      if (!payload.password) delete payload.password; // Limpa para o PATCH não quebrar
+      const payload = mapFormToWriteDTO(data);
+      if (!payload.password) delete payload.password;
 
       if (id) {
         await usuarioApi.atualizar(Number(id), payload);
       } else {
-        // Validação básica manual no frontend para criação
-        if (!form.password) {
-          alert("A senha é obrigatória para novos usuários.");
+        if (!payload.password) {
+          setGlobalError("A senha é obrigatória para a criação de novos usuários.");
+          setIsSubmitting(false);
           return;
         }
         await usuarioApi.criar(payload);
       }
       navigate(ROUTES.sistema.usuarios.list);
     } catch (err: unknown) {
-      alert(getApiErrorMessage(err, "Erro ao salvar usuário. Verifique os dados."));
+      setGlobalError(getApiErrorMessage(err, "Erro ao salvar usuário. Verifique se o CPF já existe."));
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
-  if (loading) return <div>Carregando dados do usuário...</div>;
+  if (loading) return <div>Carregando dados...</div>;
 
   return (
-    <DynamicForm<Usuario>
-      title={id ? "Editar Usuário" : "Novo Usuário"}
-      subtitle={id ? "Modifique as informações de acesso." : "Preencha os dados básicos do novo acesso."}
-      schema={usuarioFormSchema}
-      initialValues={initialValues}
-      onSubmit={handleSubmit}
-      submitLabel="💾 Salvar Usuário"
-      onCancel={() => navigate(ROUTES.sistema.usuarios.list)} // Botão Cancelar Inteligente!
-    />
+    <div className="page-container">
+      <DynamicForm<UsuarioFormData>
+        title={id ? "Editar Usuário" : "Novo Usuário"}
+        subtitle={id ? "Modifique as informações de acesso." : "Preencha os dados básicos do novo acesso."}
+        
+        uiSchema={usuarioUISchema}
+        zodSchema={usuarioFormSchema}
+        
+        initialValues={initialValues}
+        globalError={globalError}
+        isLoading={isSubmitting}
+        
+        onSubmit={handleSubmit}
+        submitLabel="💾 Salvar Usuário"
+        onCancel={() => navigate(ROUTES.sistema.usuarios.list)}
+      />
+    </div>
   );
 }

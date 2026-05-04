@@ -1,182 +1,66 @@
-import { useEffect, useMemo, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 import { usuarioApi } from "../../usuarios/usuarios.api";
 import { getApiErrorMessage } from "../../../../core/api/errorHandlers";
-import type { Usuario } from "../../../../core/types/models";
-import "../../assets/css/FormPage.css";
+import { DynamicForm } from "../../../../core/ui/forms/dynamic-form/DynamicForm";
+
+import { perfilUISchema } from "../../usuarios/schemas/usuario.schema";
+import { perfilEditFormSchema, type PerfilEditFormData } from "../../usuarios/schemas/usuario.form.zod";
+import { mapReadToForm, mapFormToWriteDTO } from "../../usuarios/usuarios.mapper";
 
 export default function PerfilEditPage() {
   const navigate = useNavigate();
-  const location = useLocation();
 
-  const [me, setMe] = useState<Usuario | null>(null);
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
-  const [cpf, setCpf] = useState("");
-  const [password, setPassword] = useState("");
-  const [password2, setPassword2] = useState("");
-
-  const [loading, setLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState("");
+  const [initialValues, setInitialValues] = useState<Partial<PerfilEditFormData> | undefined>(undefined);
+  const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [globalError, setGlobalError] = useState<string | null>(null);
 
   useEffect(() => {
-    usuarioApi
-      .me()
-      .then((res) => {
-        setMe(res.data);
-        setFirstName(res.data.first_name || "");
-        setLastName(res.data.last_name || "");
-        setCpf(formatCPF(res.data.cpf) || "");
-        setEmail(res.data.email || "");
-      })
-      .catch((err) => setErrorMsg(getApiErrorMessage(err, "Falha ao carregar perfil.")));
-  }, [location.key]);
+    usuarioApi.me()
+      .then(res => setInitialValues(mapReadToForm(res.data))) // Pegamos o res.data do axios direto do client.get() original
+      .catch(err => setGlobalError(getApiErrorMessage(err, "Falha ao carregar perfil.")))
+      .finally(() => setLoading(false));
+  }, []);
 
-  const nomeCompleto = useMemo(() => {
-    const full = `${firstName} ${lastName}`.trim();
-    return full || me?.cpf || "";
-  }, [firstName, lastName, me]);
+  async function handleSubmit(data: PerfilEditFormData) {
+    setIsSubmitting(true);
+    setGlobalError(null);
 
-  const formatCPF = (value: string) => {
-    return value
-      .replace(/\D/g, "") // Remove tudo que não é dígito
-      .replace(/(\d{3})(\d)/, "$1.$2") // Coloca ponto após os 3 primeiros dígitos
-      .replace(/(\d{3})(\d)/, "$1.$2") // Coloca ponto após os 6 primeiros dígitos
-      .replace(/(\d{3})(\d{1,2})$/, "$1-$2") // Coloca traço após os 9 primeiros dígitos
-      .slice(0, 14); // Limita o tamanho ao formato 000.000.000-00
-  };
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setErrorMsg("");
-
-    if (password || password2) {
-      if (password !== password2) {
-        setErrorMsg("As senhas n\u00e3o conferem.");
-        return;
-      }
-    }
-
-    setLoading(true);
     try {
-      // Envia o CPF limpo (apenas números) para o backend
-      const cpfLimpo = cpf.replace(/\D/g, "");
+      const payload = mapFormToWriteDTO(data);
+      // O backend não precisa das senhas se elas não foram preenchidas
+      if (!payload.password) delete payload.password;
 
-      await usuarioApi.atualizarMe({
-        cpf: cpfLimpo || undefined,
-        first_name: firstName || undefined,
-        last_name: lastName || undefined,
-        email: email || undefined,
-        ...(password ? { password } : {}),
-      });
-
+      await usuarioApi.atualizarMe(payload);
       navigate("/perfil", { replace: true });
     } catch (err: unknown) {
-      setErrorMsg(getApiErrorMessage(err, "Falha ao atualizar perfil."));
+      setGlobalError(getApiErrorMessage(err, "Falha ao atualizar perfil. Verifique os dados."));
     } finally {
-      setLoading(false);
+      setIsSubmitting(false);
     }
   }
 
+  if (loading) return <div>Carregando seu perfil...</div>;
+
   return (
-    <div className="form-page">
-      <div className="form-header usuario">
-        <h2>Editar perfil</h2>
-      </div>
-
-      {errorMsg && <div className="alert alert-error">{errorMsg}</div>}
-
-      <div className="form-container">
-        {!me ? (
-          <p>Carregando...</p>
-        ) : (
-          <form onSubmit={handleSubmit} className={loading ? "loading" : ""}>
-            <div className="form-grid">
-              <div className="form-group">
-                <label className="form-label">CPF</label>
-                <input
-                  className="form-input"
-                  value={cpf}
-                  placeholder="000.000.000-00"
-                  onChange={(e) => setCpf(formatCPF(e.target.value))}
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Nome completo</label>
-                <input className="form-input" readOnly value={nomeCompleto} />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Primeiro nome</label>
-                <input
-                  className="form-input"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Sobrenome</label>
-                <input
-                  className="form-input"
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Email</label>
-                <input
-                  className="form-input"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
-            </div>
-
-            <div className="form-grid">
-              <div className="form-group">
-                <label className="form-label">Nova senha (opcional)</label>
-                <input
-                  className="form-input"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Confirmar nova senha</label>
-                <input
-                  className="form-input"
-                  type="password"
-                  value={password2}
-                  onChange={(e) => setPassword2(e.target.value)}
-                />
-              </div>
-            </div>
-
-            <div className="form-actions">
-              <Link className="btn btn-secondary" to="/perfil">
-                Cancelar
-              </Link>
-              <button className="btn btn-primary" type="submit" disabled={loading}>
-                {loading ? (
-                  <>
-                    <span className="spinner" /> Salvando...
-                  </>
-                ) : (
-                  "Salvar"
-                )}
-              </button>
-            </div>
-          </form>
-        )}
-      </div>
+    <div className="page-container">
+      <DynamicForm<PerfilEditFormData>
+        title="Editar Meu Perfil"
+        subtitle="Atualize seus dados pessoais e de acesso."
+        
+        uiSchema={perfilUISchema}
+        zodSchema={perfilEditFormSchema}
+        
+        initialValues={initialValues}
+        globalError={globalError}
+        isLoading={isSubmitting}
+        
+        onSubmit={handleSubmit}
+        submitLabel="💾 Atualizar Perfil"
+        onCancel={() => navigate("/perfil")}
+      />
     </div>
   );
 }
-
