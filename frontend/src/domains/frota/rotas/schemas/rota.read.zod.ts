@@ -3,7 +3,7 @@ import { z } from "zod";
 export const rotaReadSchema = z.object({
   id: z.number(),
   nome: z.string(),
-  distancia_km: z.number().nullable(),
+  distancia_km: z.union([z.number(), z.string()]).nullable(),
   detalhes: z.string().nullable(),
   ativa: z.boolean(),
   secretaria_id: z.number(),
