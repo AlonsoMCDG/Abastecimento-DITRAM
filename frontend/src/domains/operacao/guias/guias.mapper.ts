@@ -8,7 +8,7 @@ export function mapFormToWriteDTO(
 ): GuiaAbastecimentoWriteDTO {
 
   const {
-    tipo_atividade,
+    tipo_atividade, // Pode ser 'number' (id existente) ou 'string' (nome novo digitado)
     ...rest
   } = form
 
@@ -28,13 +28,14 @@ export function mapFormToWriteDTO(
     tipo_veiculo,
     veiculo_descricao,
 
-    tipo_atividade_id: tipo_atividade.value ?? null,
-    tipo_atividade_nome: tipo_atividade.value
-      ? undefined
-      : tipo_atividade.label
+    // Roteamento Automático de Atividade
+    // Se for número, envia como ID. Se não, manda null.
+    tipo_atividade_id: typeof tipo_atividade === 'number' ? tipo_atividade : null,
+    
+    // Se for string, envia como Nome. Se não, manda undefined (para o backend ignorar).
+    tipo_atividade_nome: typeof tipo_atividade === 'string' ? tipo_atividade : undefined
   }
 }
-
 
 // API → FORM
 export function mapReadToForm(
@@ -43,15 +44,13 @@ export function mapReadToForm(
 
   const {
     tipo_atividade_id,
-    tipo_atividade_nome,
     ...rest
   } = data
 
   return {
     ...rest,
-    tipo_atividade: {
-      value: tipo_atividade_id,
-      label: tipo_atividade_nome ?? ""
-    }
+    // O formulário só precisa do ID primitivo.
+    // O SearchableAsyncSelect fará o lookup visual pelo ID carregado
+    tipo_atividade: tipo_atividade_id ?? ""
   }
 }

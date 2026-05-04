@@ -16,11 +16,7 @@ export const guiaAbastecimentoFormSchema = z.object({
   rota_id: z.number().nullable().optional(),
   rota_manual: z.string().nullable().optional(),
 
-  // CAMPO UNIFICADO
-  tipo_atividade: z.object({
-    value: z.number().nullable().optional(),
-    label: z.string()
-  }),
+  tipo_atividade: z.union([z.number(), z.string()], { message: "Selecione ou digite a atividade." }),
 
   tipo_combustivel_id: z.number(),
 
