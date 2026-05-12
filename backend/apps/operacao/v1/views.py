@@ -160,6 +160,28 @@ class GuiaAbastecimentoViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
             )
 
         pessoa = get_object_or_404(Pessoa, id=pessoa_id)
+    
+    def create(self, request, *args, **kwargs):
+        # Valida e salva usando o WriteSerializer (padrão)
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        
+        # Pega a instância recém-criada e serializa com o ReadSerializer
+        read_serializer = GuiaReadSerializer(serializer.instance)
+        
+        headers = self.get_success_headers(serializer.data)
+        return Response(read_serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        read_serializer = GuiaReadSerializer(instance)
+        return Response(read_serializer.data)
 
 
 # =========================================================

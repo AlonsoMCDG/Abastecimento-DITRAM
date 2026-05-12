@@ -63,10 +63,10 @@ class GuiaReadSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'data_hora', 'modalidade', 'modalidade_nome',
             'quantidade_combustivel', 'quantidade_oleo', 'periodo_uso_dias', 
-            'observacao', 'rota_manual', 
+            'hodometro', 'hodometro_quebrado', 'observacao', 'rota_manual', 
             
             # FKs Mapeadas
-            'veiculo_id', 'veiculo_display',
+            'veiculo_id', 'veiculo_display', 'tipo_veiculo',
             'pessoa_id', 'pessoa_nome',
             'rota_id', 'rota_nome',
             'tipo_atividade_id', 'tipo_atividade_nome',
@@ -133,7 +133,7 @@ class GuiaWriteSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'data_hora', 'modalidade', 'quantidade_combustivel',
             'quantidade_oleo', 'periodo_uso_dias', 'observacao',
-            'rota_manual',
+            'hodometro', 'hodometro_quebrado', 'rota_manual',
 
             'pessoa_id',
             'veiculo_id',
@@ -151,26 +151,38 @@ class GuiaWriteSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         # -------------------------
-        # Regra do veículo (XOR)
+        # Regra do Veículo (FK Exclusiva vs Par Avulso)
         # -------------------------
         veiculo = bool(data.get("veiculo"))
         tipo = bool(data.get("tipo_veiculo"))
         desc = bool(data.get("veiculo_descricao"))
 
-        if sum([veiculo, tipo, desc]) != 1:
-            raise serializers.ValidationError(
-                "Informe apenas um: veículo cadastrado, tipo de veículo ou descrição."
-            )
+        if veiculo:
+            if tipo or desc:
+                raise serializers.ValidationError(
+                    {"veiculo_id": "Se informar o veículo cadastrado, não envie categoria ou descrição."}
+                )
+        else:
+            if not tipo or not desc:
+                raise serializers.ValidationError(
+                    {"veiculo_descricao": "Para veículos avulsos ou embarcações, informe obrigatoriamente a descrição e a categoria."}
+                )
 
         # -------------------------
         # Regra da atividade (OU)
         # -------------------------
         tipo_atividade = data.get("tipo_atividade")
         nome = data.get("tipo_atividade_nome")
+        modalidade = data.get("modalidade")
 
         if not tipo_atividade and not nome:
+            # Blindagem extra baseada nas regras de negócio da SEMA/SEME:
+            if modalidade in ['COROTE', 'CARRO_PASSEIO']:
+                raise serializers.ValidationError(
+                    {"tipo_atividade_id": f"Para a modalidade {modalidade}, o campo de serviço é estritamente obrigatório."}
+                )
             raise serializers.ValidationError(
-                "Informe tipo_atividade_id ou tipo_atividade_nome."
+                {"tipo_atividade_id": "Informe tipo_atividade_id ou tipo_atividade_nome."}
             )
 
         if tipo_atividade and nome:

@@ -8,51 +8,63 @@ export const guiaAbastecimentoWriteSchema = z.object({
 
   modalidade: z.string().min(1),
 
-  pessoa_id: z.number(),
+  pessoa_id: z.coerce.number(),
 
-  // Regra XOR (validada depois)
-  veiculo_id: z.number().nullable().optional(),
+  // Identificação do Veículo
+  veiculo_id: z.coerce.number().nullable().optional(),
   tipo_veiculo: z.string().nullable().optional(),
   veiculo_descricao: z.string().nullable().optional(),
 
-  secretaria_id: z.number(),
+  secretaria_id: z.coerce.number(),
   instituicao_id: z.number().nullable().optional(),
 
-  rota_id: z.number().nullable().optional(),
+  rota_id: z.coerce.number().nullable().optional(),
   rota_manual: z.string().nullable().optional(),
 
-  tipo_atividade_id: z.number().nullable().optional(),
+  tipo_atividade_id: z.coerce.number().nullable().optional(),
   tipo_atividade_nome: z.string().optional(),
 
-  tipo_combustivel_id: z.number(),
+  tipo_combustivel_id: z.coerce.number(),
 
   quantidade_combustivel: z.union([z.number(), z.string()]),
   quantidade_oleo: z.union([z.number(), z.string()]).nullable().optional(),
 
-  periodo_uso_dias: z.number().nullable().optional(),
+  periodo_uso_dias: z.coerce.number().nullable().optional(),
+  hodometro: z.coerce.number().nullable().optional(),
+  hodometro_quebrado: z.boolean().optional(),
 
   observacao: z.string().nullable().optional()
 })
 .superRefine((data, ctx) => {
   
-  // XOR VEÍCULO
-  const fields = [
-    data.veiculo_id != null && data.veiculo_id > 0,
-    !!data.tipo_veiculo,
-    !!data.veiculo_descricao
-  ]
+  // -------------------------
+  // REGRA DO VEÍCULO (FK Exclusiva vs Par Avulso)
+  // -------------------------
+  const tem_fk = data.veiculo_id != null && data.veiculo_id > 0;
+  const tem_tipo = !!data.tipo_veiculo?.trim();
+  const tem_desc = !!data.veiculo_descricao?.trim();
 
-  const count = fields.filter(Boolean).length
-
-  if (count !== 1) {
-    ctx.addIssue({
-      code: "custom",
-      message: "Informe exatamente um: veículo, tipo ou descrição.",
-      path: ["veiculo_id"]
-    })
+  if (tem_fk) {
+    if (tem_tipo || tem_desc) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Se informar o veículo cadastrado, não envie categoria ou descrição.",
+        path: ["veiculo_id"]
+      });
+    }
+  } else {
+    if (!tem_tipo || !tem_desc) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Para veículos avulsos ou embarcações, informe obrigatoriamente a descrição e a categoria.",
+        path: ["veiculo_descricao"] // Atrela o erro ao campo que unificamos na tela
+      });
+    }
   }
 
+  // -------------------------
   // ATIVIDADE
+  // -------------------------
   if (!data.tipo_atividade_id && !data.tipo_atividade_nome) {
     ctx.addIssue({
       code: "custom",

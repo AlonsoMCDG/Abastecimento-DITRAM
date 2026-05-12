@@ -23,7 +23,7 @@ class Pessoa(models.Model):
             models.Index(fields=['ativo']),  # comentário: lookup padrão
         ]
 
-    def format_nome(nome):
+    def format_nome(self, nome):
         palavras = ['da', 'de', 'do', 'das', 'dos']
         return ' '.join(
             w if w.lower() in palavras else w.capitalize()

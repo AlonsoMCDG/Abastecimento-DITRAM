@@ -1,6 +1,7 @@
 import { ENDPOINTS } from "../../../../core/api/endpoints"
 import type { FormSchema, TableSchema } from "../../../../core/types/form"
 import type { ViewSchema } from "../../../../core/types/views"
+import type { GuiaAbastecimentoFormData } from "./guia.form.zod"
 import type { GuiaAbastecimentoReadDTO } from "./guia.read.zod"
 
 // --------------------------------------------------------
@@ -10,12 +11,18 @@ export const guiaAbastecimentoUISchema: FormSchema = {
   fields: [
     {
       name: 'modalidade',
-      label: 'Modalidade',
+      label: 'Modalidade de Abastecimento',
       type: 'select',
       options: [
-        { label: 'GUIA DE ABASTECIMENTO - PADRÃO', value: 'PADRAO' },
-        { label: 'GUIA DE ABASTECIMENTO - BARQUEIRO', value: 'BARQUEIRO' },
-        { label: 'GUIA DE ABASTECIMENTO - COROTE', value: 'COROTE' }
+        // { label: 'Terrestre (Ônibus, Carro, Moto, ...)', value: 'TERRESTRE' },
+        // { label: 'Fluvial (Barco, Catraia)', value: 'FLUVIAL' },
+        { label: 'Ônibus', value: 'ONIBUS'},
+        { label: 'Caminhonete', value: 'CAMINHONETE'},
+        { label: 'Carro', value: 'CARRO'},
+        { label: 'Moto', value: 'MOTO'},
+        { label: 'Catraia', value: 'CATRAIA'},
+        { label: 'Corote', value: 'COROTE'},
+        { label: 'Carro passeio', value: 'CARRO_PASSEIO'},
       ],
       required: true,
     },
@@ -49,17 +56,19 @@ export const guiaAbastecimentoUISchema: FormSchema = {
     },
 
     // -------------------------
-    // VEÍCULO (XOR)
+    // VEÍCULO (UNIFICADO)
     // -------------------------
     {
-      name: 'veiculo_id',
-      label: 'Veículo',
+      name: 'veiculo',
+      label: 'Veículo (Busca ou Descrição)',
       type: 'select',
       endpoint: ENDPOINTS.frota.veiculosLookup,
+      creatable: true,
+      dependsOn: 'veiculo_modo'
     },
     {
       name: 'tipo_veiculo',
-      label: 'Tipo de Veículo',
+      label: 'Categoria do Veículo',
       type: 'select',
       options: [
         { label: 'Carro', value: 'CARRO' },
@@ -69,27 +78,25 @@ export const guiaAbastecimentoUISchema: FormSchema = {
         { label: 'Van', value: 'VAN' },
         { label: 'Barco', value: 'BARCO' },
         { label: 'Máquina Pesada', value: 'MAQUINA_PESADA' },
-      ]
-    },
-    {
-      name: 'veiculo_descricao',
-      label: 'Descrição do Veículo',
-      type: 'text',
+      ],
+      visibleIf: (values: Partial<GuiaAbastecimentoFormData>) => {
+        // Esconde o campo se for BARQUEIRO (pois o tipo já é fixado em BARCO no backend)
+        if (values.modalidade === 'BARQUEIRO') return false;
+        
+        // Retorna true APENAS se o veículo não for um ID numérico (ou seja, se for texto avulso ou vazio)
+        return typeof values.veiculo !== 'number';
+      }
     },
 
     // -------------------------
-    // ROTA
+    // ROTA (UNIFICADA)
     // -------------------------
     {
-      name: 'rota_id',
+      name: 'rota',
       label: 'Rota',
       type: 'select',
       endpoint: ENDPOINTS.frota.rotasLookup,
-    },
-    {
-      name: 'rota_manual',
-      label: 'Rota Manual',
-      type: 'text',
+      creatable: true,
     },
 
     // -------------------------
@@ -110,6 +117,7 @@ export const guiaAbastecimentoUISchema: FormSchema = {
       label: 'Combustível (L)',
       type: 'number',
       required: true,
+      suffix: 'Litros',
     },
     {
       name: 'tipo_combustivel_id',
@@ -120,17 +128,42 @@ export const guiaAbastecimentoUISchema: FormSchema = {
     },
 
     // -------------------------
-    // ÓLEO / PERÍODO
+    // ÓLEO / PERÍODO / HODÔMETRO
     // -------------------------
     {
       name: 'quantidade_oleo',
       label: 'Óleo (L)',
       type: 'number',
+      suffix: 'Litros',
+    },
+    {
+      name: 'hodometro_quebrado',
+      label: 'O Hodômetro / Horímetro está quebrado?',
+      type: 'checkbox',
+      visibleIf: (values: Partial<GuiaAbastecimentoFormData>) => {
+        const modalidadesSemHodometro = ['BARQUEIRO', 'COROTE'];
+        return !modalidadesSemHodometro.includes(values.modalidade ?? '');
+      }
+    },
+    {
+      name: 'hodometro',
+      label: 'Hodômetro / Horímetro',
+      type: 'number',
+      visibleIf: (values: Partial<GuiaAbastecimentoFormData>) => {
+        const modalidadesSemHodometro = ['BARQUEIRO', 'COROTE'];
+        
+        // 1. Se for uma modalidade que não tem hodômetro, esconde
+        if (modalidadesSemHodometro.includes(values.modalidade ?? '')) return false;
+        
+        // 2. Se a modalidade TEM hodômetro, só mostra se a flag de quebrado for falsa
+        return !values.hodometro_quebrado;
+      },
     },
     {
       name: 'periodo_uso_dias',
       label: 'Período de Uso (dias)',
       type: 'number',
+      suffix: 'dias',
     },
 
     // -------------------------
@@ -143,7 +176,6 @@ export const guiaAbastecimentoUISchema: FormSchema = {
     },
   ]
 }
-
 
 // --------------------------------------------------------
 // DATATABLE
@@ -182,7 +214,6 @@ export const guiaAbastecimentoListSchema: TableSchema = {
   ],
 }
 
-
 // --------------------------------------------------------
 // VIEW (MODAL)
 // --------------------------------------------------------
@@ -198,7 +229,9 @@ export const guiaViewSchema: ViewSchema<GuiaAbastecimentoReadDTO> = {
     { label: 'Atividade', key: 'tipo_atividade_nome' },
     { label: 'Veículo', key: 'veiculo_display' },
     { label: 'Motorista', key: 'pessoa_nome' },
-    { label: 'Rota', key: 'rota_nome' },
+    
+    // Usa o campo de fallback do ReadDTO caso a rota não tenha ID
+    { label: 'Rota', render: (item) => item.rota_nome || item.rota_manual || '-' },
 
     {
       label: 'Combustível',

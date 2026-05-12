@@ -18,6 +18,8 @@ import { mapReadToForm, mapFormToWriteDTO } from '../guias.mapper';
 
 import styles from '../../../../core/ui/forms/dynamic-form/DynamicForm.module.css';
 
+import { z } from 'zod';
+
 export const GuiaAbastecimentoFormPage: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -47,6 +49,19 @@ export const GuiaAbastecimentoFormPage: React.FC = () => {
       periodo_uso_dias: 30,
     };
   }, [searchParams]);
+
+  // ==========================================
+  // FORMATAÇÃO DOS ERROS ZOD
+  // ==========================================
+  const formatZodError = (error: z.ZodError): string => {
+    const mensagens = error.issues.map(issue => {
+      // Pega o nome do campo (ex: "modalidade_nome") e a mensagem
+      const campo = issue.path.length > 0 ? `[${issue.path.join('.')}] ` : '';
+      return `• ${campo}${issue.message}`;
+    });
+    
+    return `Falha de validação de dados:\n${mensagens.join('\n')}`;
+  };
   
   // ==========================================
   // CARREGAMENTO INICIAL
@@ -55,7 +70,7 @@ export const GuiaAbastecimentoFormPage: React.FC = () => {
     if (id) {
       guiasApi.buscar(Number(id))
         .then(res => {
-          let dados = res; // O zodClient já extrai o res.data internamente
+          let dados = res;
           
           if (dados.data_hora) {
             dados.data_hora = new Date(dados.data_hora).toISOString().slice(0, 16);
@@ -64,7 +79,13 @@ export const GuiaAbastecimentoFormPage: React.FC = () => {
           // MAPPER: Converte o DTO de Leitura para o formato que o Form Zod entende
           setInitialValues(mapReadToForm(dados));
         })
-        .catch(err => setGlobalError(getApiErrorMessage(err, "Erro ao carregar a guia.")))
+        .catch(err => {
+          if (err instanceof z.ZodError) {
+            setGlobalError(formatZodError(err));
+          } else {
+            setGlobalError(getApiErrorMessage(err, "Erro ao carregar a guia."));
+          }
+        })
         .finally(() => setLoading(false));
     } else {
       setInitialValues(defaultValues);
@@ -80,7 +101,7 @@ export const GuiaAbastecimentoFormPage: React.FC = () => {
     try {
       let currentId = id ? Number(id) : null;
       
-      // MAPPER: Converte o Form validado pelo Zod para o Payload de Escrita (XOR resolvido)
+      // MAPPER: Converte o Form validado pelo Zod para o Payload de Escrita
       const payload = mapFormToWriteDTO(formData);
       
       if (currentId) {
@@ -105,7 +126,11 @@ export const GuiaAbastecimentoFormPage: React.FC = () => {
 
       navigate(ROUTES.operacao.guias.list);
     } catch (error) {
-      setGlobalError(getApiErrorMessage(error, "Não foi possível salvar a guia."));
+      if (error instanceof z.ZodError) {
+        setGlobalError(formatZodError(error));
+      } else {
+        setGlobalError(getApiErrorMessage(error, "Não foi possível salvar a guia."));
+      }
       submitIntent.current = 'save';
     }
   };

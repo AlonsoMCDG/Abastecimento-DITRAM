@@ -86,7 +86,7 @@ def _draw_guia_impressao_copy(pdf: canvas.Canvas, guia: GuiaAbastecimento, y_bot
         pdf.drawImage(path_brasao_dir, x_right - logo_size, y_logo, width=logo_size, height=logo_size, preserveAspectRatio=True, mask='auto')
 
     # Acesso seguro aos novos relacionamentos (ForeignKeys)
-    tipo_servico_nome = guia.tipo_servico.nome if getattr(guia, 'tipo_servico', None) else (guia.tipo_servico_texto or "")
+    tipo_servico_nome = guia.tipo_atividade.nome if getattr(guia, 'tipo_atividade', None) else ""
     tipo_servico_raw = tipo_servico_nome.upper().strip()
     
     tipo_combustivel_display = guia.tipo_combustivel.nome if getattr(guia, 'tipo_combustivel', None) else ""
@@ -125,7 +125,7 @@ def _draw_guia_impressao_copy(pdf: canvas.Canvas, guia: GuiaAbastecimento, y_bot
     observacao = guia.observacao or ""
     
     # Novo formato de Hodômetro
-    hodometro = f"{guia.hodometro_atual} km" if guia.hodometro_atual else "-"
+    hodometro = "0 km"#f"{guia.hodometro_atual} km" if guia.hodometro_atual else "-"
     periodo = f"{guia.periodo_uso_dias} dias" if guia.periodo_uso_dias is not None else ""
     
     def draw_field_with_line(pdf, x, y, label, value, font_name="Helvetica", font_size=11, line_width_extra=0):

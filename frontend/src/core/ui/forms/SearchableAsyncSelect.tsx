@@ -253,7 +253,7 @@ export const SearchableAsyncSelect = <T extends FieldValues>({
                 handleSelect(searchTerm.trim(), searchTerm.trim());
               }}
             >
-              ➕ Usar "{searchTerm.trim()}" (Nova rota)
+              ➕ Usar "{searchTerm.trim()}" (Novo)
             </li>
           )}
 

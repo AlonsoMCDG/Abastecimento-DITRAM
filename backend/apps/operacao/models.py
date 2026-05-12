@@ -9,13 +9,6 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
-VEICULO_XOR_CONDITION = Q(
-    veiculo__isnull=False, tipo_veiculo__isnull=True, veiculo_descricao__isnull=True
-) | Q(
-    veiculo__isnull=True, tipo_veiculo__isnull=False, veiculo_descricao__isnull=True
-) | Q(
-    veiculo__isnull=True, tipo_veiculo__isnull=True, veiculo_descricao__isnull=False
-)
 
 class TipoAtividadeManager(models.Manager):
     def get_by_natural_key(self, nome):
@@ -57,8 +50,17 @@ class GuiaAbastecimento(models.Model):
 
     # Categoria operacional do abastecimento
     MODALIDADE_CHOICES = [
-        ('TERRESTRE', 'Terrestre'), ('FLUVIAL', 'Fluvial'),
-        ('ROCAGEM', 'Roçagem'), ('BORRIFACAO', 'Borrifação'), ('COROTE', 'Corote'),
+        # ('TERRESTRE', 'Terrestre'),
+        # ('FLUVIAL', 'Fluvial'),
+        ('ONIBUS', 'Ônibus'),
+        ('CAMINHONETE', 'Caminhonete'),
+        ('CARRO', 'Carro'),
+        ('MOTO', 'Moto'),
+        ('CATRAIA', 'Catraia'),
+        ('COROTE', 'Corote'),
+        # ('ROCAGEM', 'Roçagem'),
+        # ('BORRIFACAO', 'Borrifação'),
+        ('CARRO_PASSEIO', 'Carro Passeio'),
     ]
     modalidade = models.CharField(max_length=20, choices=MODALIDADE_CHOICES)
     
@@ -73,17 +75,19 @@ class GuiaAbastecimento(models.Model):
 
     pessoa = models.ForeignKey(Pessoa, on_delete=models.PROTECT, related_name='guias')
 
-    # Identificação do veículo. Apenas 1 dos 3 campos a seguir deve ser preenchido por guia.
-    veiculo = models.ForeignKey(Veiculo, on_delete=models.PROTECT, null=True, blank=True, related_name='guias')  # 1. Objeto Veiculo (salvo no banco)
-    tipo_veiculo = models.CharField(max_length=50, choices=TIPO_VEICULO_CHOICES, null=True, blank=True)  # 2. Para barqueiros, usa esse campo (usa "Barco" genericamente para todos os barqueiros)
-    veiculo_descricao = models.CharField(max_length=100, null=True, blank=True)  # 3. Descrição avulsa do veículo, quando os campos acima não são aplicáveis
+    # Identificação do veículo
+    veiculo = models.ForeignKey(Veiculo, on_delete=models.PROTECT, null=True, blank=True, related_name='guias')  
+    tipo_veiculo = models.CharField(max_length=50, choices=TIPO_VEICULO_CHOICES, null=True, blank=True)  
+    veiculo_descricao = models.CharField(max_length=100, null=True, blank=True)
 
     tipo_combustivel = models.ForeignKey(TipoCombustivel, on_delete=models.PROTECT)
     quantidade_combustivel = models.DecimalField(max_digits=10, decimal_places=3)
     quantidade_oleo = models.DecimalField(max_digits=10, decimal_places=3, null=True, blank=True)
     periodo_uso_dias = models.PositiveIntegerField(null=True, blank=True)
+    hodometro = models.PositiveIntegerField(null=True, blank=True, verbose_name="Hodômetro")
+    hodometro_quebrado = models.BooleanField(default=False, verbose_name="Hodômetro Quebrado")
     observacao = models.TextField(max_length=256, null=True, blank=True)
-    
+
     # Rastreabilidade de sistema
     criado_em = models.DateTimeField(auto_now_add=True)
     atualizado_em = models.DateTimeField(auto_now=True)
@@ -95,26 +99,38 @@ class GuiaAbastecimento(models.Model):
 
         constraints = [
             models.CheckConstraint(
-                name="guia_um_tipo_veiculo",
-                condition=VEICULO_XOR_CONDITION
+                name="guia_veiculo_fk_ou_dupla_avulsa",
+                condition=Q(veiculo__isnull=False, tipo_veiculo__isnull=True, veiculo_descricao__isnull=True) |
+                          Q(veiculo__isnull=True, tipo_veiculo__isnull=False, veiculo_descricao__isnull=False)
             )
         ]
 
     def clean(self):
-        fields = [self.veiculo, self.tipo_veiculo, self.veiculo_descricao]
+        # Regra de Validação do Veículo (Cadastrado vs Avulso)
+        tem_fk = bool(self.veiculo)
+        tem_tipo = bool(self.tipo_veiculo)
+        tem_desc = bool(self.veiculo_descricao)
 
-        if sum(bool(x) for x in fields) != 1:
-            raise ValidationError("Informe exatamente um tipo de veículo.")
+        if tem_fk:
+            if tem_tipo or tem_desc:
+                raise ValidationError("Se um veículo cadastrado for selecionado, os campos de categoria e descrição devem ficar em branco.")
+        else:
+            if not tem_tipo or not tem_desc:
+                raise ValidationError("Para veículos avulsos ou embarcações, é obrigatório informar a descrição e a categoria.")
 
+        # Regra de Rota
         if self.rota and self.rota.secretaria_id != self.secretaria_id:
             raise ValidationError("A rota deve pertencer à mesma secretaria da guia.")
+
+        if self.hodometro_quebrado:
+            self.hodometro = None
     
     @property
     def veiculo_display(self):
         if self.veiculo:
             return str(self.veiculo)
-        if self.tipo_veiculo:
-            return self.get_tipo_veiculo_display()
+        if self.tipo_veiculo and self.tipo_veiculo:
+            return f"{self.veiculo_descricao} ({self.get_tipo_veiculo_display()})"
         return self.veiculo_descricao
     
     def save(self, *args, **kwargs):
