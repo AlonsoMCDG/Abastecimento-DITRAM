@@ -23,7 +23,7 @@ export function DynamicForm<T extends FieldValues>({
   const { register, control, watch, setValue, formState: { errors } } = useFormContext<T>();
   const currentValues = watch();
 
-  const renderInputComponent = (field: FormField) => {
+  const renderInputComponent = (field: FormField<T>) => {
     const fieldPath = field.name as Path<T>;
     const commonProps = {
       id: field.name,

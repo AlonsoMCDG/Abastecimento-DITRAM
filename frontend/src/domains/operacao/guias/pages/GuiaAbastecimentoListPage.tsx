@@ -4,15 +4,15 @@ import { Link, useNavigate } from "react-router-dom";
 import DataTable, { type DataTableParams } from "../../../../core/ui/data-display/DataTable";
 import { QuickViewModal } from "../../../../core/ui/overlays/QuickViewModal";
 
-import { guiasApi } from "../guias.api";
+import { guiasApi } from "../api/guias.api";
 import { ROUTES } from "../../../../core/routes/routes";
 import { useAuth } from "../../../../core/auth/AuthContext";
 import { Can } from "../../../../core/auth/components/Can";
 import { getApiErrorMessage } from "../../../../core/api/errorHandlers";
 import { processPdfBlob } from "../../../../core/utils/pdfHandler";
 
-import type { GuiaAbastecimentoReadDTO } from "../schemas/guia.read.zod";
-import { guiaAbastecimentoListSchema, guiaViewSchema } from "../schemas/guia.schema";
+import type { GuiaAbastecimentoReadDTO } from "../schemas/guia.dto";
+import { guiaAbastecimentoListSchema, guiaViewSchema } from "../schemas/guia.ui";
 
 import "../../../../core/ui/layouts/ListPage.css";
 

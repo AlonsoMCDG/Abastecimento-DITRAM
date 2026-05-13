@@ -1,21 +1,19 @@
 import { ENDPOINTS } from "../../../../core/api/endpoints"
 import type { FormSchema, TableSchema } from "../../../../core/types/form"
 import type { ViewSchema } from "../../../../core/types/views"
-import type { GuiaAbastecimentoFormData } from "./guia.form.zod"
-import type { GuiaAbastecimentoReadDTO } from "./guia.read.zod"
+import type { GuiaAbastecimentoFormData } from "./guia.form"
+import type { GuiaAbastecimentoReadDTO } from "./guia.dto"
 
 // --------------------------------------------------------
 // FORMULÁRIO (UI SCHEMA)
 // --------------------------------------------------------
-export const guiaAbastecimentoUISchema: FormSchema = {
+export const guiaAbastecimentoUISchema: FormSchema<GuiaAbastecimentoFormData> = {
   fields: [
     {
       name: 'modalidade',
       label: 'Modalidade de Abastecimento',
       type: 'select',
       options: [
-        // { label: 'Terrestre (Ônibus, Carro, Moto, ...)', value: 'TERRESTRE' },
-        // { label: 'Fluvial (Barco, Catraia)', value: 'FLUVIAL' },
         { label: 'Ônibus', value: 'ONIBUS'},
         { label: 'Caminhonete', value: 'CAMINHONETE'},
         { label: 'Carro', value: 'CARRO'},
@@ -25,6 +23,7 @@ export const guiaAbastecimentoUISchema: FormSchema = {
         { label: 'Carro passeio', value: 'CARRO_PASSEIO'},
       ],
       required: true,
+      colSpan: 1,
     },
     {
       name: 'secretaria_id',
@@ -79,7 +78,7 @@ export const guiaAbastecimentoUISchema: FormSchema = {
         { label: 'Barco', value: 'BARCO' },
         { label: 'Máquina Pesada', value: 'MAQUINA_PESADA' },
       ],
-      visibleIf: (values: Partial<GuiaAbastecimentoFormData>) => {
+      visibleIf: (values) => {
         // Esconde o campo se for BARQUEIRO (pois o tipo já é fixado em BARCO no backend)
         if (values.modalidade === 'BARQUEIRO') return false;
         
@@ -185,7 +184,7 @@ export const guiaAbastecimentoListSchema: TableSchema = {
     {
       key: 'data_hora',
       label: 'Data',
-      format: (val) => val ? new Date(val).toLocaleDateString('pt-BR') : '-',
+      format: (val) => val ? new Date(val as string).toLocaleDateString('pt-BR') : '-',
     },
     {
       key: 'tipo_atividade_nome',

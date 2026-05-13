@@ -1,133 +1,108 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useForm, FormProvider, type SubmitHandler } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 
-// Importe o seu DynamicForm atualizado
-import { DynamicForm } from '../../../../core/ui/forms/dynamic-form/DynamicFormOld';
+import { DynamicForm } from '../../../../core/ui/forms/dynamic-form/DynamicForm';
 import { getApiErrorMessage } from '../../../../core/api/errorHandlers';
 import { processPdfBlob } from '../../../../core/utils/pdfHandler';
 import { ROUTES } from '../../../../core/routes/routes';
 
-// Importa APIs
-import { guiasApi } from '../guias.api';
+import { guiasApi } from '../api/guias.api';
 import { veiculosApi } from '../../../frota/veiculos/veiculos.api';
+import { mapReadToForm, mapFormToWriteDTO } from '../api/guias.mapper';
+import { guiaAbastecimentoUISchema } from '../schemas/guia.ui';
+import { guiaAbastecimentoFormSchema, type GuiaAbastecimentoFormInput } from '../schemas/guia.form';
 
-// Importa a Inteligência do Domínio (Schemas e Mappers)
-import { guiaAbastecimentoUISchema } from '../schemas/guia.schema';
-import { guiaAbastecimentoFormSchema, type GuiaAbastecimentoFormData } from '../schemas/guia.form.zod';
-import { mapReadToForm, mapFormToWriteDTO } from '../guias.mapper';
+import layoutStyles from '../../../../core/ui/layouts/FormPage.module.css';
 
-import styles from '../../../../core/ui/forms/dynamic-form/DynamicForm.module.css';
+// export const GuiaAbastecimentoFormPage = () => {
+export default function GuiaAbastecimentoFormPage() {
+  
+  // INICIALIZAÇÃO DO REACT HOOK FORM
+  const methods = useForm<GuiaAbastecimentoFormInput>({
+    resolver: zodResolver(guiaAbastecimentoFormSchema),
+    mode: "onChange"
+  });
 
-import { z } from 'zod';
-
-export const GuiaAbastecimentoFormPage: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const [searchParams] = useSearchParams();
 
-  const [warnings, setWarnings] = useState<Record<string, string>>({});
   const [globalError, setGlobalError] = useState<string | null>(null);
-
-  const [initialValues, setInitialValues] = useState<Partial<GuiaAbastecimentoFormData> | undefined>(undefined);
   const [loading, setLoading] = useState(!!id);
   const [isPrinting, setIsPrinting] = useState(false);
-
-  // Referência silenciosa para saber qual botão disparou o formulário
   const submitIntent = useRef<'save' | 'save_print'>('save');
 
-  const getLocalISOString = () => {
-    const tzoffset = (new Date()).getTimezoneOffset() * 60000;
-    return new Date(Date.now() - tzoffset).toISOString().slice(0, 16);
-  };
-  
-  // Definição dos valores padrão para novas guias
-  const defaultValues = useMemo((): Partial<GuiaAbastecimentoFormData> => {
-    const secretariaParam = searchParams.get("secretaria");
-    return {
-      data_hora: getLocalISOString(),
-      secretaria_id: secretariaParam ? Number(secretariaParam) : undefined,
-      periodo_uso_dias: 30,
-    };
-  }, [searchParams]);
 
-  // ==========================================
-  // FORMATAÇÃO DOS ERROS ZOD
-  // ==========================================
-  const formatZodError = (error: z.ZodError): string => {
-    const mensagens = error.issues.map(issue => {
-      // Pega o nome do campo (ex: "modalidade_nome") e a mensagem
-      const campo = issue.path.length > 0 ? `[${issue.path.join('.')}] ` : '';
-      return `• ${campo}${issue.message}`;
-    });
-    
-    return `Falha de validação de dados:\n${mensagens.join('\n')}`;
-  };
-  
-  // ==========================================
-  // CARREGAMENTO INICIAL
-  // ==========================================
+  const { handleSubmit, reset, watch, setValue } = methods;
+
+  // BUSCA DE DADOS
   useEffect(() => {
     if (id) {
       guiasApi.buscar(Number(id))
         .then(res => {
-          let dados = res;
-          
-          if (dados.data_hora) {
-            dados.data_hora = new Date(dados.data_hora).toISOString().slice(0, 16);
+          if (res.data_hora) {
+            res.data_hora = new Date(res.data_hora).toISOString().slice(0, 16);
           }
-          
-          // MAPPER: Converte o DTO de Leitura para o formato que o Form Zod entende
-          setInitialValues(mapReadToForm(dados));
+          reset(mapReadToForm(res));
         })
-        .catch(err => {
-          if (err instanceof z.ZodError) {
-            setGlobalError(formatZodError(err));
-          } else {
-            setGlobalError(getApiErrorMessage(err, "Erro ao carregar a guia."));
-          }
-        })
+        .catch(err => setGlobalError(getApiErrorMessage(err, "Erro ao carregar a guia.")))
         .finally(() => setLoading(false));
     } else {
-      setInitialValues(defaultValues);
-    }
-  }, [id, defaultValues]);
-  
-  // ==========================================
-  // SUBMIT
-  // ==========================================
-  const handleSubmit = async (formData: GuiaAbastecimentoFormData) => {
-    setGlobalError(null);
-    
-    try {
-      let currentId = id ? Number(id) : null;
+      const tzoffset = (new Date()).getTimezoneOffset() * 60000;
+      const dataHora = new Date(Date.now() - tzoffset).toISOString().slice(0, 16);
+      const secretariaParam = searchParams.get("secretaria");
       
-      // MAPPER: Converte o Form validado pelo Zod para o Payload de Escrita
+      reset({
+        data_hora: dataHora,
+        secretaria_id: secretariaParam ? Number(secretariaParam) : undefined,
+        periodo_uso_dias: 30,
+      });
+    }
+  }, [id, searchParams, reset]);
+
+  // EFEITOS COLATERAIS
+  const veiculoIdSelecionado = watch('veiculo');
+  
+  useEffect(() => {
+    if (typeof veiculoIdSelecionado === 'number') {
+      veiculosApi.buscar(veiculoIdSelecionado)
+        .then(res => {
+          if (res.tipo_combustivel_id) {
+            setValue('tipo_combustivel_id', res.tipo_combustivel_id, { shouldValidate: true });
+          }
+        })
+        .catch(err => console.error("Erro ao buscar veículo", err));
+    }
+  }, [veiculoIdSelecionado, setValue]);
+
+  // SUBMISSÃO
+  const onSubmit: SubmitHandler<GuiaAbastecimentoFormInput> = async (rawFormData) => {
+    setGlobalError(null);
+    try {
+      const formData = guiaAbastecimentoFormSchema.parse(rawFormData);
       const payload = mapFormToWriteDTO(formData);
+      let currentId = id ? Number(id) : null;
       
       if (currentId) {
         await guiasApi.atualizar(currentId, payload);
       } else {
         const res = await guiasApi.criar(payload);
-        currentId = res.id; // Lembrar que zodClient já retorna os dados diretos
+        currentId = res.id;
       }
       
-      // Fluxo de Impressão
       if (submitIntent.current === 'save_print' && currentId) {
         setIsPrinting(true);
-        try {
-          const pdfBlob = await guiasApi.obterPdfBlob(currentId);
-          await processPdfBlob(pdfBlob, `Guia_Abastecimento_${currentId}.pdf`, 'print');
-        } catch(err) {
-          alert(getApiErrorMessage(err, "A guia foi salva, mas ocorreu um erro ao gerar o PDF."));
-        } finally {
-          setIsPrinting(false);
-        }
+        const pdfBlob = await guiasApi.obterPdfBlob(currentId);
+        await processPdfBlob(pdfBlob, `Guia_Abastecimento_${currentId}.pdf`, 'print');
+        setIsPrinting(false);
       }
-
       navigate(ROUTES.operacao.guias.list);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        setGlobalError(formatZodError(error));
+        setGlobalError("Verifique os campos obrigatórios.");
       } else {
         setGlobalError(getApiErrorMessage(error, "Não foi possível salvar a guia."));
       }
@@ -135,95 +110,68 @@ export const GuiaAbastecimentoFormPage: React.FC = () => {
     }
   };
 
-  const handlePrintOnly = async () => {
-    if (!id) return;
-    setGlobalError(null);
-    setIsPrinting(true);
-    try {
-      const pdfBlob = await guiasApi.obterPdfBlob(Number(id));
-      await processPdfBlob(pdfBlob, `Guia_Abastecimento_${id}.pdf`, 'print');
-    } catch (err) {
-      setGlobalError(getApiErrorMessage(err, "Falha ao baixar o PDF."));
-    } finally {
-      setIsPrinting(false);
-    }
-  };
-  
-  // ==========================================
-  // BOTÕES CUSTOMIZADOS
-  // ==========================================
-  const extraActions = useMemo(() => (
-    <>
-      <button
-        type="submit"
-        className={styles.btnSecondary}
-        onClick={() => { submitIntent.current = 'save_print'; }}
-        disabled={isPrinting || loading}
-      >
-        {isPrinting ? "Gerando PDF..." : "💾 Salvar e Imprimir"}
-      </button>
-
-      {id && (
-        <button
-          type="button" 
-          className={styles.btnOutline}
-          onClick={handlePrintOnly}
-          disabled={isPrinting || loading}
-          title="Imprime a versão que já está salva no banco de dados."
-        >
-          🖨️ Imprimir Versão Salva
-        </button>
-      )}
-    </>
-  ), [id, isPrinting, loading]);
-
-  // ==========================================
-  // SIDE-EFFECTS (AUTO-FILL)
-  // ==========================================
-  const handleValuesChange = async (
-    changedField: { name: string; value: unknown },
-    _currentValues: Partial<GuiaAbastecimentoFormData>,
-    setValue: any // Mantido flexível para o React Hook Form injetar
-  ) => {
-    const { name, value } = changedField;
-    if (!value) return;
-
-    // 1. Veículo: Preenche tipo de combustível
-    if (name === 'veiculo_id') {
-      try {
-        const res = await veiculosApi.buscar(Number(value));
-        if (res.tipo_combustivel_id) {
-          setValue('tipo_combustivel_id', res.tipo_combustivel_id, { shouldValidate: true });
-        }
-      } catch (err) {
-        console.error("Erro ao buscar veículo", err);
-      }
-    }
-  };
-
-  if (loading) return <div>Carregando dados...</div>;
+  if (loading) return <div className={layoutStyles.loading}>Carregando dados...</div>;
 
   return (
-    <div style={{ paddingBottom: "2rem" }}>
-      <DynamicForm<GuiaAbastecimentoFormData>
-        title={id ? "Editar Guia de Abastecimento" : "Nova Guia de Abastecimento"}
-        subtitle={id ? `Editando registro #${id}` : "Preencha os dados para gerar uma nova guia."}
-        
-        // As duas chaves principais do novo motor:
-        uiSchema={guiaAbastecimentoUISchema}
-        zodSchema={guiaAbastecimentoFormSchema}
-        
-        initialValues={initialValues}
-        warnings={warnings}
-        globalError={globalError}
-        
-        onValuesChange={handleValuesChange}
-        onSubmit={handleSubmit}
-        
-        submitLabel="💾 Salvar Guia"
-        onCancel={() => navigate(ROUTES.operacao.guias.list)}
-        extraActions={extraActions}
-      />
+    <div className={layoutStyles.pageContainer}>
+      <header className={layoutStyles.header}>
+        <h1 className={layoutStyles.title}>{id ? "Editar Guia de Abastecimento" : "Nova Guia de Abastecimento"}</h1>
+        <p className={layoutStyles.subtitle}>{id ? `Editando registro #${id}` : "Preencha os dados abaixo"}</p>
+      </header>
+
+      {globalError && (
+        <div className={layoutStyles.alertError}>
+          ⚠️ {globalError}
+        </div>
+      )}
+
+      {/* O Formulário e os botões */}
+      <div className={layoutStyles.card}>
+        <FormProvider {...methods}>
+          {/* DynamicForm gerencia apenas inputs */}
+          <DynamicForm<GuiaAbastecimentoFormInput>
+            uiSchema={guiaAbastecimentoUISchema}
+            onSubmit={methods.handleSubmit(onSubmit)}
+            isLoading={isPrinting}
+          />
+          
+          {/* A Página gerencia as ações extras livremente */}
+          <div className={layoutStyles.extraActions}>
+            <button
+              type="button"
+              className={layoutStyles.btnSecondary}
+              onClick={() => { submitIntent.current = 'save_print'; handleSubmit(onSubmit)(); }}
+              disabled={isPrinting}
+            >
+              {isPrinting ? "Gerando PDF..." : "💾 Salvar e Imprimir"}
+            </button>
+
+            {id && (
+              <button
+                type="button" 
+                className={layoutStyles.btnOutline}
+                onClick={async () => {
+                  setIsPrinting(true);
+                  const pdfBlob = await guiasApi.obterPdfBlob(Number(id));
+                  await processPdfBlob(pdfBlob, `Guia_${id}.pdf`, 'print');
+                  setIsPrinting(false);
+                }}
+                disabled={isPrinting}
+              >
+                🖨️ Imprimir Versão Salva
+              </button>
+            )}
+            
+            <button 
+              type="button" 
+              className={layoutStyles.btnCancel} 
+              onClick={() => navigate(ROUTES.operacao.guias.list)}
+            >
+              Cancelar
+            </button>
+          </div>
+        </FormProvider>
+      </div>
     </div>
   );
 };

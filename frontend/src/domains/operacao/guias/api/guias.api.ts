@@ -1,10 +1,12 @@
-import { createCrudApi } from "../../../core/api/crudFactory"
-import { client } from "../../../core/api/apiClient"
-import { ENDPOINTS } from "../../../core/api/endpoints";
+import { createCrudApi } from "../../../../core/api/crudFactory";
+import { client } from "../../../../core/api/apiClient"
+import { ENDPOINTS } from "../../../../core/api/endpoints";
 
-import { guiaAbastecimentoReadSchema } from "./schemas/guia.read.zod"
-import { guiaAbastecimentoWriteSchema } from "./schemas/guia.write.zod"
-import type { GuiaListParams } from "./schemas/guia.filters.zod";
+import {
+  guiaAbastecimentoReadSchema,
+  guiaAbastecimentoWriteSchema,
+  type GuiaListParams
+} from "../schemas/guia.dto"; 
 
 // Cria os métodos base (listar, buscar, criar, atualizar, deletar)
 const baseCrud = createCrudApi<

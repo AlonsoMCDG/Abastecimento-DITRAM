@@ -27,6 +27,10 @@ export const guiaAbastecimentoFormSchema = z.object({
     message: "Secretaria inválida.",
   }).min(1, "Selecione a secretaria."),
 
+  instituicao_id: z.coerce.number({
+    message: "Instituição inválida."
+  }).nullable().optional(),
+  
   // Rota Unificada (ID ou Rota Livre)
   rota: z.union([
     z.number({ message: "ID da rota inválido." }), 
@@ -104,4 +108,8 @@ export const guiaAbastecimentoFormSchema = z.object({
   }
 });
 
-export type GuiaAbastecimentoFormData = z.infer<typeof guiaAbastecimentoFormSchema>
+// O Input representa o que o formulário "digita" (pode ser string/unknown antes da coerção)
+export type GuiaAbastecimentoFormInput = z.input<typeof guiaAbastecimentoFormSchema>;
+
+// O Output representa o dado limpo e transformado (o que vai para a API)
+export type GuiaAbastecimentoFormOutput = z.output<typeof guiaAbastecimentoFormSchema>;

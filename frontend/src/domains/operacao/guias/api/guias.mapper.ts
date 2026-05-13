@@ -1,10 +1,9 @@
-import type { GuiaAbastecimentoFormData } from "./schemas/guia.form.zod"
-import type { GuiaAbastecimentoWriteDTO } from "./schemas/guia.write.zod"
-import type { GuiaAbastecimentoReadDTO } from "./schemas/guia.read.zod"
+import type { GuiaAbastecimentoFormInput, GuiaAbastecimentoFormOutput } from "../schemas/guia.form";
+import type { GuiaAbastecimentoWriteDTO, GuiaAbastecimentoReadDTO } from "../schemas/guia.dto";
 
 // FORM → API
 export function mapFormToWriteDTO(
-  form: GuiaAbastecimentoFormData
+  form: GuiaAbastecimentoFormOutput
 ): GuiaAbastecimentoWriteDTO {
 
   const {
@@ -71,7 +70,7 @@ export function mapFormToWriteDTO(
 // API → FORM
 export function mapReadToForm(
   data: GuiaAbastecimentoReadDTO
-): GuiaAbastecimentoFormData {
+): GuiaAbastecimentoFormInput {
 
   const {
     tipo_atividade_id,
