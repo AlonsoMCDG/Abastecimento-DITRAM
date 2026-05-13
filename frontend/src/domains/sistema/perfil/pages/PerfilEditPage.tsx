@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 import { usuarioApi } from "../../usuarios/usuarios.api";
 import { getApiErrorMessage } from "../../../../core/api/errorHandlers";
-import { DynamicForm } from "../../../../core/ui/forms/dynamic-form/DynamicForm";
+import { DynamicForm } from "../../../../core/ui/forms/dynamic-form/DynamicFormOld";
 
 import { perfilUISchema } from "../../usuarios/schemas/usuario.schema";
 import { perfilEditFormSchema, type PerfilEditFormData } from "../../usuarios/schemas/usuario.form.zod";

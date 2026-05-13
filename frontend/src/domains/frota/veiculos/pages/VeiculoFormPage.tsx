@@ -4,7 +4,7 @@ import type { Path, PathValue, UseFormSetValue } from "react-hook-form";
 
 import { veiculosApi } from "../veiculos.api";
 import { ROUTES } from "../../../../core/routes/routes";
-import { DynamicForm } from "../../../../core/ui/forms/dynamic-form/DynamicForm";
+import { DynamicForm } from "../../../../core/ui/forms/dynamic-form/DynamicFormOld";
 import { getApiErrorMessage } from "../../../../core/api/errorHandlers";
 
 import { veiculoUISchema } from "../schemas/veiculo.schema";

@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 
 // Importe o seu DynamicForm atualizado
-import { DynamicForm } from '../../../../core/ui/forms/dynamic-form/DynamicForm';
+import { DynamicForm } from '../../../../core/ui/forms/dynamic-form/DynamicFormOld';
 import { getApiErrorMessage } from '../../../../core/api/errorHandlers';
 import { processPdfBlob } from '../../../../core/utils/pdfHandler';
 import { ROUTES } from '../../../../core/routes/routes';

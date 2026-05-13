@@ -1,335 +1,176 @@
-import React, { useEffect } from 'react';
+import React from 'react';
+import { useFormContext, Controller, type FieldValues, type Path } from 'react-hook-form';
+import { SearchableAsyncSelect } from '../SearchableAsyncSelect';
+import { SearchableSelect } from '../SearchableSelect';
 import { IMaskInput } from 'react-imask';
-import { 
-  useForm, 
-  Controller, 
-  type SubmitHandler, 
-  type UseFormSetValue, 
-  type DefaultValues, 
-  type FieldValues, 
-  type Path,
-} from 'react-hook-form';
-
-import type { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-
 import type { FormSchema, FormField } from '../../../types/form';
 import styles from './DynamicForm.module.css';
 
-import { SearchableAsyncSelect } from '../SearchableAsyncSelect';
-import { SearchableSelect } from '../SearchableSelect';
-
-
 interface DynamicFormProps<T extends FieldValues> {
-  title?: string;               // Título principal exibido no topo do formulário
-  subtitle?: string;            // Texto descritivo ou de apoio abaixo do título
-  uiSchema: FormSchema;         // Estrutura visual (inputs, opções, endpoints, colunas)
-  zodSchema: z.ZodType<any, any, any>;  // Motor de validação de dados e tipagem rigorosa (Zod)
-  initialValues?: DefaultValues<T>; // Dados pré-preenchidos (útil para edição de registros)
-  onValuesChange?: (            // Disparado quando qualquer input muda (útil para side-effects e auto-fill)
-    changedField: { name: Path<T>; value: unknown },
-    currentValues: Partial<T>,
-    setValue: UseFormSetValue<T>
-  ) => void;
-  warnings?: Record<string, string>; // Alertas visuais por campo que não impedem o envio (ex: "Consumo alto")
-  globalError?: string | null;  // Mensagem de erro geral da página (ex: "Servidor offline")
-  isLoading?: boolean;          // Estado de carregamento para desativar inputs e botões
-  submitLabel?: string;         // Texto customizado para o botão de salvar principal
-  onSubmit: SubmitHandler<T>;   // Função acionada apenas quando o formulário passa na validação do Zod
-  cancelLabel?: string;         // Texto customizado para o botão de cancelar
-  onCancel?: () => void;        // Função acionada pelo botão de cancelar (geralmente um redirect)
-  extraActions?: React.ReactNode; // Elementos/Botões extras (ex: "Salvar e Imprimir") renderizados ao lado das ações
+  uiSchema: FormSchema;
+  onSubmit: (e?: React.BaseSyntheticEvent) => Promise<void> | void;
+  onCancel?: () => void;
+  isLoading?: boolean;
 }
 
-export const DynamicForm = <T extends FieldValues>({
-  title,
-  subtitle,
-  uiSchema,      // <-- Usando uiSchema
-  zodSchema,     // <-- Usando zodSchema
-  initialValues, 
-  onSubmit,
-  onValuesChange,
-  warnings = {},
-  globalError = null,
-  submitLabel = "Salvar",
-  isLoading = false,
-  cancelLabel = "Cancelar",
+export function DynamicForm<T extends FieldValues>({ 
+  uiSchema, 
+  onSubmit, 
   onCancel,
-  extraActions
-}: DynamicFormProps<T>) => {
+  isLoading = false 
+}: DynamicFormProps<T>) {
   
-  const { 
-    register, 
-    handleSubmit, 
-    control, 
-    setValue, 
-    watch, 
-    reset, 
-    formState: { errors }
-  } = useForm<T>({
-    resolver: zodResolver(zodSchema), // Conecta o Zod ao formulário!
-    defaultValues: initialValues,
-    mode: "onChange", // Permite que os erros de XOR e outros sumam instantaneamente ao digitar
-  });
-
-  // Captura o estado global do formulário para a renderização condicional
+  const { register, control, watch, setValue, formState: { errors } } = useFormContext<T>();
   const currentValues = watch();
 
-  useEffect(() => {
-    if (initialValues) {
-      reset(initialValues);
-    }
-  }, [initialValues, reset]);
-
-  useEffect(() => {
-    const subscription = watch((value, { name }) => {
-      // Não usar type === 'change', para aceitar os setValues dos custom components
-      if (name && onValuesChange) {
-        const fieldName = name as Path<T>;
-        const fieldValue = value[name as keyof typeof value]; 
-        
-        onValuesChange(
-          { name: fieldName, value: fieldValue }, 
-          value as Partial<T>, 
-          setValue
-        );
-      }
-    });
-    return () => subscription.unsubscribe();
-  }, [watch, onValuesChange, setValue]);
-
-  const renderField = (fieldConfig: FormField) => {
-    const fieldPath = fieldConfig.name as Path<T>;
-    const hasError = !!errors[fieldPath];
-
-    // Empacotador de Prefixo/Sufixo para todos os campos que necessitam
-    const wrapWithAddons = (inputElement: React.ReactNode) => {
-      if (fieldConfig.prefix || fieldConfig.suffix) {
-        return (
-          <div className={styles.inputGroup}>
-            {fieldConfig.prefix && <span className={styles.prefix}>{fieldConfig.prefix}</span>}
-            {inputElement}
-            {fieldConfig.suffix && <span className={styles.suffix}>{fieldConfig.suffix}</span>}
-          </div>
-        );
-      }
-      return inputElement;
+  const renderInputComponent = (field: FormField) => {
+    const fieldPath = field.name as Path<T>;
+    const commonProps = {
+      id: field.name,
+      className: styles.input,
+      placeholder: field.placeholder,
+      disabled: field.disabled || isLoading,
+      readOnly: field.readOnly,
     };
 
-    // Campos com Máscara (Controlados)
-    if (fieldConfig.mask) {
-      const maskProps: Record<string, unknown> = typeof fieldConfig.mask === 'object' 
-        ? fieldConfig.mask 
-        : { mask: fieldConfig.mask };
+    // Roteamento para Selects Customizados
+    if (['select', 'datalist', 'combobox'].includes(field.type)) {
+      if (field.endpoint) {
+        return (
+          <SearchableAsyncSelect
+            field={field}
+            control={control}
+            setValue={setValue}
+            register={register}
+            error={errors[field.name as keyof T]}
+            disabled={isLoading || field.disabled}
+          />
+        );
+      }
       
-      const maskedInput = (
+      return (
         <Controller
-          key={fieldConfig.name}
+          key={field.name}
+          name={fieldPath}
+          control={control}
+          render={({ field: { onChange, value } }) => (
+            <SearchableSelect
+              options={field.options || []}
+              value={value ?? ""}
+              onChange={onChange}
+              placeholder={field.placeholder}
+              disabled={field.disabled || field.readOnly || isLoading}
+            />
+          )}
+        />
+      );
+    }
+
+    if (field.mask) {
+      const maskProps = typeof field.mask === 'object' ? field.mask : { mask: field.mask };
+      return (
+        <Controller
+          key={field.name}
           name={fieldPath}
           control={control}
           render={({ field: { onChange, onBlur, value, ref } }) => (
             <IMaskInput
               {...maskProps}
-              value={value === null || value === undefined ? '' : String(value)}
-              unmask={true} 
+              value={String(value ?? '')}
+              unmask={true}
               onAccept={(unmaskedValue) => onChange(unmaskedValue)}
               onBlur={onBlur}
               inputRef={ref}
-              id={fieldConfig.name}
-              className={`${styles.input} ${hasError ? styles.inputError : ''}`}
-              placeholder={fieldConfig.placeholder || ''}
-              disabled={fieldConfig.disabled}
-              readOnly={fieldConfig.readOnly}
+              {...commonProps}
             />
           )}
         />
       );
-      
-      return wrapWithAddons(maskedInput); 
     }
-    
-    // CASO PADRÃO: Props base para inputs
-    const commonProps = {
-      ...register(fieldPath),
-      id: fieldConfig.name,
-      className: `${styles.input} ${hasError ? styles.inputError : ''}`,
-      placeholder: fieldConfig.placeholder,
-      disabled: fieldConfig.disabled || isLoading,
-    };
 
-    // ROTEAMENTO DE COMPONENTES
-    switch (fieldConfig.type) {
-      case 'textarea': 
-        return wrapWithAddons(<textarea {...commonProps} rows={4} />);
-        
-      case 'checkbox': 
-        return <input type="checkbox" {...commonProps} id={fieldConfig.name} />;
-        
-      case 'select':
-      case 'datalist':
-      case 'combobox':
-        const SelectComponent = fieldConfig.endpoint ? (
-          // Se tem endpoint -> Busca da API (SearchableAsyncSelect)
-          <SearchableAsyncSelect
-            field={fieldConfig}
-            control={control}
-            setValue={setValue}
-            register={register}
-            error={errors[fieldPath]}
-            disabled={isLoading}
-          />
-        ) : (
-          // Se não tem endpoint (tem options locais) -> Select Customizado Síncrono
-          <Controller
-            key={fieldConfig.name}
-            name={fieldPath}
-            control={control}
-            render={({ field: { onChange, value } }) => (
-              <SearchableSelect
-                options={fieldConfig.options || []}
-                value={(value as string | number) ?? ""}
-                onChange={onChange}
-                placeholder={fieldConfig.placeholder}
-                disabled={fieldConfig.disabled || fieldConfig.readOnly || isLoading}
-              />
-            )}
-          />
-        );
-        return wrapWithAddons(SelectComponent);
-
-      default:
-        const baseInput = <input type={fieldConfig.type} readOnly={fieldConfig.readOnly} {...commonProps} />;
-        return wrapWithAddons(baseInput);
+    if (field.type === 'textarea') {
+      return <textarea {...register(fieldPath)} {...commonProps} rows={4} />;
     }
-  };
 
-  const handleFormKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
-    const target = e.target as HTMLElement;
-    if (e.key === 'Enter' && !e.shiftKey) {
-      if (target.tagName === 'TEXTAREA' || target.tagName === 'BUTTON') return;
-      e.preventDefault(); 
-      const form = e.currentTarget;
-      
-      const focusableElements = Array.from(
-        form.querySelectorAll('input:not([type="hidden"]):not([disabled]):not([readonly]), select:not([disabled]), textarea:not([disabled]):not([readonly]), button[type="submit"]:not([disabled])')
-      ) as HTMLElement[];
-
-      const currentIndex = focusableElements.indexOf(target);
-      if (currentIndex > -1 && currentIndex < focusableElements.length - 1) {
-        focusableElements[currentIndex + 1].focus();
-      }
-    }
-  };
-
-  // Previne multiplos submits via botão ou enter
-  const onSafeSubmit: SubmitHandler<T> = (data, event) => {
-    if (isLoading) return;
-    onSubmit(data, event);
+    return <input type={field.type} {...register(fieldPath)} {...commonProps} />;
   };
 
   return (
-    <div className={styles.layoutContainer}>
-      {(title || subtitle) && (
-        <header className={styles.layoutHeader}>
-          {title && <h1 className={styles.layoutTitle}>{title}</h1>}
-          {subtitle && <p className={styles.layoutSubtitle}>{subtitle}</p>}
-        </header>
-      )}
-
-      {/* RENDERIZAÇÃO DO ERRO GLOBAL */}
-      {globalError && (
-        <div className={styles.globalError}>
-          ⚠️ {globalError}
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit(onSafeSubmit)} onKeyDown={handleFormKeyDown} className={styles.formContainer}>
+    <form className={styles.form} onSubmit={onSubmit}>
+      <div className={styles.row}>
         {uiSchema.fields.map((field) => {
-          // VISIBILIDADE CONDICIONAL
-          if (field.visibleIf && !field.visibleIf(currentValues)) {
-            return null; // Não renderiza o campo se a condição não for satisfeita
-          }
-
-          const fieldPath = field.name as Path<T>;
+          if (field.visibleIf && !field.visibleIf(currentValues)) return null;
 
           if (field.type === 'hidden') {
-            return <input key={field.name} type="hidden" {...register(fieldPath)} />;
+            return <input key={field.name} type="hidden" {...register(field.name as Path<T>)} />;
           }
+          
+          const hasError = !!errors[field.name as keyof T];
 
-          const warningMessage = warnings[field.name];
-          const hasError = !!errors[fieldPath];
-          const errorMessage = errors[fieldPath]?.message as string || "Este campo é obrigatório";
+          const wrapperClass = `
+            ${styles.fieldWrapper} 
+            ${hasError ? styles.hasError : ''} 
+            ${field.type === 'checkbox' ? styles.checkboxWrapper : ''}
+          `.trim();
 
           return (
             <div 
               key={field.name} 
-              className={`${styles.fieldWrapper} ${field.type === 'checkbox' ? styles.checkboxWrapper : ''}`}
-              style={{ '--col-span': field.colSpan || 1 } as React.CSSProperties}
+              className={wrapperClass}
+              data-col-span={field.colSpan || 1}
             >
               {field.type !== 'checkbox' && (
                 <label htmlFor={field.name} className={styles.label}>
-                  {field.label} {field.required && (
-                    <span className={styles.required}>*</span>
-                  )}
+                  {field.label} {field.required && <span className={styles.required}>*</span>}
                 </label>
               )}
 
-              <div className={field.quickActions?.length ? styles.inputWithActions : ''}>
-                {renderField(field)}
+              <div className={styles.inputContainer}>
+                {field.prefix && <span className={styles.prefix}>{field.prefix}</span>}
+
+                {renderInputComponent(field)}
+
+                {field.suffix && <span className={styles.prefix}>{field.suffix}</span>}
+
                 {field.quickActions?.map((action, index) => (
                   <button
                     key={index}
-                    type="button" 
-                    className={styles.quickActionButton}
+                    type="button"
+                    className={styles.quickAction}
                     title={action.tooltip}
-                    onClick={(e) => { e.preventDefault(); action.onClick(); }}
+                    onClick={action.onClick}
                   >
                     {action.icon}
                   </button>
                 ))}
               </div>
-              
+
               {field.type === 'checkbox' && (
-                <label htmlFor={field.name} className={styles.label}>
-                  {field.label} {field.required && '*'}
+                <label htmlFor={field.name} className={`${styles.label} ${styles.labelInline}`}>
+                  {field.label} {field.required && <span className={styles.required}>*</span>}
                 </label>
               )}
 
-              {hasError ? (
-                <span className={styles.error}>{errorMessage}</span>
-              ) : (
-                warningMessage && <span className={styles.warningMessage}>{warningMessage}</span>
+              {hasError && (
+                <span className={styles.errorMessage}>
+                  {errors[field.name as keyof T]?.message as string}
+                </span>
               )}
             </div>
           );
         })}
+      </div>
 
-        <div className={styles.formActions}>
-          {/* Oculta o botão primário caso o submitLabel seja vazio (ex: tela de visualização) */}
-          {submitLabel && (
-            <button
-              type="submit"
-              className={styles.submitButton}
-              disabled={isLoading}
-            >
-              {isLoading ? 'Processando...' : submitLabel}
-            </button>
-          )}
-          
-          {extraActions}
-          
-          {onCancel && (
-            <button 
-              type="button" 
-              className={styles.btnCancel} 
-              onClick={onCancel}
-              disabled={isLoading}
-            >
-              {cancelLabel}
-            </button>
-          )}
-        </div>
-      </form>
-    </div>
+      <div className={styles.actions}>
+        <button type="submit" className={styles.btnPrimary} disabled={isLoading}>
+          {isLoading ? 'Processando...' : 'Salvar'}
+        </button>
+        {onCancel && (
+          <button type="button" className={styles.btnSecondary} onClick={onCancel} disabled={isLoading}>
+            Cancelar
+          </button>
+        )}
+      </div>
+    </form>
   );
 };

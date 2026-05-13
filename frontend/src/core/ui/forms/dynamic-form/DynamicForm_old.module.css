@@ -1,0 +1,415 @@
+/* ========================================================
+   1. VARIÁVEIS DE TEMA (Design Tokens)
+   Facilita a manutenção e padroniza as cores do sistema
+   ======================================================== */
+.layoutContainer {
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --secondary: #475569;
+  --secondary-hover: #334155;
+  
+  --text-main: #111827;
+  --text-label: #374151;
+  --text-muted: #6b7280;
+  
+  --bg-main: #ffffff;
+  --bg-disabled: #f3f4f6;
+  
+  --border-color: #d1d5db;
+  --border-focus: rgba(59, 130, 246, 0.2);
+  
+  --error: #ef4444;
+  --warning: #d97706;
+
+  --bg-surface: #f8fafc;     /* Fundos muito claros (sufixos, hover de botões outline) */
+  --border-light: #e2e8f0;   /* Divisórias sutis e bordas de elementos desativados */
+  --border-hover: #94a3b8;   /* Bordas destacadas ao passar o mouse */
+  --text-disabled: #9ca3af;  /* Textos inativos */
+
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0.5rem 2rem 2rem; 
+}
+
+/* ========================================================
+   2. CABEÇALHO
+   ======================================================== */
+.layoutHeader {
+  margin-bottom: 1rem; 
+  margin-top: 0;
+}
+
+.layoutTitle {
+  font-size: 1.5rem;
+  color: var(--text-main);
+  margin: 0 0 0.25rem 0; 
+  line-height: 1.2; 
+}
+
+.layoutSubtitle {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* ========================================================
+   3. SISTEMA DE GRID
+   ======================================================== */
+.formContainer {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.25rem;
+  align-items: start;
+  width: 100%;
+  background: var(--bg-main);
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.fieldWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  grid-column: span var(--col-span, 1); 
+}
+
+.checkboxWrapper {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+  height: 100%;
+  padding-top: 1.25rem;
+}
+
+/* ========================================================
+   4. INPUTS E CONTROLES
+   ======================================================== */
+.label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-label);
+}
+
+.input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  color: var(--text-main);
+  background-color: var(--bg-main);
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px var(--border-focus);
+}
+
+.input:disabled {
+  background-color: var(--bg-disabled);
+  color: var(--text-disabled);
+  cursor: not-allowed;
+  border-color: var(--border-light);
+}
+
+.input[readonly] {
+  background-color: var(--bg-disabled);
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
+
+/* Grupos de Input (Prefix/Suffix) */
+.inputGroup {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  border: 1px solid var(--border-color);
+  border-radius: 0.375rem;
+  background-color: var(--bg-main);
+  transition: all 0.15s ease-in-out;
+  overflow: hidden;
+}
+
+.inputGroup:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px var(--border-focus);
+}
+
+.inputGroup .input {
+  border: none;
+  box-shadow: none;
+  border-radius: 0;
+  flex: 1;
+  min-width: 0;
+}
+
+.inputGroup:has(.input[readonly]):focus-within {
+  border-color: var(--border-color);
+  box-shadow: none;
+}
+
+.prefix, .suffix {
+  padding: 0.5rem 0.75rem;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  background-color: var(--bg-surface);
+}
+
+.prefix { border-right: 1px solid var(--bg-disabled); }
+.suffix { border-left: 1px solid var(--bg-disabled); }
+
+/* Inputs com Botões Rápidos */
+.inputWithActions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.inputWithActions > :first-child {
+  flex: 1;
+  min-width: 0;
+}
+
+.quickActionButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 2.375rem;
+  min-width: 2.375rem;
+  background-color: var(--bg-disabled);
+  border: 1px solid var(--border-color);
+  border-radius: 0.375rem;
+  cursor: pointer;
+  font-size: 1rem;
+  color: var(--text-muted);
+  transition: all 0.2s ease-in-out;
+}
+
+.quickActionButton:hover {
+  background-color: var(--border-light);
+  color: var(--text-main);
+  border-color: var(--border-hover);
+}
+
+/* ========================================================
+   5. MENSAGENS E ALERTAS
+   ======================================================== */
+.error {
+  font-size: 0.75rem;
+  color: var(--error);
+  margin-top: 0.25rem;
+}
+
+.warning {
+  color: var(--warning);
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+  display: block;
+}
+
+.required {
+  color: var(--error);
+}
+
+/* ========================================================
+   6. RODAPÉ E BOTÕES DE AÇÃO
+   ======================================================== */
+.formActions {
+  grid-column: 1 / -1; /* Ocupa toda a largura do form */
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-light);
+  align-items: center;
+}
+
+/* Base comum para todos os botões do rodapé para evitar código duplicado */
+.submitButton, .btnSecondary, .btnOutline, .btnCancel {
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.submitButton:disabled, .btnSecondary:disabled, .btnOutline:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Botão 1: Salvar Padrão */
+.submitButton {
+  background-color: var(--primary); 
+  color: white;
+  border: none;
+}
+.submitButton:hover:not(:disabled) { background-color: var(--primary-hover); }
+
+/* Botão 2: Salvar e Imprimir */
+.btnSecondary {
+  background-color: var(--secondary); 
+  color: white;
+  border: none;
+}
+.btnSecondary:hover:not(:disabled) { background-color: var(--secondary-hover); }
+
+/* Botão 3: Apenas Imprimir */
+.btnOutline {
+  background-color: transparent;
+  color: var(--secondary);
+  border: 1px solid var(--border-color);
+}
+.btnOutline:hover:not(:disabled) {
+  background-color: var(--bg-surface);
+  border-color: var(--border-hover);
+}
+
+/* Botão de Cancelar / Voltar */
+.btnCancel {
+  background-color: var(--bg-main);
+  color: var(--text-label);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.btnCancel:hover:not(:disabled) {
+  background-color: var(--bg-disabled);
+  color: var(--text-main);
+}
+
+.btnCancel:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ========================================================
+   7. RESPONSIVIDADE
+   ======================================================== */
+@media (max-width: 1024px) {
+  .formContainer {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  
+  .fieldWrapper {
+    grid-column: span min(var(--col-span, 1), 2);
+  }
+}
+
+@media (max-width: 768px) {
+  .layoutContainer { padding: 1rem; }
+  
+  .formContainer { grid-template-columns: 1fr; }
+  
+  .fieldWrapper {
+    grid-column: 1 / -1 !important; 
+  }
+}
+
+/* Container relativo para o Combobox */
+.comboWrapper {
+  position: relative;
+  width: 100%;
+}
+
+/* Espaço reservado para a setinha */
+.comboInput {
+  padding-right: 32px; 
+  cursor: text;
+}
+
+.comboChevron {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #64748b;
+  font-size: 0.8rem;
+  pointer-events: none;
+}
+
+/* O Dropdown Flutuante (O segredo do visual) */
+.comboDropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  width: 100%;
+  max-height: 220px;
+  overflow-y: auto;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  z-index: 1000; /* Fica por cima de outros inputs */
+  list-style: none;
+  padding: 4px 0;
+  margin: 0;
+}
+
+.comboOption {
+  padding: 10px 14px;
+  font-size: 0.95rem;
+  color: #334155;
+  cursor: pointer;
+  transition: background-color 0.1s ease;
+}
+
+.comboOption:hover {
+  background-color: #f8fafc;
+  color: #2563eb;
+}
+
+.comboSelected {
+  background-color: #eff6ff;
+  color: #1d4ed8;
+  font-weight: 500;
+}
+
+.comboEmpty {
+  color: #94a3b8;
+  text-align: center;
+  padding: 16px;
+  cursor: default;
+}
+
+.comboOptionCreatable {
+  font-weight: 600;
+  color: #2563eb;
+  border-top: 1px solid #e2e8f0;
+  background-color: #f8fafc;
+}
+
+.comboHighlighted {
+  background-color: #f1f5f9; /* Slate 100 - Exemplo de hover suave */
+  cursor: pointer;
+}
+
+/* Mensagem de erro global */
+.globalError {
+  background-color: #fef2f2;
+  color: var(--error);
+  padding: 14px 20px;
+  border-radius: 8px;
+  margin-bottom: 24px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  border: 1px solid #fecaca;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}

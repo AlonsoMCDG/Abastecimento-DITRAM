@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 
 import { tiposCombustivelApi } from "../tiposCombustivel.api";
 import { ROUTES } from "../../../../core/routes/routes";
-import { DynamicForm } from "../../../../core/ui/forms/dynamic-form/DynamicForm";
+import { DynamicForm } from "../../../../core/ui/forms/dynamic-form/DynamicFormOld";
 import { getApiErrorMessage } from "../../../../core/api/errorHandlers";
 
 import { tipoCombustivelUISchema } from "../schemas/tipoCombustivel.schema";
