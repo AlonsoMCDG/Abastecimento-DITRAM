@@ -7,7 +7,7 @@ import type { FormSchema, FormField } from '../../../types/form';
 import styles from './DynamicForm.module.css';
 
 interface DynamicFormProps<T extends FieldValues> {
-  uiSchema: FormSchema;
+  uiSchema: FormSchema<T>;
   onSubmit: (e?: React.BaseSyntheticEvent) => Promise<void> | void;
   onCancel?: () => void;
   isLoading?: boolean;

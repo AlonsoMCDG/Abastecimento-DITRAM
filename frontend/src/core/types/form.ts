@@ -52,6 +52,6 @@ export interface FormField<T extends FieldValues = any> {
   creatable?: boolean;     // Permite que o usuário digite um valor novo que não está na lista
 }
 
-export interface FormSchema {
-  fields: FormField[]
+export interface FormSchema<T extends FieldValues = any> {
+  fields: FormField<T>[]
 }
