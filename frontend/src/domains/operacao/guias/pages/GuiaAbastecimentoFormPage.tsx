@@ -10,7 +10,7 @@ import { processPdfBlob } from '../../../../core/utils/pdfHandler';
 import { ROUTES } from '../../../../core/routes/routes';
 
 import { guiasApi } from '../api/guias.api';
-import { veiculosApi } from '../../../frota/veiculos/veiculos.api';
+import { veiculosApi } from '../../../frota/veiculos/api/veiculos.api';
 import { mapReadToForm, mapFormToWriteDTO } from '../api/guias.mapper';
 import { guiaAbastecimentoUISchema } from '../schemas/guia.ui';
 import { guiaAbastecimentoFormSchema, type GuiaAbastecimentoFormInput } from '../schemas/guia.form';
