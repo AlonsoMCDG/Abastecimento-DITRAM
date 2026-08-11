@@ -17,7 +17,6 @@ import { guiaAbastecimentoFormSchema, type GuiaAbastecimentoFormInput } from '..
 
 import layoutStyles from '../../../../core/ui/layouts/FormPage.module.css';
 
-// export const GuiaAbastecimentoFormPage = () => {
 export default function GuiaAbastecimentoFormPage() {
   
   // INICIALIZAÇÃO DO REACT HOOK FORM
@@ -67,6 +66,7 @@ export default function GuiaAbastecimentoFormPage() {
   const veiculoIdSelecionado = watch('veiculo');
   
   useEffect(() => {
+    console.log("Selecionou veiculo "+ veiculoIdSelecionado);
     if (typeof veiculoIdSelecionado === 'number') {
       veiculosApi.buscar(veiculoIdSelecionado)
         .then(res => {
