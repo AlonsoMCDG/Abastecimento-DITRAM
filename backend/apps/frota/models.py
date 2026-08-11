@@ -30,16 +30,11 @@ class TipoCombustivel(models.Model):
             self.nome = " ".join(self.nome.split()).title()
             
     def save(self, *args, **kwargs):
-        self.full_clean()
         
         if not self.slug:
-            base_slug = slugify(self.nome)
-            slug = base_slug
-            # counter = 1
-            # while TipoCombustivel.objects.filter(slug=slug).exists():
-            #     slug = f"{base_slug}-{counter}"
-            #     counter += 1
-            self.slug = slug
+            self.slug = slugify(self.nome)
+
+        self.full_clean()
         super().save(*args, **kwargs)
 
     def natural_key(self):
@@ -57,6 +52,7 @@ class Veiculo(models.Model):
         ('ONIBUS', 'Ônibus'), 
         ('MOTO', 'Moto'), 
         ('VAN', 'Van'),
+        ('CAMINHAO', 'Caminhão'),
         ('MAQUINA_PESADA', 'Máquina Pesada/Trator')
     ]
     
@@ -161,18 +157,35 @@ class Rota(models.Model):
     def save(self, *args, **kwargs):
         from django.utils.text import slugify
 
+        print(
+            f"[ROTA] ANTES: pk={self.pk}, "
+            f"nome={self.nome!r}, "
+            f"slug={self.slug!r}, "
+            f"secretaria={self.secretaria_id}",
+            flush=True
+        )
+
         self.full_clean()
-        
+
         if not self.slug:
             base_slug = slugify(self.nome)
             slug = base_slug
             counter = 1
-            
-            while Rota.objects.filter(slug=slug, secretaria=self.secretaria).exists():
+
+            while Rota.objects.filter(
+                slug=slug,
+                secretaria=self.secretaria
+            ).exists():
+                print(f"[ROTA] Slug {slug!r} já existe", flush=True)
                 slug = f"{base_slug}-{counter}"
                 counter += 1
-            
+
             self.slug = slug
+
+        print(
+            f"[ROTA] DEPOIS: pk={self.pk}, slug={self.slug!r}",
+            flush=True
+        )
 
         super().save(*args, **kwargs)
 

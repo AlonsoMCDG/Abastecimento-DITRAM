@@ -33,7 +33,7 @@ class TipoAtividade(models.Model):
 class GuiaAbastecimento(models.Model):
     TIPO_VEICULO_CHOICES = [
         ('CARRO', 'Carro'), ('CAMINHONETE', 'Caminhonete'), ('ONIBUS', 'Ônibus'), ('MOTO', 'Moto'),
-        ('VAN', 'Van'), ('BARCO', 'Barco'), ('MAQUINA_PESADA', 'Máquina Pesada/Trator'),
+        ('VAN', 'Van'), ('BARCO', 'Barco'), ('CAMINHAO', 'Caminhão'), ('MAQUINA_PESADA', 'Máquina Pesada/Trator'),
     ]
 
     MODALIDADE_CHOICES = [
