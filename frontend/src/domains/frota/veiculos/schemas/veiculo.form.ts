@@ -19,6 +19,19 @@ const nullableNumberFromInput = z
     return Number.isNaN(number) ? null : number;
   });
 
+const numberFromInput = z
+  .union([z.string(), z.number()])
+  .transform((value) => {
+    if (typeof value === "number") {
+      return value;
+    }
+
+    const normalized = value.replace(",", ".");
+    const number = Number(normalized);
+
+    return isNaN(number) ? 0 : number;
+  });
+
 export const veiculoFormSchema = z.object({
   categoria: z
     .string({
@@ -56,11 +69,10 @@ export const veiculoFormSchema = z.object({
     })
     .min(1, "Selecione a unidade de consumo."),
 
-  hodometro_atual: nullableNumberFromInput
-    .refine(
-      (value) => value !== null && value >= 0,
-      "O hodômetro não pode ser negativo."
-    ),
+  hodometro_atual: numberFromInput.refine(
+    (value) => value >= 0,
+    "O hodômetro não pode ser negativo."
+  ),
 
   consumo_estimado_combustivel:
     nullableNumberFromInput.refine(
