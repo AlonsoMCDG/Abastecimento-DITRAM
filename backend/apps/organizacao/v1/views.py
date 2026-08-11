@@ -14,7 +14,7 @@ from .serializers import (
 
 
 class SecretariaViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
-    queryset = Secretaria.objects.all()
+    queryset = Secretaria.objects.all().order_by('-ativo', 'nome')
     serializer_class = SecretariaSerializer
     permission_classes = [IsAuthenticated, CadastrosPermission]
 
@@ -34,18 +34,18 @@ class SecretariaViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
     ordering_fields = ['nome', 'sigla', 'ativo']
     ordering = ['-ativo', 'nome'] 
     
-    @action(detail=False, methods=['get'])
+    @action(detail=False, methods=['get'], serializer_class=SecretariaLookupSerializer)
     def lookup(self, request):
         queryset = self.filter_queryset(self.get_queryset())
         
-        # REGRA DE NEGÓCIO: Só exibe secretarias ativas nos Selects do sistema
+        # Só exibe secretarias ativas nos Selects do sistema
         if 'ativo' not in request.query_params:
             queryset = queryset.filter(ativo=True)
 
         # Otimização da query
-        queryset = queryset.only('nome', 'sigla')
+        queryset = queryset.only('id', 'nome', 'sigla')
 
-        serializer = SecretariaLookupSerializer(queryset, many=True)
+        serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
 
@@ -60,21 +60,23 @@ class InstituicaoViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
     ]
 
     # Filtros Exatos
-    filterset_fields = ['id', 'secretaria_id', 'tipo', 'ativo']
+    filterset_fields = ['id', 'secretaria', 'tipo', 'ativo']
 
     # Busca Textual
-    search_fields = ['nome', 'tipo', 'secretaria__nome', 'secretaria__sigla']
+    search_fields = ['nome', 'secretaria__nome', 'secretaria__sigla']
     
     # Ordenação
     ordering_fields = ['nome', 'tipo', 'id', 'secretaria__sigla', 'ativo']
     ordering = ['-ativo', 'nome'] # Ativas no topo, depois alfabético
 
     def get_serializer_class(self):
+        if self.action == 'lookup':
+            return InstituicaoLookupSerializer
         if self.request.method in ['GET', 'HEAD', 'OPTIONS']:
             return InstituicaoReadSerializer
         return InstituicaoWriteSerializer
     
-    @action(detail=False, methods=['get'])
+    @action(detail=False, methods=['get'], serializer_class=InstituicaoLookupSerializer)
     def lookup(self, request):
         queryset = self.filter_queryset(self.get_queryset())
 
@@ -82,8 +84,8 @@ class InstituicaoViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
         if 'ativo' not in request.query_params:
             queryset = queryset.filter(ativo=True)
 
-        # Otimiza a query. Precisamos do tipo e nome para o get_label
+        # Otimiza a query
         queryset = queryset.only('id', 'nome', 'tipo', 'secretaria_id')
 
-        serializer = InstituicaoLookupSerializer(queryset, many=True)
+        serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)

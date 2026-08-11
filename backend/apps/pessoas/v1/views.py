@@ -8,11 +8,14 @@ from apps.core.viewset_cache import ModelViewSetCacheMixin
 from apps.usuarios.permissions import CadastrosPermission
 
 from apps.pessoas.models import Pessoa
-from .serializers import PessoaSerializer, PessoaLookupSerializer
+from .serializers import (
+    PessoaWriteSerializer, 
+    PessoaReadSerializer, 
+    PessoaLookupSerializer
+)
 
 class PessoaViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
     queryset = Pessoa.objects.all()
-    serializer_class = PessoaSerializer
     permission_classes = [IsAuthenticated, CadastrosPermission]
 
     filter_backends = [
@@ -27,22 +30,29 @@ class PessoaViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
     # Busca Textual
     search_fields = ['nome', 'cpf']
 
-    # Ordenação (Mantendo o padrão: ativos primeiro, depois ordem alfabética)
+    # Ordenação
     ordering_fields = ['nome', 'cpf', 'id', 'ativo']
     ordering = ['-ativo', 'nome']
 
-    @action(detail=False, methods=['get'])
+    def get_queryset(self):
+        return super().get_queryset()
+
+    def get_serializer_class(self):
+        if self.action == 'lookup':
+            return PessoaLookupSerializer
+        if self.request.method in ['GET', 'HEAD', 'OPTIONS']:
+            return PessoaReadSerializer
+        return PessoaWriteSerializer
+
+    @action(detail=False, methods=['get'], serializer_class=PessoaLookupSerializer)
     def lookup(self, request):
         queryset = self.filter_queryset(self.get_queryset())
         
-        # REGRA DE NEGÓCIO: Dropdowns padrão só devem mostrar pessoas ativas
-        # Se o frontend enviar ?ativo=false ou ?ativo=true, o DjangoFilterBackend já terá resolvido.
-        # Mas se o frontend não enviar nada, nós forçamos ativo=True.
         if 'ativo' not in request.query_params:
             queryset = queryset.filter(ativo=True)
         
-        # Otimização: Traz apenas os campos usados pelo PessoaLookupSerializer
-        queryset = queryset.only('id', 'nome', 'cpf')
+        # Otimização: Traz apenas o necessário. 
+        queryset = queryset.only('id', 'nome')
         
-        serializer = PessoaLookupSerializer(queryset, many=True)
+        serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)

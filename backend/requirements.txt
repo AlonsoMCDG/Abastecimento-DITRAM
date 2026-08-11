@@ -13,6 +13,7 @@ pillow==12.1.1
 psycopg2-binary==2.9.11
 PyJWT==2.12.1
 python-dotenv==1.2.2
+RapidFuzz==3.14.5
 reportlab==4.0.9
 sqlparse==0.5.5
 tzdata==2025.3

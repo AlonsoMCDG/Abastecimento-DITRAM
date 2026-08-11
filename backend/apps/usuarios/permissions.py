@@ -1,42 +1,50 @@
 from rest_framework.permissions import BasePermission, SAFE_METHODS
 
 
-class CadastrosPermission(BasePermission):
-    def has_permission(self, request, view):
-        if request.method in SAFE_METHODS:
-            return True
-        user = request.user
-        return bool(user and user.is_authenticated and (user.is_staff or getattr(user, "can_write_cadastros", False)))
+class BaseMethodPermission(BasePermission):
+    permission_map = {}
 
-
-class FrotaPermission(BasePermission):
-    def has_permission(self, request, view):
-        if request.method in SAFE_METHODS:
-            return True
-        user = request.user
-        return bool(user and user.is_authenticated and (user.is_staff or getattr(user, "can_write_frota", False)))
-
-
-class GuiaAbastecimentoPermission(BasePermission):
     def has_permission(self, request, view):
         if request.method in SAFE_METHODS:
             return True
 
         user = request.user
+
         if not (user and user.is_authenticated):
             return False
 
         if user.is_staff:
             return True
 
-        if request.method == "POST":
-            return bool(getattr(user, "can_create_guia_abastecimento", False))
+        required_flag = self.permission_map.get(request.method)
 
-        if request.method in ("PUT", "PATCH"):
-            return bool(getattr(user, "can_edit_guia_abastecimento", False))
+        if not required_flag:
+            return False
 
-        if request.method == "DELETE":
-            return bool(getattr(user, "can_delete_guia_abastecimento", False))
+        return bool(getattr(user, required_flag, False))
 
-        return False
+class CadastrosPermission(BaseMethodPermission):
+    permission_map = {
+        "POST": "can_write_cadsatros",
+        "PUT": "can_write_cadsatros",
+        "PATCH": "can_write_cadsatros",
+        "DELETE": "can_write_cadsatros",
+    }
 
+
+class FrotaPermission(BaseMethodPermission):
+    permission_map = {
+        "POST": "can_write_frota",
+        "PUT": "can_write_frota",
+        "PATCH": "can_write_frota",
+        "DELETE": "can_write_frota",
+    }
+
+
+class GuiaAbastecimentoPermission(BaseMethodPermission):
+    permission_map = {
+        "POST": "can_create_guia_abastecimento",
+        "PUT": "can_edit_guia_abastecimento",
+        "PATCH": "can_edit_guia_abastecimento",
+        "DELETE": "can_delete_guia_abastecimento",
+    }

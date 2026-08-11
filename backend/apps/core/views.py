@@ -4,8 +4,10 @@ from datetime import datetime
 from io import StringIO
 
 from django.conf import settings
+from django.core.cache import cache
 from django.core.management import call_command
-from django.db import connection
+from django.core.serializers import deserialize
+from django.db import IntegrityError, transaction, connection
 from django.http import FileResponse, HttpResponse
 from django.utils.timezone import now
 from rest_framework.decorators import api_view, permission_classes
@@ -25,7 +27,7 @@ class IsSuperAdmin(BasePermission):
 
 
 # ==========================================
-# Upload de JSON com Correção de PK
+# Upload de JSON com Correção de PK (e Ignore Duplicates)
 # ==========================================
 @api_view(["POST"])
 @permission_classes([IsSuperAdmin])
@@ -34,36 +36,46 @@ def upload_seed_files(request):
     if not files:
         return Response({"detail": "Nenhum arquivo enviado."}, status=400)
 
+    criados = 0
+    ignorados = 0
+
     try:
-        # Usa um diretório temporário para não deixar lixo no servidor
-        with tempfile.TemporaryDirectory() as temp_dir:
-            temp_paths = []
+        for f in files:
+            json_data = f.read().decode('utf-8')
             
-            for f in files:
-                file_path = os.path.join(temp_dir, f.name)
-                with open(file_path, 'wb+') as destination:
-                    for chunk in f.chunks():
-                        destination.write(chunk)
-                temp_paths.append(file_path)
-
-            # Ordena os arquivos recebidos
-            temp_paths.sort()
-
-            # Roda o loaddata passando a lista de arquivos
-            call_command("loaddata", *temp_paths, verbosity=0)
-
-            # Sincronização de Sequência (CRÍTICO para PostgreSQL com JSONs hardcoded)
-            if connection.vendor in ['postgresql', 'mysql', 'oracle']:
-                out = StringIO()
-                apps_to_reset = ['organizacao', 'frota', 'pessoas', 'operacao', 'usuarios']
-                call_command('sqlsequencereset', *apps_to_reset, stdout=out)
-                sql = out.getvalue()
+            # O deserialize nativo lê a string JSON e resolve as chaves naturais
+            for obj_deserializado in deserialize("json", json_data):
+                instancia = obj_deserializado.object
                 
-                if sql:
-                    with connection.cursor() as cursor:
-                        cursor.execute(sql)
+                try:
+                    # Isola o salvamento. Se violar uma constraint (unique), 
+                    # faz o rollback só desta linha e vai pro except.
+                    with transaction.atomic():
+                        instancia.save()
+                        criados += 1
+                
+                except IntegrityError:
+                    ignorados += 1
+                    continue # Dado já existe, ignora e segue pro próximo
 
-        return Response({"detail": f"{len(files)} arquivo(s) processado(s) e IDs sincronizados!"})
+        # Sincronização de Sequência (CRÍTICO para PostgreSQL com JSONs hardcoded)
+        # Mantido intacto, pois se novos IDs foram inseridos manualmente, a sequência precisa alinhar
+        if connection.vendor in ['postgresql', 'mysql', 'oracle']:
+            out = StringIO()
+            apps_to_reset = ['organizacao', 'frota', 'pessoas', 'operacao', 'usuarios']
+            call_command('sqlsequencereset', *apps_to_reset, stdout=out)
+            sql = out.getvalue()
+            
+            if sql:
+                with connection.cursor() as cursor:
+                    cursor.execute(sql)
+
+        cache.clear() # Limpa o cache após a inserção dos novos dados
+
+
+        return Response({
+            "detail": f"Upload concluído! {criados} novos registros salvos, {ignorados} já existentes ignorados."
+        })
 
     except Exception as e:
         return Response({"detail": f"Erro ao processar: {str(e)}"}, status=500)
@@ -73,6 +85,7 @@ def upload_seed_files(request):
 @permission_classes([IsSuperAdmin])
 def seed_default_data_force(request):
     seed_force(verbosity=0)
+    cache.clear() # Limpa o cache após a inserção dos novos dados
     return Response({"detail": "Seed carregado (force)."})
 
 
@@ -82,6 +95,7 @@ def reset_db_and_seed_default_data(request):
     call_command("flush", interactive=False, verbosity=0, allow_cascade=True)
     call_command("migrate", verbosity=0)
     seed_force(verbosity=0)
+    cache.clear() # Limpa o cache após a inserção dos novos dados
     return Response({"detail": "Banco resetado e seed carregado."})
 
 
@@ -90,6 +104,7 @@ def reset_db_and_seed_default_data(request):
 def flush_db_keep_superadmin(request):
     call_command("flush", interactive=False, verbosity=0, allow_cascade=True)
     ensure_superadmin()
+    cache.clear() # Limpa o cache após a inserção dos novos dados
     return Response({"detail": "Banco apagado (mantendo superadmin)."})
 
 
@@ -141,7 +156,7 @@ def db_stats(request):
     from apps.organizacao.models import Instituicao, Secretaria
     from apps.frota.models import Rota, Veiculo
     from apps.pessoas.models import Pessoa
-    from apps.operacao.models import Guia, OperadorVeiculo, AlocacaoServico, TipoServico
+    from apps.operacao.models import GuiaAbastecimento, TipoAtividade
     from django.contrib.auth import get_user_model
 
     User = get_user_model()
@@ -157,8 +172,8 @@ def db_stats(request):
                 "rotas": Rota.objects.count(),
                 "condutores": Pessoa.objects.count(),
                 "veiculos": Veiculo.objects.count(),
-                "lotacoes": AlocacaoServico.objects.count(),
-                "guias": Guia.objects.count(),
+                "atividades": TipoAtividade.objects.count(),
+                "guias": GuiaAbastecimento.objects.count(),
                 "usuarios": User.objects.count(),
             },
         }

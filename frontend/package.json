@@ -6,18 +6,21 @@
   "scripts": {
     "dev": "vite",
     "dev:validation": "vite --mode validation",
+    "dev:local": "vite --mode devlocal",
     "build": "tsc -b && vite build",
     "build:validation": "tsc -b && vite build --mode validation",
     "lint": "eslint .",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@hookform/resolvers": "^5.2.2",
     "axios": "^1.13.6",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-hook-form": "^7.72.1",
     "react-imask": "^7.6.1",
-    "react-router-dom": "^7.13.1"
+    "react-router-dom": "^7.13.1",
+    "zod": "^4.4.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",

@@ -4,191 +4,52 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
+from django.core.exceptions import ValidationError
 
+from apps.pessoas.models import Pessoa
 from apps.core.viewset_cache import ModelViewSetCacheMixin
-from apps.usuarios.permissions import GuiaAbastecimentoPermission, FrotaPermission, CadastrosPermission
+from apps.usuarios.permissions import GuiaAbastecimentoPermission, CadastrosPermission
 
-from apps.operacao.models import OperadorVeiculo, Guia, TipoServico, AlocacaoServico
+from apps.operacao.models import TipoAtividade, GuiaAbastecimento, RegistroHodometroDiario
 from .serializers import (
-    TipoServicoSerializer, TipoServicoLookupSerializer,
-    AlocacaoServicoReadSerializer, AlocacaoServicoWriteSerializer, AlocacaoServicoLookupSerializer,
-    OperadorVeiculoReadSerializer, OperadorVeiculoWriteSerializer,
-    GuiaReadSerializer, GuiaWriteSerializer
+    TipoAtividadeSerializer, TipoAtividadeLookupSerializer,
+    GuiaReadSerializer, GuiaWriteSerializer, RegistroHodometroDiarioSerializer
 )
 
-from apps.operacao.services.pdf_generator import gerar_pdf_guia
+# Services
+from apps.operacao.services import guia_service
+from apps.operacao.services import hodometro_service
+from apps.operacao.services.pdf_service import gerar_pdf_guia
+from apps.operacao.services.sugestoes_service import get_sugestoes_pessoa
 
-class TipoServicoViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
-    queryset = TipoServico.objects.all()
-    serializer_class = TipoServicoSerializer
+
+class TipoAtividadeViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
+    queryset = TipoAtividade.objects.all()
+    serializer_class = TipoAtividadeSerializer
     permission_classes = [IsAuthenticated, CadastrosPermission]
-
-    # Habilitando os motores
-    filter_backends = [
-        DjangoFilterBackend, 
-        filters.SearchFilter, 
-        filters.OrderingFilter
-    ]
-
-    # Filtros Exatos
-    filterset_fields = ['id', 'ativo']
-
-    # Busca Textual
-    search_fields = ['nome', 'id']
-
-    # Ordenação (Ativos primeiro, depois ordem alfabética)
-    ordering_fields = ['nome', 'id', 'ativo']
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_fields = ['ativo']
+    search_fields = ['nome']
     ordering = ['-ativo', 'nome']
 
-    @action(detail=False, methods=['get'])
+    @action(detail=False, methods=['get'], serializer_class=TipoAtividadeLookupSerializer)
     def lookup(self, request):
         queryset = self.filter_queryset(self.get_queryset())
-        
-        # REGRA DE NEGÓCIO: Só exibe serviços ativos nos Selects (Dropdowns)
         if 'ativo' not in request.query_params:
             queryset = queryset.filter(ativo=True)
-        
-        # Otimização: Traz apenas o necessário para o Select do frontend
-        queryset = queryset.only('id', 'nome')
-        
-        serializer = TipoServicoLookupSerializer(queryset, many=True)
+        serializer = self.get_serializer(queryset.only('id', 'nome'), many=True)
         return Response(serializer.data)
 
 
-class AlocacaoServicoViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
-    # PREVENÇÃO N+1: Busca as 3 tabelas em uma única ida ao banco
-    queryset = AlocacaoServico.objects.select_related('pessoa', 'tipo_servico', 'secretaria').all()
-    
-    # SEGURANÇA
-    permission_classes = [IsAuthenticated, CadastrosPermission] 
-
-    # MOTORES HABILITADOS
-    filter_backends = [
-        DjangoFilterBackend, 
-        filters.SearchFilter, 
-        filters.OrderingFilter
-    ]
-
-    # Filtros Exatos 
-    filterset_fields = ['pessoa_id', 'tipo_servico_id', 'secretaria_id', 'is_principal']
-    
-    # Busca Textual (Permite o usuário pesquisar pelo nome na tabela)
-    search_fields = [
-        'pessoa__nome', 
-        'pessoa__cpf', 
-        'tipo_servico__nome', 
-        'secretaria__sigla'
-    ]
-
-    # Ordenação
-    ordering_fields = ['id', 'pessoa__nome', 'tipo_servico__nome', 'secretaria__sigla', 'is_principal']
-    ordering = ['-is_principal', 'pessoa__nome'] # Traz os principais primeiro
-
-    def get_serializer_class(self):
-        if self.request.method in ['GET', 'HEAD', 'OPTIONS']:
-            return AlocacaoServicoReadSerializer
-        return AlocacaoServicoWriteSerializer
-
-    @action(detail=False, methods=['get'])
-    def lookup(self, request):
-        queryset = self.filter_queryset(self.get_queryset())
-        
-        # OTIMIZAÇÃO LOOKUP
-        queryset = queryset.select_related(None).select_related('pessoa', 'tipo_servico').only(
-            'id', 
-            'pessoa__nome',
-            'tipo_servico__nome',
-            'secretaria_id', 
-            'is_principal'
-        )
-        
-        serializer = AlocacaoServicoLookupSerializer(queryset, many=True)
-        return Response(serializer.data)
-        queryset = self.filter_queryset(self.get_queryset())
-        
-        # 1. select_related(None): Anula o 'tipo_servico' e 'pessoa' vindos do topo da classe.
-        # 2. select_related('pessoa'): Refaz o JOIN só com quem a gente precisa agora.
-        # 3. only(...): Filtra as colunas.
-        queryset = queryset.select_related(None).select_related('pessoa').only(
-            'id', 
-            'pessoa__nome',
-            'secretaria_id', 
-            'is_principal'
-        )
-        
-        serializer = AlocacaoServicoLookupSerializer(queryset, many=True)
-        return Response(serializer.data)
-
-
-class OperadorVeiculoViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
-    # Performance: Otimiza as duas FKs para evitar N+1 queries
-    queryset = OperadorVeiculo.objects.select_related('pessoa', 'veiculo').all()
-    permission_classes = [IsAuthenticated, FrotaPermission]
-
-    # Habilitando motores
-    filter_backends = [
-        DjangoFilterBackend, 
-        filters.SearchFilter, # Faltava este!
-        filters.OrderingFilter
-    ]
-    
-    # Filtros exatos
-    filterset_fields = ['pessoa_id', 'veiculo_id', 'is_principal']
-    
-    # Busca Textual Inteligente
-    search_fields = [
-        'pessoa__nome', 
-        'pessoa__cpf', 
-        'veiculo__placa', 
-        'veiculo__modelo'
-    ]
-    
-    # Ordenação (Motoristas principais ficam no topo por padrão)
-    ordering_fields = ['id', 'pessoa__nome', 'veiculo__placa', 'is_principal']
-    ordering = ['-is_principal', 'pessoa__nome']
-
-    def get_serializer_class(self):
-        if self.request.method in ['GET', 'HEAD', 'OPTIONS']:
-            return OperadorVeiculoReadSerializer
-        return OperadorVeiculoWriteSerializer
-
-
-class GuiaViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
-    # ==========================================
-    # Faz o INNER JOIN entre as tabelas para prevenção de N+1 Queries
-    # ==========================================
-    queryset = Guia.objects.select_related(
-        'pessoa', 'veiculo', 'secretaria', 'rota', 'tipo_servico',
-        'instituicao', 'tipo_veiculo', 'tipo_combustivel', 'usuario'
+class GuiaAbastecimentoViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
+    queryset = GuiaAbastecimento.objects.select_related(
+        'pessoa', 'veiculo', 'secretaria', 'rota', 'tipo_atividade',
+        'instituicao', 'tipo_combustivel', 'usuario'
     ).all()
-
     permission_classes = [IsAuthenticated, GuiaAbastecimentoPermission]
-
-    filter_backends = [
-        DjangoFilterBackend, 
-        filters.SearchFilter, 
-        filters.OrderingFilter
-    ]
-
-    # Filtros exatos atualizados com as novas FKs (Excelentes para relatórios)
-    filterset_fields = [
-        'pessoa_id', 'veiculo_id', 'secretaria_id', 'rota_id', 
-        'tipo_servico_id', 'instituicao_id', 'tipo_veiculo_id', 
-        'tipo_combustivel_id', 'usuario_id'
-    ]
-
-    # Busca Textual cruzando para as outras tabelas
-    search_fields = [
-        'veiculo__placa', 
-        'pessoa__nome', 
-        'pessoa__cpf', 
-        'secretaria__sigla',
-        'instituicao__nome',
-        'tipo_servico__nome',
-        'tipo_servico_texto',
-    ]
-
-    ordering_fields = ['data_hora', 'id', 'tipo_servico__nome', 'secretaria__nome', 'pessoa__nome', 'quantidade_combustivel']
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_fields = ['modalidade', 'pessoa', 'veiculo', 'secretaria']
+    search_fields = ['veiculo__placa', 'veiculo_descricao', 'pessoa__nome']
     ordering = ['-data_hora']
 
     def get_serializer_class(self):
@@ -196,40 +57,62 @@ class GuiaViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
             return GuiaReadSerializer
         return GuiaWriteSerializer
 
-    # ==========================================
-    # INJEÇÃO DE AUTORIA (Segurança)
-    # ==========================================
-    def perform_create(self, serializer):
-        # O frontend não envia o usuario_id. O backend extrai do token JWT.
-        serializer.save(usuario=self.request.user)
-    
-    # ==========================================
-    # GERAÇÃO DE PDF
-    # Rota gerada: GET /api/v1/guias/<pk>/pdf/
-    # ==========================================
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        try:
+            guia = guia_service.criar_guia(serializer.validated_data, request.user)
+            read_serializer = GuiaReadSerializer(guia)
+            return Response(read_serializer.data, status=status.HTTP_201_CREATED)
+        except ValidationError as e:
+            return Response(e.message_dict if hasattr(e, 'message_dict') else {'detail': e.messages}, status=status.HTTP_400_BAD_REQUEST)
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+
+        try:
+            guia = guia_service.atualizar_guia(instance, serializer.validated_data)
+            return Response(GuiaReadSerializer(guia).data)
+        except ValidationError as e:
+            return Response(e.message_dict if hasattr(e, 'message_dict') else {'detail': e.messages}, status=status.HTTP_400_BAD_REQUEST)
+
     @action(detail=True, methods=['get'])
     def pdf(self, request, pk=None):
         try:
-            # Chama o motor do ReportLab para desenhar o PDF
-            pdf_bytes = gerar_pdf_guia(pk)
-            
-            # Devolve como arquivo binário
+            guia = self.get_object()
+            pdf_bytes = gerar_pdf_guia(guia)
             response = HttpResponse(pdf_bytes, content_type='application/pdf')
-            
-            # Usando "inline" para abrir na aba do navegador/iframe
             response['Content-Disposition'] = f'inline; filename="guia_abastecimento_{pk}.pdf"'
-            
             return response
-            
-        except ValueError:
-            return Response(
-                {"detail": "Guia não encontrada no banco de dados."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-        except Exception as e:
-            # Em desenvolvimento, é útil imprimir o erro real no console do Django
-            print(f"Erro Crítico no PDF: {e}") 
-            return Response(
-                {"detail": "Erro interno ao gerar o layout do PDF."},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
+        except Exception:
+            return Response({"detail": "Erro interno ao gerar o PDF."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @action(detail=False, methods=["get"])
+    def sugestoes(self, request):
+        pessoa_id = request.query_params.get("pessoa")
+        if not pessoa_id:
+            return Response({"detail": "Parâmetro 'pessoa' é obrigatório."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        dados = get_sugestoes_pessoa(pessoa_id)
+        return Response(dados, status=status.HTTP_200_OK)
+
+
+class RegistroHodometroDiarioViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
+    queryset = RegistroHodometroDiario.objects.all()
+    serializer_class = RegistroHodometroDiarioSerializer
+    permission_classes = [IsAuthenticated, GuiaAbastecimentoPermission]
+    filterset_fields = ['guia', 'data_referencia']
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        try:
+            registro = hodometro_service.registrar_hodometro_diario(serializer.validated_data)
+            return Response(self.get_serializer(registro).data, status=status.HTTP_201_CREATED)
+        except ValidationError as e:
+            return Response(e.message_dict if hasattr(e, 'message_dict') else {'detail': e.messages}, status=status.HTTP_400_BAD_REQUEST)
