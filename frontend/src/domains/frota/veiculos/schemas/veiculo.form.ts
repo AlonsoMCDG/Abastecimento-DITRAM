@@ -92,7 +92,7 @@ export const veiculoFormSchema = z.object({
 });
 
 // O Input representa o que o formulário "digita" (pode ser string/unknown antes da coerção)
-export type veiculoFormInput = z.input<typeof veiculoFormSchema>;
+export type VeiculoFormInput = z.input<typeof veiculoFormSchema>;
 
 // O Output representa o dado limpo e transformado (o que vai para a API)
-export type veiculoFormOutput = z.output<typeof veiculoFormSchema>;
+export type VeiculoFormOutput = z.output<typeof veiculoFormSchema>;
