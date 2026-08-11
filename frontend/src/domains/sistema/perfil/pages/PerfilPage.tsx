@@ -3,7 +3,6 @@ import { Link, useLocation } from "react-router-dom";
 import { usuarioApi } from "../../usuarios/usuarios.api";
 import { getApiErrorMessage } from "../../../../core/api/errorHandlers";
 import type { UsuarioReadDTO } from "../../usuarios/schemas/usuario.read.zod";
-import "../../../../core/ui/layouts/FormPage.css"
 
 export default function PerfilPage() {
   const location = useLocation();
