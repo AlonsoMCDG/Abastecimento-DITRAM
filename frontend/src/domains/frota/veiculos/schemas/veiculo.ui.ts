@@ -84,7 +84,6 @@ export const veiculoUISchema: FormSchema<VeiculoFormInput> = {
       name: "hodometro_atual",
       label: "Hodômetro Atual",
       type: "number",
-      required: true,
       suffix: "km",
     },
 

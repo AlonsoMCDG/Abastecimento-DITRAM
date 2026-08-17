@@ -1,5 +1,11 @@
 import { z } from "zod";
 
+const decimalNumber = z
+  .union([z.number(), z.string()])
+  .transform((value) =>
+    typeof value === "string" ? Number(value) : value
+  );
+
 // ============================================================
 // DTO DE LEITURA
 // O que vem da API para o frontend.
@@ -15,7 +21,7 @@ export const veiculoReadSchema = z.object({
   categoria: z.string(),
   categoria_nome: z.string(),
 
-  hodometro_atual: z.union([z.number(), z.string()]),
+  hodometro_atual: decimalNumber,
 
   unidade_consumo: z.string(),
   unidade_consumo_nome: z.string(),

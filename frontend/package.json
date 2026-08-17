@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "dev:validation": "vite --mode validation",
-    "dev:local": "vite --mode devlocal",
+    "dev:local": "vite --mode devlocal --host 0.0.0.0",
     "build": "tsc -b && vite build",
     "build:validation": "tsc -b && vite build --mode validation",
     "lint": "eslint .",
