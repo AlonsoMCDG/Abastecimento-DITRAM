@@ -43,7 +43,6 @@ export default function VeiculoFormPage() {
   });
 
   const {
-    handleSubmit,
     reset,
     watch,
     setValue,
