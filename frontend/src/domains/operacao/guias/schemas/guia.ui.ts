@@ -82,6 +82,7 @@ export const guiaAbastecimentoUISchema:
       options: [
         { label: 'Carro', value: 'CARRO' },
         { label: 'Caminhonete', value: 'CAMINHONETE' },
+        { label: 'Caminhão', value: 'CAMINHAO' },
         { label: 'Ônibus', value: 'ONIBUS' },
         { label: 'Moto', value: 'MOTO' },
         { label: 'Van', value: 'VAN' },
