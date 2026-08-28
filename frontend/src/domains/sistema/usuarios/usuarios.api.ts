@@ -21,6 +21,12 @@ const baseCrud = createCrudApi<
 export const usuarioApi = {
   ...baseCrud,
 
+  // Cadastro de novo usuário (tela de registro pública).
+  // É um alias do criar() do CRUD base, com nome explícito para o RegisterPage.
+  registrar(data: Parameters<typeof baseCrud.criar>[0]) {
+    return baseCrud.criar(data);
+  },
+
   // Perfil
   me() {
     return client.get<UsuarioReadDTO>(ENDPOINTS.usuarios.me);

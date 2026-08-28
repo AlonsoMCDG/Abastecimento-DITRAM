@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useForm, FormProvider, type SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -10,14 +10,13 @@ import { processPdfBlob } from '../../../../core/utils/pdfHandler';
 import { ROUTES } from '../../../../core/routes/routes';
 
 import { guiasApi } from '../api/guias.api';
-import { veiculosApi } from '../../../frota/veiculos/veiculos.api';
+import { veiculosApi } from '../../../frota/veiculos/api/veiculos.api';
 import { mapReadToForm, mapFormToWriteDTO } from '../api/guias.mapper';
 import { guiaAbastecimentoUISchema } from '../schemas/guia.ui';
 import { guiaAbastecimentoFormSchema, type GuiaAbastecimentoFormInput } from '../schemas/guia.form';
 
 import layoutStyles from '../../../../core/ui/layouts/FormPage.module.css';
 
-// export const GuiaAbastecimentoFormPage = () => {
 export default function GuiaAbastecimentoFormPage() {
   
   // INICIALIZAÇÃO DO REACT HOOK FORM
@@ -67,6 +66,7 @@ export default function GuiaAbastecimentoFormPage() {
   const veiculoIdSelecionado = watch('veiculo');
   
   useEffect(() => {
+    console.log("Selecionou veiculo "+ veiculoIdSelecionado);
     if (typeof veiculoIdSelecionado === 'number') {
       veiculosApi.buscar(veiculoIdSelecionado)
         .then(res => {

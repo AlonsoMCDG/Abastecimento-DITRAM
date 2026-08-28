@@ -53,7 +53,8 @@ class Veiculo(models.Model):
         ('MOTO', 'Moto'), 
         ('VAN', 'Van'),
         ('CAMINHAO', 'Caminhão'),
-        ('MAQUINA_PESADA', 'Máquina Pesada/Trator')
+        ('MAQUINA_PESADA', 'Máquina Pesada/Trator'),
+        # ('BARCO', 'Barco'),
     ]
     
     UNIDADE_CONSUMO_CHOICES = [

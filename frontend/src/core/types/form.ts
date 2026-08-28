@@ -4,7 +4,11 @@ import type { FieldValues, Path } from 'react-hook-form';
 export interface TableColumn {
   key: string;
   label: string;
-  format?: (value: unknown, item?: unknown) => React.ReactNode;
+  // `any` de propósito: o DataTable é genérico e cada domínio tipa seu próprio render
+  // (ex.: (val: boolean) => "✅"). A variância do TS não permite tipar value/item de
+  // forma estrita sem generics na schema inteira, então relaxamos apenas aqui.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  format?: (value: any, item?: any) => React.ReactNode;
   sortable?: boolean; // Permite desativar o clique em colunas específicas (ex.: Observação)
   sortKey?: string;   // O nome REAL do campo lá no banco de dados do Django
 }

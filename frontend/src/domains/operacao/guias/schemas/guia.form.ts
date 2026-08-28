@@ -83,7 +83,7 @@ export const guiaAbastecimentoFormSchema = z.object({
   }).nullable().optional()
 })
 .superRefine((data, ctx) => {
-  const isBarqueiro = data.modalidade === 'BARQUEIRO';
+  const isBarqueiro = data.modalidade === 'CATRAIA';
   const isVeiculoFilled = data.veiculo !== null && data.veiculo !== undefined && String(data.veiculo).trim() !== '';
   const isVeiculoAvulso = typeof data.veiculo === 'string';
   const isTipoFilled = typeof data.tipo_veiculo === 'string' && data.tipo_veiculo.trim() !== '';

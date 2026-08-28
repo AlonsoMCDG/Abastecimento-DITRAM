@@ -44,8 +44,9 @@ export function RegisterPage() {
       await usuarioApi.registrar({
         cpf: cpfDigits,
         password,
-        first_name: firstName || undefined,
-        last_name: lastName || undefined,
+        // O schema de escrita exige strings (vazias quando não informado)
+        first_name: firstName || "",
+        last_name: lastName || "",
         email: email || undefined,
       });
 

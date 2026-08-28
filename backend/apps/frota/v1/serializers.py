@@ -7,19 +7,27 @@ from apps.organizacao.models import Secretaria
 # ==========================================
 
 class VeiculoWriteSerializer(serializers.ModelSerializer):
-    tipo_combustivel_id = serializers.PrimaryKeyRelatedField(
-        source='tipo_combustivel',
-        queryset=TipoCombustivel.objects.filter(ativo=True)
-    )
 
     class Meta:
         model = Veiculo
         fields = [
-            'id', 'modelo', 'placa', 'categoria',
-            'capacidade_carga_kg', 'capacidade_pessoas',
-            'consumo_estimado_combustivel', 'consumo_estimado_oleo',
-            'unidade_consumo', 'hodometro_atual', 'ativo',
-            'tipo_combustivel_id',
+            'id', 
+
+            'modelo', 
+            'placa', 
+            'categoria',
+
+            'capacidade_carga_kg', 
+            'capacidade_pessoas',
+
+            'consumo_estimado_combustivel', 
+            'consumo_estimado_oleo',
+            'tipo_combustivel',
+
+            'unidade_consumo', 
+            'hodometro_atual', 
+
+            'ativo',
         ]
 
     def validate_placa(self, value):

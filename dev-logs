@@ -40,3 +40,16 @@ frontend: https://abastecimento-seme-app.onrender.com/
 
 
 
+17/08/2026: CORREÇÃO do erro de rede ao selecionar veículo (ERR_INTERNET_DISCONNECTED).
+- Causa raiz: o frontend usava o modo "dev:local" (VITE_API_URL=http://192.168.18.209:8000/api)
+  enquanto o backend (manage.py runserver) escutava apenas em 127.0.0.1:8000. O navegador tentava
+  o IP da rede e recebia Connection refused / network error em TODAS as chamadas, inclusive no
+  veiculosApi.buscar(id) disparado ao selecionar o veículo no formulário de guia.
+- Correções:
+  1. backend/apps/core/pagination.py: links de paginação (next/previous) agora são RELATIVOS,
+     eliminando URLs absolutas com host fixo (localhost x 127.0.0.1 x IP).
+  2. backend/runserver-local.cmd (novo): sobe o backend em 0.0.0.0:8000 para o modo dev:local.
+  3. frontend/package.json: script dev:local agora usa --host 0.0.0.0 (front acessível na rede).
+  4. frontend/.env.devlocal e .env.example: documentados os modos e os requisitos de IP.
+
+

@@ -19,7 +19,7 @@ import PessoaListPage from "./domains/pessoas/pages/PessoaListPage";
 import PessoaFormPage from "./domains/pessoas/pages/PessoaFormPage";
 
 import GuiaAbastecimentoListPage from "./domains/operacao/guias/pages/GuiaAbastecimentoListPage";
-import { GuiaAbastecimentoFormPage } from "./domains/operacao/guias/pages/GuiaAbastecimentoFormPage_old";
+import GuiaAbastecimentoFormPage from "./domains/operacao/guias/pages/GuiaAbastecimentoFormPage";
 import TipoAtividadeListPage from "./domains/operacao/tipos-atividade/pages/TipoAtividadeListPage";
 import TipoAtividadeFormPage from "./domains/operacao/tipos-atividade/pages/TipoAtividadeFormPage";
 

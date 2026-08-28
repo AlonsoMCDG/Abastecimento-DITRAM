@@ -53,18 +53,45 @@ class GuiaReadSerializer(serializers.ModelSerializer):
         ]
 
 class GuiaWriteSerializer(serializers.ModelSerializer):
-    # Tipagem string virtual para criação da atividade via Service
-    tipo_atividade_nome = serializers.CharField(write_only=True, required=False, allow_blank=True)
+    # Campo virtual utilizado pelo Service para localizar/criar
+    # uma atividade pelo nome.
+    tipo_atividade_nome = serializers.CharField(
+        write_only=True, 
+        required=False, 
+        allow_blank=True
+    )
 
     class Meta:
         model = GuiaAbastecimento
         fields = [
-            'id', 'data_hora', 'modalidade', 'quantidade_combustivel',
-            'quantidade_oleo', 'periodo_uso_dias', 'observacao',
-            'hodometro', 'hodometro_quebrado', 'rota_manual',
-            'pessoa', 'veiculo', 'tipo_veiculo', 'veiculo_descricao',
-            'tipo_atividade', 'tipo_atividade_nome', 'rota',
-            'secretaria', 'instituicao', 'tipo_combustivel'
+            'id', 
+            'data_hora', 
+            'modalidade', 
+
+            'quantidade_combustivel',
+            'quantidade_oleo', 
+            'periodo_uso_dias', 
+            'observacao',
+
+            'hodometro', 
+            'hodometro_quebrado', 
+
+            'rota_manual',
+
+            'pessoa', 
+
+            'veiculo', 
+            'tipo_veiculo', 
+            'veiculo_descricao',
+
+            'tipo_atividade', 
+            'tipo_atividade_nome', 
+
+            'rota',
+
+            'secretaria', 
+            'instituicao', 
+            'tipo_combustivel',
         ]
 
 class RegistroHodometroDiarioSerializer(serializers.ModelSerializer):
