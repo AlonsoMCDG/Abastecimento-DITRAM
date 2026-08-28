@@ -16,7 +16,8 @@ export function mapReadToForm(data: RotaReadDTO): Partial<RotaFormData> {
   return {
     nome: data.nome,
     secretaria_id: data.secretaria_id,
-    distancia_km: data.distancia_km,
+    // A API devolve decimais como string ("12.50"); o form espera number|null
+    distancia_km: data.distancia_km === null ? null : Number(data.distancia_km),
     detalhes: data.detalhes,
     ativa: data.ativa
   };

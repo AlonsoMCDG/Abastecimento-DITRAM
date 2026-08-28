@@ -25,8 +25,9 @@ export default function Home() {
     setError(false);
     secretariaApi.listar()
       .then((secRes) => {
-        const data: any = secRes.data;
-        const lista = Array.isArray(data) ? data : (data?.results || []);
+        // listar() já retorna a resposta paginada (não é um AxiosResponse):
+        // pode vir como array puro ou como { results: [...] }
+        const lista = Array.isArray(secRes) ? secRes : (secRes?.results ?? []);
         setSecretarias(lista);
       })
       .catch(() => setError(true))
