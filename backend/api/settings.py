@@ -37,8 +37,17 @@ else:
 allowed_hosts_env = os.getenv("ALLOWED_HOSTS", "").strip()
 if allowed_hosts_env:
     ALLOWED_HOSTS = [h.strip() for h in allowed_hosts_env.split(",") if h.strip()]
+elif DEBUG:
+    # Fallback seguro apenas em desenvolvimento local
+    ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
 else:
-    ALLOWED_HOSTS = ["*"]
+    # FAIL-CLOSED: em validação/produção, ALLOWED_HOSTS é OBRIGATÓRIO.
+    # Levantar erro aqui impede o app de subir aceitando Hosts arbitrários
+    # (evita ataques de Host Header Injection). Configure a env var!
+    raise RuntimeError(
+        "ALLOWED_HOSTS não configurado. Fora do perfil 'dev' esta variável "
+        "é obrigatória (ex.: ALLOWED_HOSTS=seu-app.onrender.com)."
+    )
 
 # ======================
 # SECURITY (PRODUCTION)
@@ -238,13 +247,19 @@ cors_allowed_origins_env = os.getenv("CORS_ALLOWED_ORIGINS", "").strip()
 if cors_allowed_origins_env:
     CORS_ALLOW_ALL_ORIGINS = False
     CORS_ALLOWED_ORIGINS = [o.strip() for o in cors_allowed_origins_env.split(",") if o.strip()]
+elif DEBUG:
+    # Fallback seguro apenas em desenvolvimento local (Vite)
+    CORS_ALLOWED_ORIGINS = ["http://localhost:5173", "http://127.0.0.1:5173"]
 else:
+    # FAIL-CLOSED fora de dev: sem env var, nenhuma origem externa é permitida
     CORS_ALLOWED_ORIGINS = []
 
 # Leitura do CSRF
 csrf_trusted_env = os.getenv("CSRF_TRUSTED_ORIGINS", "").strip()
 if csrf_trusted_env:
     CSRF_TRUSTED_ORIGINS = [o.strip() for o in csrf_trusted_env.split(",") if o.strip()]
+elif DEBUG:
+    CSRF_TRUSTED_ORIGINS = ["http://localhost:5173", "http://127.0.0.1:5173"]
 else:
     CSRF_TRUSTED_ORIGINS = []
 
