@@ -1,7 +1,7 @@
 // src/components/RequirePermission.tsx
 import React from "react";
 import { Navigate } from "react-router-dom";
-import { useAuth } from "../AuthContext";
+import { useAuth } from "../useAuth";
 import type { Usuario } from "../../types/models";
 
 type Props = {

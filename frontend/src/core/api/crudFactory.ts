@@ -11,8 +11,9 @@ import {
 import type { PaginatedResponse } from "../types/api"
 
 export function createCrudApi<
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   TReadSchema extends z.ZodType<any>,
-  TWriteSchema extends z.ZodObject<any>,
+  TWriteSchema extends z.ZodObject<z.ZodRawShape>,
   TParams extends Record<string, unknown> = Record<string, unknown>
 >(config: {
   endpoint: string

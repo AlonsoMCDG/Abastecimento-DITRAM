@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authApi } from '../auth.api';
-import { useAuth } from '../AuthContext';
+import { useAuth } from '../useAuth';
 import { isAuthenticated } from '../auth.utils';
 import { getApiErrorMessage } from '../../api/errorHandlers';
 import { IMaskInput } from 'react-imask';

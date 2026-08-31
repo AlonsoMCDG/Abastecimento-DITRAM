@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import { usuarioApi } from "../usuarios.api";
 import type { UsuarioReadDTO } from "../schemas/usuario.read.zod";
-import { useAuth } from "../../../../core/auth/AuthContext";
+import { useAuth } from "../../../../core/auth/useAuth";
 
 import DataTable, { type DataTableParams } from "../../../../core/ui/data-display/DataTable";
 import type { TableSchema } from "../../../../core/types/form";
@@ -78,7 +78,7 @@ export default function UsuariosPermissoesPage() {
       });
       // Recarrega os dados com os parâmetros atuais (força refresh via nova referência, 
       // ou o usuário clica num botão de refresh. Aqui, remover a edição já limpa o estado visual).
-    } catch (err) {
+    } catch {
       setErrorMsg("Erro ao salvar permissões. Tente novamente.");
     }
   };

@@ -4,6 +4,91 @@ Sistema de controle e emissão de guias de abastecimento para a Diretoria de Tra
 
 [![Figma Design](https://img.shields.io/badge/Figma-Design-blue?logo=figma&logoColor=white)](https://www.figma.com/design/iyTMnJRem5A4SyjrpKxiOO/SEME?node-id=0-1&t=aqXvkX3mVawrXngo-1)
 
+---
+
+## 🚀 Como Executar o Projeto
+
+### 📋 Pré-requisitos
+- Python 3.10+
+- Node.js 20+
+- npm 10+
+
+### 🔧 1. Backend (Django)
+
+```bash
+# Entrar na pasta do backend
+cd backend
+
+# Criar e ativar o ambiente virtual (venv)
+python3 -m venv venv
+source venv/bin/activate  # No Linux/macOS
+# ou: venv\Scripts\activate  (No Windows)
+
+# Instalar dependências
+pip install -r requirements.txt
+
+# Configurar o arquivo .env (copie do exemplo)
+cp .env.example .env
+
+# Aplicar migrações do banco de dados
+python manage.py migrate
+
+# Popular com dados padrão de testes (138 registros)
+python manage.py seed_default_data --force
+
+# Iniciar o servidor de desenvolvimento (http://127.0.0.1:8000)
+python manage.py runserver
+```
+
+**Credenciais padrão de desenvolvimento (seed):**
+- **CPF:** `999.999.999-99` (ou `99999999999`)
+- **Senha:** `admin`
+
+---
+
+### 💻 2. Frontend (React + Vite)
+
+Em **outro terminal**:
+
+```bash
+# Entrar na pasta do frontend
+cd frontend
+
+# Instalar dependências
+npm install
+
+# Configurar o arquivo .env (copie do exemplo)
+cp .env.example .env
+
+# Iniciar o servidor Vite (http://localhost:5173)
+npm run dev
+```
+
+---
+
+## 🛠️ Arquitetura e Convenções
+
+### Perfis do Backend (`DJANGO_PROFILE`)
+| Perfil | Banco | Debug | Finalidade |
+|---|---|---|---|
+| `dev` | SQLite local (`db.sqlite3`) | `True` | Desenvolvimento local |
+| `validation` | PostgreSQL (Render) | `False` | Homologação e testes |
+| `prod` | PostgreSQL (Render) | `False` | Produção final |
+
+### Convenção de Contrato da API REST
+- **Sufixo `_id` em FKs:** Toda chave estrangeira nos DTOs de leitura e escrita utiliza o sufixo `_id` (ex.: `tipo_combustivel_id`, `secretaria_id`, `pessoa_id`).
+- **Fonte Única de Verdade dos Enums:** Os selects de enums consome o endpoint `/api/v1/choices/` alimentado diretamente pelos `CHOICES` dos models Django, garantindo consistência total entre frontend e backend.
+
+---
+
+## ☁️ Deploy no Render
+
+1. **Backend:** Web Service com build `bash build.sh` e start `gunicorn api.wsgi:application`.
+   - Requer as variáveis: `DJANGO_PROFILE=validation`, `DEBUG=False`, `SECRET_KEY`, `ALLOWED_HOSTS`, `DATABASE_URL`, `CORS_ALLOWED_ORIGINS`, `CSRF_TRUSTED_ORIGINS`.
+2. **Frontend:** Static Site com build `npm run build` e publish directory `dist`.
+
+---
+
 ## 📋 Requisitos Funcionais (RF)
 
 | ID | Requisito Funcional | Descrição |
@@ -35,8 +120,8 @@ Sistema de controle e emissão de guias de abastecimento para a Diretoria de Tra
 ## 📐 Regras de Operação
 
 ### Tipos de Serviço Suportados
-* **Veículos:** Caminhonete, Ônibus, Motocicleta, Carro.
-* **Serviços Especiais:** Roçagem, Barqueiro (Catraieiro).
+* **Veículos:** Caminhonete, Ônibus, Motocicleta, Carro, Van, Máquina Pesada.
+* **Embarcações:** Catraia (embarcações de transporte fluvial).
 * **Outros:** Recipientes Avulsos (Corote).
 
 ### Automações de Campo
@@ -44,48 +129,5 @@ Sistema de controle e emissão de guias de abastecimento para a Diretoria de Tra
 * **Rótulos Dinâmicos:** A guia altera termos conforme o serviço (ex: "Catraieiro" para barcos, "Responsável" para roçagem).
 * **Validação de Hodômetro:** O sistema bloqueia KM inferior à última registrada, mas permite confirmação manual caso o campo seja deixado vazio (medidor quebrado).
 
----
-
-## ⚙️ Configuração e Instalação (Profiles)
-
-### Backend (Django)
-O backend usa a variável `DJANGO_PROFILE` para definir o perfil:
-- `dev`: Desenvolvimento local (SQLite/Debug On).
-- `validation`: Ambiente de testes (PostgreSQL/Debug Off).
-- `prod`: Produção final (PostgreSQL/Debug Off).
-
-**Rodando local:**
-```powershell
-cd backend
-$env:DJANGO_PROFILE="dev"
-python manage.py runserver
-```
-
-### Frontend (Vite)
-O frontend utiliza arquivos `.env` específicos para direcionar as requisições à API e configurar o comportamento do build de acordo com o ambiente:
-
-| Arquivo | Finalidade |
-| :--- | :--- |
-| `.env.development` | Modo padrão para desenvolvimento local. |
-| `.env.validation` | Aponta para o ambiente de homologação/validação. |
-| `.env.production` | Configurações para o ambiente final de produção. |
-
-**Comandos de Execução e Build:**
-
-```bash
-cd frontend
-
-# Executar em modo desenvolvimento (padrão)
-npm run dev
-
-# Executar contra o backend de validação
-npm run dev:validation
-
-# Build para produção final
-npm run build
-
-# Build para o ambiente de validação
-npm run build:validation
-```
 
 

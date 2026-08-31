@@ -35,18 +35,8 @@ export const veiculoUISchema: FormSchema<VeiculoFormInput> = {
       label: "Categoria",
       type: "select",
       required: true,
-      options: [
-        { label: "Carro", value: "CARRO" },
-        { label: "Caminhonete", value: "CAMINHONETE" },
-        { label: "Ônibus", value: "ONIBUS" },
-        { label: "Moto", value: "MOTO" },
-        { label: "Van", value: "VAN" },
-        { label: "Caminhão", value: "CAMINHAO" },
-        {
-          label: "Máquina Pesada/Trator",
-          value: "MAQUINA_PESADA",
-        },
-      ],
+      // Fonte única de verdade: choices do model Veiculo no backend
+      endpoint: ENDPOINTS.choices.veiculoCategoria,
     },
 
     // -------------------------
@@ -65,16 +55,8 @@ export const veiculoUISchema: FormSchema<VeiculoFormInput> = {
       label: "Unidade de Consumo",
       type: "select",
       required: true,
-      options: [
-        {
-          label: "km/L",
-          value: "KM_POR_L",
-        },
-        {
-          label: "L/h",
-          value: "L_POR_H",
-        },
-      ],
+      // Fonte única de verdade: choices do model Veiculo no backend
+      endpoint: ENDPOINTS.choices.veiculoUnidadeConsumo,
     },
 
     // -------------------------

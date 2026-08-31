@@ -18,7 +18,7 @@ class SecretariaLookupSerializer(serializers.ModelSerializer):
         fields = ['value', 'label']
 
     def get_label(self, obj: Secretaria):
-        # Formatação: "SEME - Secretaria Municipal de Educação"
+        # Formatação: "Secretaria Municipal de Educação - SEME"
         return f"{obj.nome} - {obj.sigla}"
 
 

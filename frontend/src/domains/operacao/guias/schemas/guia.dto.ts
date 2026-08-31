@@ -75,27 +75,27 @@ export const guiaAbastecimentoWriteSchema = z.object({
 
   modalidade: z.string().min(1),
 
-  pessoa: z.coerce.number(),
+  pessoa_id: z.coerce.number(),
 
-  veiculo: z.coerce.number().nullable().optional(),
+  veiculo_id: z.coerce.number().nullable().optional(),
 
   tipo_veiculo: z.string().nullable().optional(),
 
   veiculo_descricao: z.string().nullable().optional(),
 
-  secretaria: z.coerce.number(),
+  secretaria_id: z.coerce.number(),
 
-  instituicao: z.number().nullable().optional(),
+  instituicao_id: z.number().nullable().optional(),
 
-  rota: z.coerce.number().nullable().optional(),
+  rota_id: z.coerce.number().nullable().optional(),
 
   rota_manual: z.string().nullable().optional(),
 
-  tipo_atividade: z.coerce.number().nullable().optional(),
+  tipo_atividade_id: z.coerce.number().nullable().optional(),
 
   tipo_atividade_nome: z.string().optional(),
 
-  tipo_combustivel: z.coerce.number(),
+  tipo_combustivel_id: z.coerce.number(),
 
   quantidade_combustivel: z.union([
     z.number(), z.string()
@@ -119,18 +119,18 @@ export type GuiaAbastecimentoWriteDTO = z.infer<typeof guiaAbastecimentoWriteSch
 // ============================================================
 // FILTROS DA LISTAGEM
 // Estes nomes correspondem aos parâmetros de filtro da API.
+// IMPORTANTE: contém APENAS params suportados pelo backend
+// (GuiaAbastecimentoViewSet.filterset_fields = modalidade,
+// pessoa, veiculo, secretaria). Params como rota, tipo_atividade,
+// instituicao, tipo_veiculo, tipo_combustivel e usuario são
+// silenciosamente ignorados pelo django-filter e foram removidos.
 // ============================================================
 
 export const guiaListParamsSchema = z.object({
+  modalidade: z.string().optional(),
   pessoa: z.number().optional(),
   veiculo: z.number().optional(),
   secretaria: z.number().optional(),
-  rota: z.number().optional(),
-  tipo_atividade: z.number().optional(),
-  instituicao: z.number().optional(),
-  tipo_veiculo: z.string().optional(),
-  tipo_combustivel: z.number().optional(),
-  usuario: z.number().optional(),
 
   search: z.string().optional(),
   ordering: z.string().optional(),

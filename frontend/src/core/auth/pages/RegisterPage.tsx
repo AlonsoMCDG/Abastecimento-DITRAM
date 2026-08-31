@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { authApi } from "../auth.api";
 import { usuarioApi } from "../../../domains/sistema/usuarios/usuarios.api";
-import { useAuth } from "../AuthContext";
+import { useAuth } from "../useAuth";
 import { isAuthenticated } from "../auth.utils";
 import { getApiErrorMessage } from "../../api/errorHandlers";
 

@@ -6,7 +6,7 @@ import { QuickViewModal } from "../../../../core/ui/overlays/QuickViewModal";
 
 import { guiasApi } from "../api/guias.api";
 import { ROUTES } from "../../../../core/routes/routes";
-import { useAuth } from "../../../../core/auth/AuthContext";
+import { useAuth } from "../../../../core/auth/useAuth";
 import { Can } from "../../../../core/auth/components/Can";
 import { getApiErrorMessage } from "../../../../core/api/errorHandlers";
 import { processPdfBlob } from "../../../../core/utils/pdfHandler";

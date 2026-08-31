@@ -41,17 +41,19 @@ export function mapFormToWriteDTO(
 
   // --- ROTEAMENTO INTELIGENTE DO VEÍCULO ---
 
-  if (modalidade === 'BARQUEIRO') {
-    // Regra do Barqueiro: Sem ID, Tipo é fixo, Descrição usa o que foi digitado ou assume "Barco"
+  if (modalidade === 'CATRAIA') {
+    // Regra da embarcação (Catraia): Sem ID, Tipo é fixo em CATRAIA,
+    // Descrição usa o que foi digitado ou assume "Catraia"
+    // (alinhado com guia.form.ts; BARQUEIRO não existe nas choices do backend)
 
     final_veiculo = null;
 
-    final_tipo_veiculo = "BARCO";
+    final_tipo_veiculo = "CATRAIA";
 
     final_veiculo_descricao =
       typeof veiculo === 'string' && veiculo.trim() !== ''
         ? veiculo
-        : "Barco";
+        : "Catraia";
 
   } else {
 
@@ -87,18 +89,18 @@ export function mapFormToWriteDTO(
     
     modalidade,
     
-    // FKs
-    pessoa: pessoa_id,
+    // FKs (padrão *_id, igual ao contrato de leitura)
+    pessoa_id,
 
-    secretaria: secretaria_id,
+    secretaria_id,
 
-    instituicao: instituicao_id ?? null,
+    instituicao_id: instituicao_id ?? null,
 
-    tipo_combustivel: tipo_combustivel_id,
+    tipo_combustivel_id: tipo_combustivel_id,
     
-
+    
     // --- ROTEAMENTO DO VEÍCULO ---
-    veiculo: final_veiculo,
+    veiculo_id: final_veiculo,
 
     veiculo_descricao: final_veiculo_descricao,
 
@@ -115,7 +117,7 @@ export function mapFormToWriteDTO(
 
     
     // --- ROTEAMENTO DA ROTA ---
-    rota: 
+    rota_id: 
       typeof rota === 'number' 
         ? rota 
         : null,
@@ -127,7 +129,7 @@ export function mapFormToWriteDTO(
     
     
     // --- ROTEAMENTO DA ATIVIDADE ---
-    tipo_atividade: 
+    tipo_atividade_id: 
       typeof tipo_atividade === 'number' 
         ? tipo_atividade 
         : null,

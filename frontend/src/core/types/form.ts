@@ -35,6 +35,7 @@ export interface FieldOption {
   value: string | number;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface FormField<T extends FieldValues = any> {
   name: Path<T>;            // Nome exato do campo no formulário/payload (ex.: 'veiculo_id')
   label: string;           // Texto de cabeçalho visível para o usuário
@@ -51,11 +52,12 @@ export interface FormField<T extends FieldValues = any> {
   quickActions?: QuickAction[]; // Botões de atalho embutidos no campo (ex.: '➕ Novo')
   prefix?: string | React.ReactNode;  // Elemento renderizado no início do input (ex.: 'R$')
   suffix?: string | React.ReactNode;  // Elemento renderizado no final do input (ex.: 'km/L')
-  mask?: any;              // Lógica de formatação do texto digitado (ex.: máscara de CPF)
+  mask?: unknown;          // Lógica de formatação do texto digitado (ex.: máscara de CPF)
   visibleIf?: (values: Partial<T>) => boolean; // Função condicional para mostrar ou ocultar este campo
   creatable?: boolean;     // Permite que o usuário digite um valor novo que não está na lista
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface FormSchema<T extends FieldValues = any> {
   fields: FormField<T>[]
 }

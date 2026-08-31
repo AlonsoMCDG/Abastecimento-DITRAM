@@ -53,6 +53,35 @@ class GuiaReadSerializer(serializers.ModelSerializer):
         ]
 
 class GuiaWriteSerializer(serializers.ModelSerializer):
+    # FKs de escrita padronizadas com sufixo _id (contrato da API).
+    # O source aponta para o campo do model, então o service continua
+    # recebendo validated_data com as chaves do model.
+    pessoa_id = serializers.PrimaryKeyRelatedField(
+        source='pessoa', queryset=Pessoa.objects.all()
+    )
+    secretaria_id = serializers.PrimaryKeyRelatedField(
+        source='secretaria', queryset=Secretaria.objects.all()
+    )
+    instituicao_id = serializers.PrimaryKeyRelatedField(
+        source='instituicao', queryset=Instituicao.objects.all(),
+        allow_null=True, required=False
+    )
+    veiculo_id = serializers.PrimaryKeyRelatedField(
+        source='veiculo', queryset=Veiculo.objects.all(),
+        allow_null=True, required=False
+    )
+    rota_id = serializers.PrimaryKeyRelatedField(
+        source='rota', queryset=Rota.objects.all(),
+        allow_null=True, required=False
+    )
+    tipo_atividade_id = serializers.PrimaryKeyRelatedField(
+        source='tipo_atividade', queryset=TipoAtividade.objects.all(),
+        allow_null=True, required=False
+    )
+    tipo_combustivel_id = serializers.PrimaryKeyRelatedField(
+        source='tipo_combustivel', queryset=TipoCombustivel.objects.all()
+    )
+
     # Campo virtual utilizado pelo Service para localizar/criar
     # uma atividade pelo nome.
     tipo_atividade_nome = serializers.CharField(
@@ -78,20 +107,20 @@ class GuiaWriteSerializer(serializers.ModelSerializer):
 
             'rota_manual',
 
-            'pessoa', 
+            'pessoa_id', 
 
-            'veiculo', 
+            'veiculo_id', 
             'tipo_veiculo', 
             'veiculo_descricao',
 
-            'tipo_atividade', 
+            'tipo_atividade_id', 
             'tipo_atividade_nome', 
 
-            'rota',
+            'rota_id',
 
-            'secretaria', 
-            'instituicao', 
-            'tipo_combustivel',
+            'secretaria_id', 
+            'instituicao_id', 
+            'tipo_combustivel_id',
         ]
 
 class RegistroHodometroDiarioSerializer(serializers.ModelSerializer):

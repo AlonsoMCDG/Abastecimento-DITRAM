@@ -2,268 +2,440 @@
   {
     "model": "organizacao.secretaria",
     "pk": 1,
-    "fields": { "nome": "Secretaria Municipal de Educação", "sigla": "SEME" }
+    "fields": {
+      "nome": "Secretaria Municipal de Educação",
+      "sigla": "SEME"
+    }
   },
   {
     "model": "organizacao.secretaria",
     "pk": 2,
-    "fields": { "nome": "Secretaria Municipal de Meio Ambiente", "sigla": "SEMA" }
+    "fields": {
+      "nome": "Secretaria Municipal de Meio Ambiente",
+      "sigla": "SEMA"
+    }
   },
   {
     "model": "organizacao.secretaria",
     "pk": 3,
-    "fields": { "nome": "Secretaria Municipal de Saúde", "sigla": "SAÚDE" }
+    "fields": {
+      "nome": "Secretaria Municipal de Saúde",
+      "sigla": "SAÚDE"
+    }
   },
   {
     "model": "organizacao.secretaria",
     "pk": 4,
-    "fields": { "nome": "Secretaria Municipal de Administração e Finanças", "sigla": "SEMAF" }
+    "fields": {
+      "nome": "Secretaria Municipal de Administração e Finanças",
+      "sigla": "SEMAF"
+    }
   },
-
-  
-  
-
-
   {
     "model": "organizacao.instituicao",
     "pk": 1,
-    "fields": { "nome": "Escola Municipal Monteiro Lobato", "tipo": "ESCOLA", "secretaria": 1 }
+    "fields": {
+      "nome": "Escola Municipal Monteiro Lobato",
+      "tipo": "ESCOLA",
+      "secretaria": 1
+    }
   },
   {
     "model": "organizacao.instituicao",
     "pk": 2,
-    "fields": { "nome": "Creche Casulo Pintando o Sete", "tipo": "CRECHE", "secretaria": 1 }
+    "fields": {
+      "nome": "Creche Casulo Pintando o Sete",
+      "tipo": "CRECHE",
+      "secretaria": 1
+    }
   },
   {
     "model": "organizacao.instituicao",
     "pk": 3,
-    "fields": { "nome": "CMEI Primeiros Passos", "tipo": "CRECHE", "secretaria": 1 }
+    "fields": {
+      "nome": "CMEI Primeiros Passos",
+      "tipo": "CRECHE",
+      "secretaria": 1
+    }
   },
   {
     "model": "organizacao.instituicao",
     "pk": 4,
-    "fields": { "nome": "Escola de Ensino Fundamental Novo Tempo", "tipo": "ESCOLA", "secretaria": 1 }
+    "fields": {
+      "nome": "Escola de Ensino Fundamental Novo Tempo",
+      "tipo": "ESCOLA",
+      "secretaria": 1
+    }
   },
   {
     "model": "organizacao.instituicao",
     "pk": 5,
-    "fields": { "nome": "Biblioteca Municipal Central", "tipo": "OUTRO", "secretaria": 4 }
+    "fields": {
+      "nome": "Biblioteca Municipal Central",
+      "tipo": "OUTRO",
+      "secretaria": 4
+    }
   },
   {
     "model": "organizacao.instituicao",
     "pk": 6,
-    "fields": { "nome": "Escola Rural Boa Vista", "tipo": "ESCOLA", "secretaria": 1 }
+    "fields": {
+      "nome": "Escola Rural Boa Vista",
+      "tipo": "ESCOLA",
+      "secretaria": 1
+    }
   },
   {
     "model": "organizacao.instituicao",
     "pk": 7,
-    "fields": { "nome": "Creche Municipal Tia Anastácia", "tipo": "CRECHE", "secretaria": 1 }
+    "fields": {
+      "nome": "Creche Municipal Tia Anastácia",
+      "tipo": "CRECHE",
+      "secretaria": 1
+    }
   },
   {
     "model": "organizacao.instituicao",
     "pk": 8,
-    "fields": { "nome": "Viveiro Municipal de Mudas", "tipo": "OUTRO", "secretaria": 2 }
+    "fields": {
+      "nome": "Viveiro Municipal de Mudas",
+      "tipo": "OUTRO",
+      "secretaria": 2
+    }
   },
   {
     "model": "organizacao.instituicao",
     "pk": 9,
-    "fields": { "nome": "Aterro Sanitário Municipal", "tipo": "OUTRO", "secretaria": 2 }
+    "fields": {
+      "nome": "Aterro Sanitário Municipal",
+      "tipo": "OUTRO",
+      "secretaria": 2
+    }
   },
   {
     "model": "organizacao.instituicao",
     "pk": 10,
-    "fields": { "nome": "Parque de Exposições", "tipo": "OUTRO", "secretaria": 2 }
+    "fields": {
+      "nome": "Parque de Exposições",
+      "tipo": "OUTRO",
+      "secretaria": 2
+    }
   },
   {
     "model": "organizacao.instituicao",
     "pk": 11,
-    "fields": { "nome": "Centro de Triagem de Recicláveis", "tipo": "OUTRO", "secretaria": 2 }
+    "fields": {
+      "nome": "Centro de Triagem de Recicláveis",
+      "tipo": "OUTRO",
+      "secretaria": 2
+    }
   },
   {
     "model": "organizacao.instituicao",
     "pk": 12,
-    "fields": { "nome": "Horta Comunitária Sul", "tipo": "OUTRO", "secretaria": 2 }
+    "fields": {
+      "nome": "Horta Comunitária Sul",
+      "tipo": "OUTRO",
+      "secretaria": 2
+    }
   },
   {
     "model": "organizacao.instituicao",
     "pk": 13,
-    "fields": { "nome": "Base de Fiscalização Ambiental", "tipo": "OUTRO", "secretaria": 2 }
+    "fields": {
+      "nome": "Base de Fiscalização Ambiental",
+      "tipo": "OUTRO",
+      "secretaria": 2
+    }
   },
   {
     "model": "organizacao.instituicao",
     "pk": 14,
-    "fields": { "nome": "Departamento de Parques e Jardins", "tipo": "OUTRO", "secretaria": 2 }
+    "fields": {
+      "nome": "Departamento de Parques e Jardins",
+      "tipo": "OUTRO",
+      "secretaria": 2
+    }
   },
   {
     "model": "organizacao.instituicao",
     "pk": 15,
-    "fields": { "nome": "Centro de Especialidades Médicas", "tipo": "OUTRO", "secretaria": 3 }
+    "fields": {
+      "nome": "Centro de Especialidades Médicas",
+      "tipo": "OUTRO",
+      "secretaria": 3
+    }
   },
   {
     "model": "organizacao.instituicao",
     "pk": 16,
-    "fields": { "nome": "Vigilância Sanitária", "tipo": "OUTRO", "secretaria": 3 }
+    "fields": {
+      "nome": "Vigilância Sanitária",
+      "tipo": "OUTRO",
+      "secretaria": 3
+    }
   },
   {
     "model": "organizacao.instituicao",
     "pk": 17,
-    "fields": { "nome": "Posto de Saúde Central", "tipo": "UPA", "secretaria": 3 }
+    "fields": {
+      "nome": "Posto de Saúde Central",
+      "tipo": "UPA",
+      "secretaria": 3
+    }
   },
   {
     "model": "organizacao.instituicao",
     "pk": 18,
-    "fields": { "nome": "UPA 24 Horas Vila Nova", "tipo": "UPA", "secretaria": 3 }
+    "fields": {
+      "nome": "UPA 24 Horas Vila Nova",
+      "tipo": "UPA",
+      "secretaria": 3
+    }
   },
   {
     "model": "organizacao.instituicao",
     "pk": 19,
-    "fields": { "nome": "Hospital Municipal Dr. José Frota", "tipo": "HOSPITAL", "secretaria": 3 }
+    "fields": {
+      "nome": "Hospital Municipal Dr. José Frota",
+      "tipo": "HOSPITAL",
+      "secretaria": 3
+    }
   },
   {
     "model": "organizacao.instituicao",
     "pk": 20,
-    "fields": { "nome": "Centro de Vacinação Municipal", "tipo": "OUTRO", "secretaria": 3 }
+    "fields": {
+      "nome": "Centro de Vacinação Municipal",
+      "tipo": "OUTRO",
+      "secretaria": 3
+    }
   },
-  
-  
-
-
-
   {
     "model": "pessoas.pessoa",
     "pk": 1,
-    "fields": { "nome": "Ricardo Silva Pereira", "cpf": "12345000001", "ativo": true }
+    "fields": {
+      "nome": "Ricardo Silva Pereira",
+      "cpf": "12345000001",
+      "ativo": true
+    }
   },
   {
     "model": "pessoas.pessoa",
     "pk": 2,
-    "fields": { "nome": "Ana Cláudia Martins", "cpf": "12345000002", "ativo": true }
+    "fields": {
+      "nome": "Ana Cláudia Martins",
+      "cpf": "12345000002",
+      "ativo": true
+    }
   },
   {
     "model": "pessoas.pessoa",
     "pk": 3,
-    "fields": { "nome": "Marcos Antônio Santos", "cpf": "12345000003", "ativo": true }
+    "fields": {
+      "nome": "Marcos Antônio Santos",
+      "cpf": "12345000003",
+      "ativo": true
+    }
   },
   {
     "model": "pessoas.pessoa",
     "pk": 4,
-    "fields": { "nome": "Juliana Souza Lima", "cpf": "12345000004", "ativo": true }
+    "fields": {
+      "nome": "Juliana Souza Lima",
+      "cpf": "12345000004",
+      "ativo": true
+    }
   },
   {
     "model": "pessoas.pessoa",
     "pk": 5,
-    "fields": { "nome": "Fernando Oliveira Cruz", "cpf": "12345000005", "ativo": true }
+    "fields": {
+      "nome": "Fernando Oliveira Cruz",
+      "cpf": "12345000005",
+      "ativo": true
+    }
   },
   {
     "model": "pessoas.pessoa",
     "pk": 6,
-    "fields": { "nome": "Patrícia Gomes Ferreira", "cpf": "12345000006", "ativo": true }
+    "fields": {
+      "nome": "Patrícia Gomes Ferreira",
+      "cpf": "12345000006",
+      "ativo": true
+    }
   },
   {
     "model": "pessoas.pessoa",
     "pk": 7,
-    "fields": { "nome": "Luiz Gustavo Mendes", "cpf": "12345000007", "ativo": true }
+    "fields": {
+      "nome": "Luiz Gustavo Mendes",
+      "cpf": "12345000007",
+      "ativo": true
+    }
   },
   {
     "model": "pessoas.pessoa",
     "pk": 8,
-    "fields": { "nome": "Beatriz Rocha Cavalcanti", "cpf": "12345000008", "ativo": true }
+    "fields": {
+      "nome": "Beatriz Rocha Cavalcanti",
+      "cpf": "12345000008",
+      "ativo": true
+    }
   },
   {
     "model": "pessoas.pessoa",
     "pk": 9,
-    "fields": { "nome": "Carlos Eduardo Xavier", "cpf": "12345000009", "ativo": true }
+    "fields": {
+      "nome": "Carlos Eduardo Xavier",
+      "cpf": "12345000009",
+      "ativo": true
+    }
   },
   {
     "model": "pessoas.pessoa",
     "pk": 10,
-    "fields": { "nome": "Sônia Maria Albuquerque", "cpf": "12345000010", "ativo": true }
+    "fields": {
+      "nome": "Sônia Maria Albuquerque",
+      "cpf": "12345000010",
+      "ativo": true
+    }
   },
   {
     "model": "pessoas.pessoa",
     "pk": 11,
-    "fields": { "nome": "Renato Augusto Machado", "cpf": "12345000011", "ativo": true }
+    "fields": {
+      "nome": "Renato Augusto Machado",
+      "cpf": "12345000011",
+      "ativo": true
+    }
   },
   {
     "model": "pessoas.pessoa",
     "pk": 12,
-    "fields": { "nome": "Mônica Helena Silveira", "cpf": "12345000012", "ativo": true }
+    "fields": {
+      "nome": "Mônica Helena Silveira",
+      "cpf": "12345000012",
+      "ativo": true
+    }
   },
   {
     "model": "pessoas.pessoa",
     "pk": 13,
-    "fields": { "nome": "Wellington Jose Barros", "cpf": "12345000013", "ativo": true }
+    "fields": {
+      "nome": "Wellington Jose Barros",
+      "cpf": "12345000013",
+      "ativo": true
+    }
   },
   {
     "model": "pessoas.pessoa",
     "pk": 14,
-    "fields": { "nome": "Daniela Freitas Viana", "cpf": "12345000014", "ativo": true }
+    "fields": {
+      "nome": "Daniela Freitas Viana",
+      "cpf": "12345000014",
+      "ativo": true
+    }
   },
   {
     "model": "pessoas.pessoa",
     "pk": 15,
-    "fields": { "nome": "Paulo Roberto Moreira", "cpf": "12345000015", "ativo": true }
+    "fields": {
+      "nome": "Paulo Roberto Moreira",
+      "cpf": "12345000015",
+      "ativo": true
+    }
   },
   {
     "model": "pessoas.pessoa",
     "pk": 16,
-    "fields": { "nome": "Fernanda Torres Neves", "cpf": "12345000016", "ativo": true }
+    "fields": {
+      "nome": "Fernanda Torres Neves",
+      "cpf": "12345000016",
+      "ativo": true
+    }
   },
   {
     "model": "pessoas.pessoa",
     "pk": 17,
-    "fields": { "nome": "Jorge Luis Barbosa", "cpf": "12345000017", "ativo": true }
+    "fields": {
+      "nome": "Jorge Luis Barbosa",
+      "cpf": "12345000017",
+      "ativo": true
+    }
   },
   {
     "model": "pessoas.pessoa",
     "pk": 18,
-    "fields": { "nome": "Eliana Castro Peixoto", "cpf": "12345000018", "ativo": true }
+    "fields": {
+      "nome": "Eliana Castro Peixoto",
+      "cpf": "12345000018",
+      "ativo": true
+    }
   },
   {
     "model": "pessoas.pessoa",
     "pk": 19,
-    "fields": { "nome": "Marcelo Dantas Silva", "cpf": "12345000019", "ativo": true }
+    "fields": {
+      "nome": "Marcelo Dantas Silva",
+      "cpf": "12345000019",
+      "ativo": true
+    }
   },
   {
     "model": "pessoas.pessoa",
     "pk": 20,
-    "fields": { "nome": "Cláudia Regina Amaral", "cpf": "12345000020", "ativo": true }
+    "fields": {
+      "nome": "Cláudia Regina Amaral",
+      "cpf": "12345000020",
+      "ativo": true
+    }
   },
-  
-  
-
-
-
   {
     "model": "frota.tipocombustivel",
     "pk": 1,
-    "fields": { "nome": "Gasolina", "ativo": true, "slug": "gasolina" }
+    "fields": {
+      "nome": "Gasolina",
+      "ativo": true,
+      "slug": "gasolina"
+    }
   },
   {
     "model": "frota.tipocombustivel",
     "pk": 2,
-    "fields": { "nome": "Diesel", "ativo": true, "slug": "diesel" }
+    "fields": {
+      "nome": "Diesel",
+      "ativo": true,
+      "slug": "diesel"
+    }
   },
   {
     "model": "frota.tipocombustivel",
     "pk": 3,
-    "fields": { "nome": "Diesel S10", "ativo": true, "slug": "diesel-s10" }
+    "fields": {
+      "nome": "Diesel S10",
+      "ativo": true,
+      "slug": "diesel-s10"
+    }
   },
   {
     "model": "frota.tipocombustivel",
     "pk": 4,
-    "fields": { "nome": "Etanol", "ativo": true, "slug": "etanol" }
+    "fields": {
+      "nome": "Etanol",
+      "ativo": true,
+      "slug": "etanol"
+    }
   },
   {
     "model": "frota.tipocombustivel",
     "pk": 5,
-    "fields": { "nome": "GNV", "ativo": true, "slug": "gnv" }
+    "fields": {
+      "nome": "GNV",
+      "ativo": true,
+      "slug": "gnv"
+    }
   },
-  
-
-
-  
-
   {
     "model": "frota.veiculo",
     "pk": 1,
@@ -278,23 +450,6 @@
       "tipo_combustivel": 2,
       "capacidade_carga_kg": "5000.0",
       "capacidade_pessoas": 45,
-      "ativo": true
-    }
-  },
-  {
-    "model": "frota.veiculo",
-    "pk": 2,
-    "fields": {
-      "modelo": "Volkswagen Constellation 24.280",
-      "placa": "KRM4J12",
-      "categoria": "CAMINHAO",
-      "hodometro_atual": "120300",
-      "unidade_consumo": "KM_POR_L",
-      "consumo_estimado_combustivel": "2.800",
-      "consumo_estimado_oleo": "0.800",
-      "tipo_combustivel": 3,
-      "capacidade_carga_kg": "17000.0",
-      "capacidade_pessoas": 3,
       "ativo": true
     }
   },
@@ -333,7 +488,6 @@
     }
   },
   {
-
     "model": "frota.veiculo",
     "pk": 5,
     "fields": {
@@ -362,23 +516,6 @@
       "consumo_estimado_combustivel": "15.000",
       "consumo_estimado_oleo": "2.000",
       "tipo_combustivel": 2,
-      "capacidade_carga_kg": "10.5",
-      "capacidade_pessoas": 20,
-      "ativo": true
-    }
-  },
-  {
-    "model": "frota.veiculo",
-    "pk": 7,
-    "fields": {
-      "modelo": "Ford Cargo 1119",
-      "placa": "SAM5D32",
-      "categoria": "CAMINHAO",
-      "hodometro_atual": "10239",
-      "unidade_consumo": "KM_POR_L",
-      "consumo_estimado_combustivel": "15.000",
-      "consumo_estimado_oleo": "2.000",
-      "tipo_combustivel": 3,
       "capacidade_carga_kg": "10.5",
       "capacidade_pessoas": 20,
       "ativo": true
@@ -436,24 +573,6 @@
     }
   },
   {
-    "model": "frota.veiculo",
-    "pk": 11,
-    "fields": {
-      "modelo": "Scania P310 B8X2",
-      "placa": "WWM4K90",
-      "categoria": "CAMINHAO",
-      "hodometro_atual": "210500",
-      "unidade_consumo": "KM_POR_L",
-      "consumo_estimado_combustivel": "2.200",
-      "consumo_estimado_oleo": "1.000",
-      "tipo_combustivel": 2,
-      "capacidade_carga_kg": "25000.0",
-      "capacidade_pessoas": 2,
-      "ativo": true
-    }
-  },
-    {
-
     "model": "frota.veiculo",
     "pk": 12,
     "fields": {
@@ -612,7 +731,7 @@
     "fields": {
       "modelo": "Voadeira Alumínio 6m - Motor Yamaha 40HP",
       "placa": "BAR-0001",
-      "categoria": "BARCO",
+      "categoria": "CATRAIA",
       "hodometro_atual": "450",
       "unidade_consumo": "H_POR_L",
       "consumo_estimado_combustivel": "15.000",
@@ -629,7 +748,7 @@
     "fields": {
       "modelo": "Lancha Rápida Escolar - Motor 115HP",
       "placa": "BAR-0002",
-      "categoria": "BARCO",
+      "categoria": "CATRAIA",
       "hodometro_atual": "1200",
       "unidade_consumo": "H_POR_L",
       "consumo_estimado_combustivel": "25.000",
@@ -646,7 +765,7 @@
     "fields": {
       "modelo": "Ambulancha Marajó 19 - Motor 90HP",
       "placa": "BAR-0003",
-      "categoria": "BARCO",
+      "categoria": "CATRAIA",
       "hodometro_atual": "890",
       "unidade_consumo": "H_POR_L",
       "consumo_estimado_combustivel": "20.000",
@@ -663,7 +782,7 @@
     "fields": {
       "modelo": "Balsa de Transporte de Resíduos",
       "placa": "BAR-0004",
-      "categoria": "BARCO",
+      "categoria": "CATRAIA",
       "hodometro_atual": "3400",
       "unidade_consumo": "H_POR_L",
       "consumo_estimado_combustivel": "12.000",
@@ -674,11 +793,6 @@
       "ativo": true
     }
   },
-
-
-
-
-  
   {
     "model": "frota.rota",
     "pk": 1,
@@ -1039,11 +1153,6 @@
       "ativa": true
     }
   },
-
-
-
-
-
   {
     "model": "operacao.tipoatividade",
     "pk": 1,
@@ -1093,11 +1202,6 @@
       "nome": "Barqueiro"
     }
   },
-
-
-
-
-
   {
     "model": "operacao.guiaabastecimento",
     "pk": 1,
@@ -1119,32 +1223,6 @@
       "quantidade_oleo": "0.00",
       "periodo_uso_dias": null,
       "hodometro": "10139",
-      "hodometro_quebrado": false,
-      "observacao": null,
-      "usuario": 1
-    }
-  },
-  {
-    "model": "operacao.guiaabastecimento",
-    "pk": 2,
-    "fields": {
-      "data_hora": "2026-03-02T09:30:00Z",
-      "criado_em": "2026-03-02T09:30:00Z",
-      "atualizado_em": "2026-03-02T09:30:00Z",
-      "pessoa": 2,
-      "veiculo": 2,
-      "tipo_veiculo": null,
-      "veiculo_descricao": null,
-      "secretaria": 1,
-      "tipo_atividade": 2,
-      "instituicao": 1,
-      "rota": 2,
-      "rota_manual": null,
-      "tipo_combustivel": 3,
-      "quantidade_combustivel": "33.50",
-      "quantidade_oleo": "0.00",
-      "periodo_uso_dias": null,
-      "hodometro": "10259",
       "hodometro_quebrado": false,
       "observacao": null,
       "usuario": 1
@@ -1256,32 +1334,6 @@
   },
   {
     "model": "operacao.guiaabastecimento",
-    "pk": 7,
-    "fields": {
-      "data_hora": "2026-03-07T08:15:00Z",
-      "criado_em": "2026-03-07T08:15:00Z",
-      "atualizado_em": "2026-03-07T08:15:00Z",
-      "pessoa": 7,
-      "veiculo": 7,
-      "tipo_veiculo": null,
-      "veiculo_descricao": null,
-      "secretaria": 1,
-      "tipo_atividade": 2,
-      "instituicao": 1,
-      "rota": 7,
-      "rota_manual": null,
-      "tipo_combustivel": 3,
-      "quantidade_combustivel": "42.25",
-      "quantidade_oleo": "0.00",
-      "periodo_uso_dias": null,
-      "hodometro": "10895",
-      "hodometro_quebrado": false,
-      "observacao": null,
-      "usuario": 1
-    }
-  },
-  {
-    "model": "operacao.guiaabastecimento",
     "pk": 8,
     "fields": {
       "data_hora": "2026-03-08T09:00:00Z",
@@ -1353,32 +1405,6 @@
       "quantidade_oleo": "0.80",
       "periodo_uso_dias": null,
       "hodometro": "955",
-      "hodometro_quebrado": false,
-      "observacao": null,
-      "usuario": 1
-    }
-  },
-  {
-    "model": "operacao.guiaabastecimento",
-    "pk": 11,
-    "fields": {
-      "data_hora": "2026-03-11T07:00:00Z",
-      "criado_em": "2026-03-11T07:00:00Z",
-      "atualizado_em": "2026-03-11T07:00:00Z",
-      "pessoa": 11,
-      "veiculo": 11,
-      "tipo_veiculo": null,
-      "veiculo_descricao": null,
-      "secretaria": 2,
-      "tipo_atividade": 1,
-      "instituicao": 1,
-      "rota": 11,
-      "rota_manual": null,
-      "tipo_combustivel": 2,
-      "quantidade_combustivel": "150.00",
-      "quantidade_oleo": "2.00",
-      "periodo_uso_dias": null,
-      "hodometro": "210679",
       "hodometro_quebrado": false,
       "observacao": null,
       "usuario": 1
@@ -1899,32 +1925,6 @@
       "quantidade_oleo": "1.00",
       "periodo_uso_dias": null,
       "hodometro": "85607",
-      "hodometro_quebrado": false,
-      "observacao": null,
-      "usuario": 1
-    }
-  },
-  {
-    "model": "operacao.guiaabastecimento",
-    "pk": 32,
-    "fields": {
-      "data_hora": "2026-04-01T09:30:00Z",
-      "criado_em": "2026-04-01T09:30:00Z",
-      "atualizado_em": "2026-04-01T09:30:00Z",
-      "pessoa": 2,
-      "veiculo": 2,
-      "tipo_veiculo": null,
-      "veiculo_descricao": null,
-      "secretaria": 1,
-      "tipo_atividade": 2,
-      "instituicao": 1,
-      "rota": 2,
-      "rota_manual": null,
-      "tipo_combustivel": 2,
-      "quantidade_combustivel": "120.00",
-      "quantidade_oleo": "2.00",
-      "periodo_uso_dias": null,
-      "hodometro": "120609",
       "hodometro_quebrado": false,
       "observacao": null,
       "usuario": 1

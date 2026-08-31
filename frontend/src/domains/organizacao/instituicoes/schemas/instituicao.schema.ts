@@ -20,13 +20,8 @@ export const instituicaoUISchema: FormSchema = {
       name: "tipo",
       label: "Tipo",
       type: "select",
-      options: [
-        { value: 'ESCOLA', label: 'Escola' },
-        { value: 'CRECHE', label: 'Creche' },
-        { value: 'UPA', label: 'UPA' },
-        { value: 'HOSPITAL', label: 'Hospital' },
-        { value: 'OUTRO', label: 'Outro' },
-      ],
+      // Fonte única de verdade: Instituicao.TIPO_CHOICES no backend
+      endpoint: ENDPOINTS.choices.instituicaoTipo,
       colSpan: 1,
       required: true,
     },

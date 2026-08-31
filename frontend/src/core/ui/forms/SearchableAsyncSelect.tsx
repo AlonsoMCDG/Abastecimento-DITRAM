@@ -6,7 +6,7 @@ import {
   type UseFormRegister, 
   type FieldValues, 
   type Path, 
-  type PathValue 
+  type PathValue
 } from 'react-hook-form';
 import { client } from '../../api/apiClient';
 import styles from './dynamic-form/DynamicForm.module.css';
@@ -22,6 +22,7 @@ interface SearchableAsyncSelectProps<T extends FieldValues> {
   control: Control<T>;
   setValue: UseFormSetValue<T>;
   register: UseFormRegister<T>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   error?: any;
   disabled?: boolean;
 }

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { coreApi } from "../../system.api";
 import { getApiErrorMessage } from "../../../../core/api/errorHandlers";
-import { useAuth } from "../../../../core/auth/AuthContext";
+import { useAuth } from "../../../../core/auth/useAuth";
 
 type DbStats = {
   database_engine?: string;
