@@ -41,8 +41,10 @@ export function mapFormToWriteDTO(
 
   // --- ROTEAMENTO INTELIGENTE DO VEÍCULO ---
 
-  if (modalidade === 'BARQUEIRO') {
-    // Regra do Barqueiro: Sem ID, Tipo é fixo, Descrição usa o que foi digitado ou assume "Barco"
+  if (modalidade === 'CATRAIA') {
+    // Regra da embarcação (Catraia): Sem ID, Tipo é fixo em BARCO,
+    // Descrição usa o que foi digitado ou assume "Barco"
+    // (alinhado com guia.form.ts; BARQUEIRO não existe nas choices do backend)
 
     final_veiculo = null;
 

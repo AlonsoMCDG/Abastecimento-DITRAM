@@ -90,9 +90,9 @@ export const guiaAbastecimentoUISchema:
         { label: 'Máquina Pesada', value: 'MAQUINA_PESADA' },
       ],
       visibleIf: (values) => {
-        // Esconde o campo se for BARQUEIRO
+        // Esconde o campo se for embarcação (CATRAIA)
         // (o tipo já é fixado em BARCO no backend)
-        if (values.modalidade === 'BARQUEIRO') {
+        if (values.modalidade === 'CATRAIA') {
           return false;
         }
         
@@ -163,7 +163,7 @@ export const guiaAbastecimentoUISchema:
         values: Partial<GuiaAbastecimentoFormInput>
       ) => {
         const modalidadesSemHodometro = [
-          'BARQUEIRO',
+          'CATRAIA',
           'COROTE'
         ];
         
@@ -181,7 +181,7 @@ export const guiaAbastecimentoUISchema:
         values: Partial<GuiaAbastecimentoFormInput>
       ) => {
         const modalidadesSemHodometro = [
-          'BARQUEIRO',
+          'CATRAIA',
           'COROTE'
         ];
         
