@@ -43,7 +43,7 @@ export function mapFormToWriteDTO(
     // O formulário utiliza *_id para facilitar
     // o Select, enquanto o DTO de escrita utiliza
     // o nome do relacionamento.
-    tipo_combustivel:
+    tipo_combustivel_id:
       form.tipo_combustivel_id,
   };
 }

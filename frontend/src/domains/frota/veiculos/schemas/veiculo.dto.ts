@@ -83,7 +83,7 @@ export const veiculoWriteSchema = z.object({
 
   ativo: z.boolean(),
 
-  tipo_combustivel: z.number(),
+  tipo_combustivel_id: z.number(),
 });
 
 export type VeiculoWriteDTO = z.infer<typeof veiculoWriteSchema>;

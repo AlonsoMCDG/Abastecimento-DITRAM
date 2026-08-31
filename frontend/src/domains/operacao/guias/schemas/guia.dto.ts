@@ -75,27 +75,27 @@ export const guiaAbastecimentoWriteSchema = z.object({
 
   modalidade: z.string().min(1),
 
-  pessoa: z.coerce.number(),
+  pessoa_id: z.coerce.number(),
 
-  veiculo: z.coerce.number().nullable().optional(),
+  veiculo_id: z.coerce.number().nullable().optional(),
 
   tipo_veiculo: z.string().nullable().optional(),
 
   veiculo_descricao: z.string().nullable().optional(),
 
-  secretaria: z.coerce.number(),
+  secretaria_id: z.coerce.number(),
 
-  instituicao: z.number().nullable().optional(),
+  instituicao_id: z.number().nullable().optional(),
 
-  rota: z.coerce.number().nullable().optional(),
+  rota_id: z.coerce.number().nullable().optional(),
 
   rota_manual: z.string().nullable().optional(),
 
-  tipo_atividade: z.coerce.number().nullable().optional(),
+  tipo_atividade_id: z.coerce.number().nullable().optional(),
 
   tipo_atividade_nome: z.string().optional(),
 
-  tipo_combustivel: z.coerce.number(),
+  tipo_combustivel_id: z.coerce.number(),
 
   quantidade_combustivel: z.union([
     z.number(), z.string()

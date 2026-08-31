@@ -1,12 +1,16 @@
 from rest_framework import serializers
 from apps.frota.models import Veiculo, Rota, TipoCombustivel
 from apps.organizacao.models import Secretaria
-
 # ==========================================
 # SERIALIZERS DE VEÍCULO
 # ==========================================
 
 class VeiculoWriteSerializer(serializers.ModelSerializer):
+    # FKs de escrita padronizadas com sufixo _id (contrato da API)
+    tipo_combustivel_id = serializers.PrimaryKeyRelatedField(
+        source='tipo_combustivel',
+        queryset=TipoCombustivel.objects.all()
+    )
 
     class Meta:
         model = Veiculo
@@ -22,7 +26,7 @@ class VeiculoWriteSerializer(serializers.ModelSerializer):
 
             'consumo_estimado_combustivel', 
             'consumo_estimado_oleo',
-            'tipo_combustivel',
+            'tipo_combustivel_id',
 
             'unidade_consumo', 
             'hodometro_atual', 
@@ -73,14 +77,15 @@ class VeiculoLookupSerializer(serializers.ModelSerializer):
 # ==========================================
 
 class RotaWriteSerializer(serializers.ModelSerializer):
-    secretaria = serializers.PrimaryKeyRelatedField(
+    # FK de escrita padronizada com sufixo _id (contrato da API)
+    secretaria_id = serializers.PrimaryKeyRelatedField(
+        source='secretaria',
         queryset=Secretaria.objects.all()
     )
 
-    
     class Meta:
         model = Rota
-        fields = ['id', 'nome', 'distancia_km', 'secretaria', 'ativa', 'detalhes']
+        fields = ['id', 'nome', 'distancia_km', 'secretaria_id', 'ativa', 'detalhes']
     
     def validate_nome(self, value):
         return " ".join(value.split())

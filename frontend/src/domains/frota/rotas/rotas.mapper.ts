@@ -5,7 +5,7 @@ import type { RotaReadDTO } from "./schemas/rota.read.zod";
 export function mapFormToWriteDTO(form: RotaFormData): RotaWriteDTO {
   return {
     nome: form.nome,
-    secretaria: form.secretaria_id,
+    secretaria_id: form.secretaria_id,
     distancia_km: form.distancia_km,
     detalhes: form.detalhes,
     ativa: form.ativa

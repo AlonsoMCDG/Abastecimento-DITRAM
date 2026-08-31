@@ -89,18 +89,18 @@ export function mapFormToWriteDTO(
     
     modalidade,
     
-    // FKs
-    pessoa: pessoa_id,
+    // FKs (padrão *_id, igual ao contrato de leitura)
+    pessoa_id,
 
-    secretaria: secretaria_id,
+    secretaria_id,
 
-    instituicao: instituicao_id ?? null,
+    instituicao_id: instituicao_id ?? null,
 
-    tipo_combustivel: tipo_combustivel_id,
+    tipo_combustivel_id: tipo_combustivel_id,
     
-
+    
     // --- ROTEAMENTO DO VEÍCULO ---
-    veiculo: final_veiculo,
+    veiculo_id: final_veiculo,
 
     veiculo_descricao: final_veiculo_descricao,
 
@@ -117,7 +117,7 @@ export function mapFormToWriteDTO(
 
     
     // --- ROTEAMENTO DA ROTA ---
-    rota: 
+    rota_id: 
       typeof rota === 'number' 
         ? rota 
         : null,
@@ -129,7 +129,7 @@ export function mapFormToWriteDTO(
     
     
     // --- ROTEAMENTO DA ATIVIDADE ---
-    tipo_atividade: 
+    tipo_atividade_id: 
       typeof tipo_atividade === 'number' 
         ? tipo_atividade 
         : null,
