@@ -24,7 +24,8 @@ interface DynamicFormProps<T extends FieldValues> {
   title?: string;               // Título principal exibido no topo do formulário
   subtitle?: string;            // Texto descritivo ou de apoio abaixo do título
   uiSchema: FormSchema;         // Estrutura visual (inputs, opções, endpoints, colunas)
-  zodSchema: z.ZodType<any, any, any>;  // Motor de validação de dados e tipagem rigorosa (Zod)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  zodSchema: z.ZodType<any>;  // Motor de validação de dados e tipagem rigorosa (Zod)
   initialValues?: DefaultValues<T>; // Dados pré-preenchidos (útil para edição de registros)
   onValuesChange?: (            // Disparado quando qualquer input muda (útil para side-effects e auto-fill)
     changedField: { name: Path<T>; value: unknown },
@@ -67,7 +68,8 @@ export const DynamicForm = <T extends FieldValues>({
     reset, 
     formState: { errors }
   } = useForm<T>({
-    resolver: zodResolver(zodSchema), // Conecta o Zod ao formulário!
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    resolver: zodResolver(zodSchema as any), // Conecta o Zod ao formulário!
     defaultValues: initialValues,
     mode: "onChange", // Permite que os erros de XOR e outros sumam instantaneamente ao digitar
   });
@@ -118,7 +120,8 @@ export const DynamicForm = <T extends FieldValues>({
 
     // Campos com Máscara (Controlados)
     if (fieldConfig.mask) {
-      const maskProps: Record<string, unknown> = typeof fieldConfig.mask === 'object' 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const maskProps: Record<string, any> = typeof fieldConfig.mask === 'object' 
         ? fieldConfig.mask 
         : { mask: fieldConfig.mask };
       
@@ -167,7 +170,7 @@ export const DynamicForm = <T extends FieldValues>({
         
       case 'select':
       case 'datalist':
-      case 'combobox':
+      case 'combobox': {
         const SelectComponent = fieldConfig.endpoint ? (
           // Se tem endpoint -> Busca da API (SearchableAsyncSelect)
           <SearchableAsyncSelect
@@ -196,10 +199,12 @@ export const DynamicForm = <T extends FieldValues>({
           />
         );
         return wrapWithAddons(SelectComponent);
+      }
 
-      default:
+      default: {
         const baseInput = <input type={fieldConfig.type} readOnly={fieldConfig.readOnly} {...commonProps} />;
         return wrapWithAddons(baseInput);
+      }
     }
   };
 
@@ -221,8 +226,8 @@ export const DynamicForm = <T extends FieldValues>({
     }
   };
 
-  // Previne multiplos submits via botão ou enter
-  const onSafeSubmit: SubmitHandler<T> = (data, event) => {
+  // Previne múltiplos submits via botão ou enter
+  const onSafeSubmit = (data: T, event?: React.BaseSyntheticEvent) => {
     if (isLoading) return;
     onSubmit(data, event);
   };
@@ -243,7 +248,7 @@ export const DynamicForm = <T extends FieldValues>({
         </div>
       )}
 
-      <form onSubmit={handleSubmit(onSafeSubmit)} onKeyDown={handleFormKeyDown} className={styles.formContainer}>
+      <form onSubmit={handleSubmit((data, event) => onSafeSubmit(data as unknown as T, event))} onKeyDown={handleFormKeyDown} className={styles.formContainer}>
         {uiSchema.fields.map((field) => {
           // VISIBILIDADE CONDICIONAL
           if (field.visibleIf && !field.visibleIf(currentValues)) {

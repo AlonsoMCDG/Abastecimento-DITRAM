@@ -73,7 +73,7 @@ export async function safePut<TResponse, TRequest>(
 export async function safePatch<TResponse, TRequest>(
   url: string,
   responseSchema: z.ZodType<TResponse>,
-  requestSchema: z.ZodObject<any>,
+  requestSchema: z.ZodObject<z.ZodRawShape>,
   data: Partial<TRequest>
 ): Promise<TResponse> {
   const payload = await requestSchema.partial().parseAsync(data)

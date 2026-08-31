@@ -3,7 +3,7 @@ import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import "./Layout.css"
 import logoImg from "../../assets/logo ditram - transparente branco.png"
 
-import { useAuth } from "../../auth/AuthContext";
+import { useAuth } from "../../auth/useAuth";
 import { ROUTES } from "../../routes/routes";
 
 export default function Layout() {

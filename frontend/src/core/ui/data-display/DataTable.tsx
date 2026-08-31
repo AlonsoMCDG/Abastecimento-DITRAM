@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import type { TableSchema } from "../../types/form";
+import type { TableSchema, TableColumn } from "../../types/form";
 import { getApiErrorMessage } from "../../api/errorHandlers";
 import "./DataTable.css"
 
@@ -126,7 +126,7 @@ export default function DataTable<T extends { id: number }>({
     }
   };
 
-  function renderCell(value: unknown, col: any, item: T) {
+  function renderCell(value: unknown, col: TableColumn, item: T) {
     if (col.format) return col.format(value, item);
     if (typeof value === "boolean") {
       return (

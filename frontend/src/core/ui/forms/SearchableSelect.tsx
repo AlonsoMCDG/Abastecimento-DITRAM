@@ -25,32 +25,29 @@ export const SearchableSelect = ({
   const [searchTerm, setSearchTerm] = useState("");
   const wrapperRef = useRef<HTMLDivElement>(null);
 
-  // 1. SINCRONIA INICIAL: Acha o nome (label) do valor (ID) selecionado
-  useEffect(() => {
-    if (value === null || value === undefined || value === "") {
-      setSearchTerm("");
-      return;
-    }
-    const matchedOption = options.find((opt) => String(opt.value) === String(value));
-    if (matchedOption && !isOpen) {
-      setSearchTerm(matchedOption.label);
-    }
-  }, [value, options, isOpen]);
+  // Label do valor selecionado, DERIVADO (sem estado espelhado):
+  // elimina o setState síncrono em useEffect (react-hooks warnings /
+  // cascading renders no React 19) e garante sincronia automática
+  // sempre que value ou options mudarem.
+  const selectedLabel = useMemo(
+    () =>
+      options.find((opt) => String(opt.value) === String(value))?.label ?? "",
+    [options, value]
+  );
 
-  // 2. CLICK OUTSIDE: Fecha a lista e reseta o texto se clicar fora
+  // 1. CLICK OUTSIDE: Fecha a lista e reseta o texto se clicar fora
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
         setIsOpen(false);
-        const matched = options.find((opt) => String(opt.value) === String(value));
-        setSearchTerm(matched ? matched.label : "");
+        setSearchTerm("");
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [value, options]);
+  }, []);
 
-  // 3. FILTRO LOCAL
+  // 2. FILTRO LOCAL
   const filteredOptions = useMemo(() => {
     if (!searchTerm) return options;
     const lowerSearch = searchTerm.toLowerCase();
@@ -60,7 +57,7 @@ export const SearchableSelect = ({
   }, [options, searchTerm]);
 
   const handleSelect = (opt: Option) => {
-    setSearchTerm(opt.label);
+    setSearchTerm("");
     onChange(opt.value);
     setIsOpen(false);
   };
@@ -71,13 +68,20 @@ export const SearchableSelect = ({
         type="text"
         className={`${styles.input} ${styles.comboInput}`}
         placeholder={placeholder}
-        value={searchTerm}
+        // Fechado: exibe o label derivado do value (sempre sincronizado).
+        // Aberto: exibe o termo digitado para busca.
+        value={isOpen ? searchTerm : selectedLabel}
         disabled={disabled}
         onChange={(e) => {
           setSearchTerm(e.target.value);
           if (!isOpen) setIsOpen(true);
         }}
-        onClick={() => !disabled && setIsOpen(true)}
+        onClick={() => {
+          if (!disabled) {
+            setSearchTerm("");
+            setIsOpen(true);
+          }
+        }}
       />
       
       <span className={styles.comboChevron}>{isOpen ? "▲" : "▼"}</span>

@@ -40,7 +40,7 @@ export const usuarioApi = {
   me() {
     return client.get<UsuarioReadDTO>(ENDPOINTS.usuarios.me);
   },
-  atualizarMe(data: any) {
+  atualizarMe(data: Record<string, unknown>) {
     return client.patch<UsuarioReadDTO>(ENDPOINTS.usuarios.me, data);
   },
 

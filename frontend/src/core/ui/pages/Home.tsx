@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { secretariaApi } from "../../../domains/organizacao/secretarias/secretarias.api";
 import { ROUTES } from "../../routes/routes";
 import type { Secretaria } from "../../types/models";
-import { useAuth } from "../../auth/AuthContext";
+import { useAuth } from "../../auth/useAuth";
 import "./Home.css";
 
 // Remove acentos e padroniza para busca precisa
@@ -21,14 +21,15 @@ export default function Home() {
   const [error, setError] = useState(false);
 
   const fetchData = () => {
-    setLoading(true);
-    setError(false);
     secretariaApi.listar()
       .then((secRes) => {
         // listar() já retorna a resposta paginada (não é um AxiosResponse):
         // pode vir como array puro ou como { results: [...] }
         const lista = Array.isArray(secRes) ? secRes : (secRes?.results ?? []);
         setSecretarias(lista);
+        // Reset de erro dentro do fluxo assíncrono (sem setState
+        // síncrono no corpo do effect — evita cascading renders)
+        setError(false);
       })
       .catch(() => setError(true))
       .finally(() => setLoading(false));

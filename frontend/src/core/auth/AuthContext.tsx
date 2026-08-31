@@ -1,18 +1,8 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { usuarioApi } from "../../domains/sistema/usuarios/usuarios.api";
 import type { Usuario } from "../types/models";
+import { AuthContext } from "./authContext";
 import { isAuthenticated, clearAuthTokens } from "./auth.utils";
-
-// Tipagem do que o nosso contexto vai fornecer para o resto do app
-interface AuthContextType {
-  user: Usuario | null;
-  isLoading: boolean;
-  logout: () => void;
-  // Função para forçar o recarregamento (útil logo após o usuário fazer login na tela de login)
-  refreshUser: () => Promise<void>; 
-}
-
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<Usuario | null>(null);
@@ -54,13 +44,4 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       {children}
     </AuthContext.Provider>
   );
-}
-
-// Hook customizado para facilitar o uso nos outros arquivos
-export function useAuth() {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error("useAuth deve ser usado dentro de um AuthProvider");
-  }
-  return context;
 }
