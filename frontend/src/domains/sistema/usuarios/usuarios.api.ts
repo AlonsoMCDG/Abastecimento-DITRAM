@@ -22,9 +22,18 @@ export const usuarioApi = {
   ...baseCrud,
 
   // Cadastro de novo usuário (tela de registro pública).
-  // É um alias do criar() do CRUD base, com nome explícito para o RegisterPage.
+  //
+  // IMPORTANTE: usa o endpoint PÚBLICO /register/ (AllowAny no backend).
+  // O ViewSet base (POST /usuarios/) exige IsAdminUser e retorna 401
+  // para usuários anônimos, o que quebrava o cadastro pela tela.
+  //
+  // Resposta do backend (UsuarioRegisterSerializer): { id, cpf, nome }
+  // — diferente do UsuarioReadDTO retornado pelo ViewSet.
   registrar(data: Parameters<typeof baseCrud.criar>[0]) {
-    return baseCrud.criar(data);
+    return client.post<{ id: number; cpf: string; nome: string }>(
+      ENDPOINTS.usuarios.register,
+      data
+    );
   },
 
   // Perfil
