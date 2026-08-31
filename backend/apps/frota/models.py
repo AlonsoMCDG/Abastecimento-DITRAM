@@ -47,14 +47,13 @@ class VeiculoManager(models.Manager):
 
 class Veiculo(models.Model):
     CATEGORIA_CHOICES = [
-        ('CARRO', 'Carro'), 
+        ('CARRO', 'Carro'),
         ('CAMINHONETE', 'Caminhonete'),
-        ('ONIBUS', 'Ônibus'), 
-        ('MOTO', 'Moto'), 
+        ('ONIBUS', 'Ônibus'),
+        ('MOTO', 'Moto'),
         ('VAN', 'Van'),
-        ('CAMINHAO', 'Caminhão'),
+        ('CATRAIA', 'Catraia (Embarcação)'),
         ('MAQUINA_PESADA', 'Máquina Pesada/Trator'),
-        # ('BARCO', 'Barco'),
     ]
     
     UNIDADE_CONSUMO_CHOICES = [
