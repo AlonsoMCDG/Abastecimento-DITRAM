@@ -23,7 +23,6 @@ export const guiaAbastecimentoUISchema:
         { label: 'Moto', value: 'MOTO'},
         { label: 'Catraia', value: 'CATRAIA'},
         { label: 'Corote', value: 'COROTE'},
-        { label: "Caminhão", value: "CAMINHAO" },
         { label: 'Carro passeio', value: 'CARRO_PASSEIO'},
       ],
       required: true,
