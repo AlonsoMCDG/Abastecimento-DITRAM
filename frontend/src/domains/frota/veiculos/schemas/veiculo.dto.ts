@@ -105,8 +105,6 @@ export const veiculoListParamsSchema = z.object({
     z.string()
   ]).optional(),
 
-  pessoa: z.number().optional(),
-
   search: z.string().optional(),
   ordering: z.string().optional(),
   page: z.number().optional(),

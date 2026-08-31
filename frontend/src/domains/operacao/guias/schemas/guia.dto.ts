@@ -119,18 +119,18 @@ export type GuiaAbastecimentoWriteDTO = z.infer<typeof guiaAbastecimentoWriteSch
 // ============================================================
 // FILTROS DA LISTAGEM
 // Estes nomes correspondem aos parâmetros de filtro da API.
+// IMPORTANTE: contém APENAS params suportados pelo backend
+// (GuiaAbastecimentoViewSet.filterset_fields = modalidade,
+// pessoa, veiculo, secretaria). Params como rota, tipo_atividade,
+// instituicao, tipo_veiculo, tipo_combustivel e usuario são
+// silenciosamente ignorados pelo django-filter e foram removidos.
 // ============================================================
 
 export const guiaListParamsSchema = z.object({
+  modalidade: z.string().optional(),
   pessoa: z.number().optional(),
   veiculo: z.number().optional(),
   secretaria: z.number().optional(),
-  rota: z.number().optional(),
-  tipo_atividade: z.number().optional(),
-  instituicao: z.number().optional(),
-  tipo_veiculo: z.string().optional(),
-  tipo_combustivel: z.number().optional(),
-  usuario: z.number().optional(),
 
   search: z.string().optional(),
   ordering: z.string().optional(),
