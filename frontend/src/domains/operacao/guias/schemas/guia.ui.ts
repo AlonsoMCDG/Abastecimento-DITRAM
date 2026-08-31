@@ -16,15 +16,8 @@ export const guiaAbastecimentoUISchema:
       name: 'modalidade',
       label: 'Modalidade de Abastecimento',
       type: 'select',
-      options: [
-        { label: 'Ônibus', value: 'ONIBUS'},
-        { label: 'Caminhonete', value: 'CAMINHONETE'},
-        { label: 'Carro', value: 'CARRO'},
-        { label: 'Moto', value: 'MOTO'},
-        { label: 'Catraia', value: 'CATRAIA'},
-        { label: 'Corote', value: 'COROTE'},
-        { label: 'Carro passeio', value: 'CARRO_PASSEIO'},
-      ],
+      // Fonte única de verdade: GuiaAbastecimento.MODALIDADE_CHOICES no backend
+      endpoint: ENDPOINTS.choices.guiaModalidade,
       required: true,
       colSpan: 1,
     },
@@ -78,19 +71,11 @@ export const guiaAbastecimentoUISchema:
       name: 'tipo_veiculo',
       label: 'Categoria do Veículo',
       type: 'select',
-      options: [
-        { label: 'Carro', value: 'CARRO' },
-        { label: 'Caminhonete', value: 'CAMINHONETE' },
-        { label: 'Caminhão', value: 'CAMINHAO' },
-        { label: 'Ônibus', value: 'ONIBUS' },
-        { label: 'Moto', value: 'MOTO' },
-        { label: 'Van', value: 'VAN' },
-        { label: 'Barco', value: 'BARCO' },
-        { label: 'Máquina Pesada', value: 'MAQUINA_PESADA' },
-      ],
+      // Fonte única de verdade: GuiaAbastecimento.TIPO_VEICULO_CHOICES no backend
+      endpoint: ENDPOINTS.choices.guiaTipoVeiculo,
       visibleIf: (values) => {
         // Esconde o campo se for embarcação (CATRAIA)
-        // (o tipo já é fixado em BARCO no backend)
+        // (o tipo já é fixado em CATRAIA pelo mapper)
         if (values.modalidade === 'CATRAIA') {
           return false;
         }

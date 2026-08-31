@@ -42,18 +42,18 @@ export function mapFormToWriteDTO(
   // --- ROTEAMENTO INTELIGENTE DO VEÍCULO ---
 
   if (modalidade === 'CATRAIA') {
-    // Regra da embarcação (Catraia): Sem ID, Tipo é fixo em BARCO,
-    // Descrição usa o que foi digitado ou assume "Barco"
+    // Regra da embarcação (Catraia): Sem ID, Tipo é fixo em CATRAIA,
+    // Descrição usa o que foi digitado ou assume "Catraia"
     // (alinhado com guia.form.ts; BARQUEIRO não existe nas choices do backend)
 
     final_veiculo = null;
 
-    final_tipo_veiculo = "BARCO";
+    final_tipo_veiculo = "CATRAIA";
 
     final_veiculo_descricao =
       typeof veiculo === 'string' && veiculo.trim() !== ''
         ? veiculo
-        : "Barco";
+        : "Catraia";
 
   } else {
 
