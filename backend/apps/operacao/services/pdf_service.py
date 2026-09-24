@@ -208,7 +208,7 @@ def gerar_pdf_guia(guia=None, guia_id=None):
                 "usuario",
                 "secretaria",
                 "pessoa",
-                "tipo_servico",
+                "tipo_atividade",
                 "tipo_combustivel"
             ).get(id=guia_id)
         except GuiaAbastecimento.DoesNotExist:
