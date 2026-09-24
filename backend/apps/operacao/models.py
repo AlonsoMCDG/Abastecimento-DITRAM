@@ -42,10 +42,10 @@ class GuiaAbastecimento(models.Model):
     ]
 
     data_hora = models.DateTimeField(verbose_name="Data e Hora")
-    modalidade = models.CharField(max_length=20, choices=MODALIDADE_CHOICES)
+    modalidade = models.CharField(max_length=20, choices=MODALIDADE_CHOICES, verbose_name="Tipo de Guia / Operação")
     usuario = models.ForeignKey(User, on_delete=models.PROTECT, related_name='guias_emitidas')
     secretaria = models.ForeignKey(Secretaria, on_delete=models.PROTECT)
-    tipo_atividade = models.ForeignKey(TipoAtividade, on_delete=models.PROTECT)
+    tipo_atividade = models.ForeignKey(TipoAtividade, on_delete=models.PROTECT, null=True, blank=True)
     instituicao = models.ForeignKey(Instituicao, on_delete=models.PROTECT, null=True, blank=True)
     rota = models.ForeignKey(Rota, on_delete=models.PROTECT, null=True, blank=True)
     rota_manual = models.CharField(max_length=255, null=True, blank=True)
