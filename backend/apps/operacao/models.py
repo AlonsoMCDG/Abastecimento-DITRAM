@@ -1,6 +1,5 @@
 from django.db import models
 from django.core.exceptions import ValidationError
-from django.db.models import Q
 from django.contrib.auth import get_user_model
 
 from apps.pessoas.models import Pessoa
@@ -23,7 +22,7 @@ class TipoAtividade(models.Model):
         verbose_name = "Tipo de Atividade"
         verbose_name_plural = "Tipos de Atividade"
 
-    def __str__(self): 
+    def __str__(self):
         return self.nome
 
     def natural_key(self):
@@ -36,23 +35,37 @@ class GuiaAbastecimento(models.Model):
         ('VAN', 'Van'), ('CATRAIA', 'Catraia (Embarcação)'), ('MAQUINA_PESADA', 'Máquina Pesada/Trator'),
     ]
 
-    MODALIDADE_CHOICES = [
-        ('ONIBUS', 'Ônibus'), ('CAMINHONETE', 'Caminhonete'), ('CARRO', 'Carro'),
-        ('MOTO', 'Moto'), ('CATRAIA', 'Catraia'), ('COROTE', 'Corote'), ('CARRO_PASSEIO', 'Carro Passeio'),
-    ]
-
+    # Mantido sem choices de propósito: o tipo de guia/operação é um dado
+    # operacional e não deve ser confundido com o veículo abastecido.
     data_hora = models.DateTimeField(verbose_name="Data e Hora")
-    modalidade = models.CharField(max_length=20, choices=MODALIDADE_CHOICES)
+    modalidade = models.CharField(
+        max_length=100,
+        verbose_name="Tipo de Guia / Operação"
+    )
     usuario = models.ForeignKey(User, on_delete=models.PROTECT, related_name='guias_emitidas')
     secretaria = models.ForeignKey(Secretaria, on_delete=models.PROTECT)
-    tipo_atividade = models.ForeignKey(TipoAtividade, on_delete=models.PROTECT)
+    tipo_atividade = models.ForeignKey(
+        TipoAtividade,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True
+    )
     instituicao = models.ForeignKey(Instituicao, on_delete=models.PROTECT, null=True, blank=True)
     rota = models.ForeignKey(Rota, on_delete=models.PROTECT, null=True, blank=True)
     rota_manual = models.CharField(max_length=255, null=True, blank=True)
     pessoa = models.ForeignKey(Pessoa, on_delete=models.PROTECT, related_name='guias')
-    
-    veiculo = models.ForeignKey(Veiculo, on_delete=models.PROTECT, null=True, blank=True, related_name='guias')  
-    tipo_veiculo = models.CharField(max_length=50, choices=TIPO_VEICULO_CHOICES, null=True, blank=True)  
+
+    # Veículo cadastrado é opcional porque nem todo abastecimento está
+    # relacionado a um veículo (ex.: roçador/corote).
+    veiculo = models.ForeignKey(
+        Veiculo,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name='guias'
+    )
+    # Campos antigos mantidos para compatibilidade com registros existentes.
+    tipo_veiculo = models.CharField(max_length=50, choices=TIPO_VEICULO_CHOICES, null=True, blank=True)
     veiculo_descricao = models.CharField(max_length=100, null=True, blank=True)
 
     tipo_combustivel = models.ForeignKey(TipoCombustivel, on_delete=models.PROTECT)
@@ -70,21 +83,16 @@ class GuiaAbastecimento(models.Model):
         verbose_name = "Guia de Abastecimento"
         verbose_name_plural = "Guias de Abastecimento"
         ordering = ['-data_hora']
-        constraints = [
-            models.CheckConstraint(
-                name="guia_veiculo_fk_ou_dupla_avulsa",
-                condition=Q(veiculo__isnull=False, tipo_veiculo__isnull=True, veiculo_descricao__isnull=True) |
-                          Q(veiculo__isnull=True, tipo_veiculo__isnull=False, veiculo_descricao__isnull=False)
-            )
-        ]
-    
+
     @property
     def veiculo_display(self):
         if self.veiculo:
             return str(self.veiculo)
-        if self.tipo_veiculo and self.veiculo_descricao:
-            return f"{self.veiculo_descricao} ({self.get_tipo_veiculo_display()})"
-        return self.veiculo_descricao
+        if self.veiculo_descricao:
+            if self.tipo_veiculo:
+                return f"{self.veiculo_descricao} ({self.get_tipo_veiculo_display()})"
+            return self.veiculo_descricao
+        return "-"
 
     def __str__(self):
         return f"Guia #{self.id}: {self.pessoa} - {self.veiculo_display} - {self.quantidade_combustivel}L"
