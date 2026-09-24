@@ -18,7 +18,7 @@ class TipoAtividadeLookupSerializer(serializers.ModelSerializer):
         fields = ['value', 'label']
 
 class GuiaReadSerializer(serializers.ModelSerializer):
-    modalidade_nome = serializers.CharField(source='get_modalidade_display', read_only=True)
+    modalidade_nome = serializers.CharField(source='modalidade', read_only=True)
     pessoa_id = serializers.IntegerField(read_only=True)
     pessoa_nome = serializers.CharField(source='pessoa.nome', read_only=True)
     veiculo_id = serializers.IntegerField(read_only=True)
@@ -26,7 +26,7 @@ class GuiaReadSerializer(serializers.ModelSerializer):
     rota_id = serializers.IntegerField(read_only=True)
     rota_nome = serializers.CharField(source='rota.nome', read_only=True, default=None)
     tipo_atividade_id = serializers.IntegerField(read_only=True)
-    tipo_atividade_nome = serializers.CharField(source='tipo_atividade.nome', read_only=True)
+    tipo_atividade_nome = serializers.CharField(source='tipo_atividade.nome', read_only=True, allow_null=True)
     secretaria_id = serializers.IntegerField(read_only=True)
     secretaria_nome = serializers.CharField(source='secretaria.nome', read_only=True)
     secretaria_sigla = serializers.CharField(source='secretaria.sigla', read_only=True)
@@ -41,8 +41,8 @@ class GuiaReadSerializer(serializers.ModelSerializer):
         model = GuiaAbastecimento
         fields = [
             'id', 'data_hora', 'modalidade', 'modalidade_nome',
-            'quantidade_combustivel', 'quantidade_oleo', 'periodo_uso_dias', 
-            'hodometro', 'hodometro_quebrado', 'observacao', 'rota_manual', 
+            'quantidade_combustivel', 'quantidade_oleo', 'periodo_uso_dias',
+            'hodometro', 'hodometro_quebrado', 'observacao', 'rota_manual',
             'veiculo_id', 'veiculo_display', 'tipo_veiculo',
             'pessoa_id', 'pessoa_nome', 'rota_id', 'rota_nome',
             'tipo_atividade_id', 'tipo_atividade_nome',
@@ -53,9 +53,6 @@ class GuiaReadSerializer(serializers.ModelSerializer):
         ]
 
 class GuiaWriteSerializer(serializers.ModelSerializer):
-    # FKs de escrita padronizadas com sufixo _id (contrato da API).
-    # O source aponta para o campo do model, então o service continua
-    # recebendo validated_data com as chaves do model.
     pessoa_id = serializers.PrimaryKeyRelatedField(
         source='pessoa', queryset=Pessoa.objects.all()
     )
@@ -81,53 +78,46 @@ class GuiaWriteSerializer(serializers.ModelSerializer):
     tipo_combustivel_id = serializers.PrimaryKeyRelatedField(
         source='tipo_combustivel', queryset=TipoCombustivel.objects.all()
     )
-
-    # Campo virtual utilizado pelo Service para localizar/criar
-    # uma atividade pelo nome.
     tipo_atividade_nome = serializers.CharField(
-        write_only=True, 
-        required=False, 
+        write_only=True,
+        required=False,
         allow_blank=True
     )
 
     class Meta:
         model = GuiaAbastecimento
         fields = [
-            'id', 
-            'data_hora', 
-            'modalidade', 
-
-            'quantidade_combustivel',
-            'quantidade_oleo', 
-            'periodo_uso_dias', 
-            'observacao',
-
-            'hodometro', 
-            'hodometro_quebrado', 
-
-            'rota_manual',
-
-            'pessoa_id', 
-
-            'veiculo_id', 
-            'tipo_veiculo', 
-            'veiculo_descricao',
-
-            'tipo_atividade_id', 
-            'tipo_atividade_nome', 
-
-            'rota_id',
-
-            'secretaria_id', 
-            'instituicao_id', 
+            'id', 'data_hora', 'modalidade',
+            'quantidade_combustivel', 'quantidade_oleo',
+            'periodo_uso_dias', 'observacao',
+            'hodometro', 'hodometro_quebrado',
+            'rota_manual', 'pessoa_id',
+            'veiculo_id', 'tipo_veiculo', 'veiculo_descricao',
+            'tipo_atividade_id', 'tipo_atividade_nome',
+            'rota_id', 'secretaria_id', 'instituicao_id',
             'tipo_combustivel_id',
         ]
+
+    def validate(self, attrs):
+        veiculo = attrs.get('veiculo')
+        descricao = attrs.get('veiculo_descricao')
+
+        if self.instance:
+            veiculo = attrs.get('veiculo', self.instance.veiculo)
+            descricao = attrs.get('veiculo_descricao', self.instance.veiculo_descricao)
+
+        if not veiculo and not descricao:
+            raise serializers.ValidationError({
+                'veiculo_id': 'Informe o veículo ou o equipamento/recurso abastecido.'
+            })
+
+        return attrs
 
 class RegistroHodometroDiarioSerializer(serializers.ModelSerializer):
     class Meta:
         model = RegistroHodometroDiario
         fields = [
-            'id', 'guia', 'data_referencia', 
+            'id', 'guia', 'data_referencia',
             'hodometro_inicial', 'hodometro_final', 'distancia_percorrida'
         ]
         read_only_fields = ['distancia_percorrida']
