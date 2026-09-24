@@ -125,7 +125,7 @@ def _draw_guia_impressao_copy(pdf: canvas.Canvas, guia: GuiaAbastecimento, y_bot
     observacao = guia.observacao or ""
     
     # Novo formato de Hodômetro
-    hodometro = "0 km"#f"{guia.hodometro_atual} km" if guia.hodometro_atual else "-"
+    hodometro = "-" if guia.hodometro_quebrado or guia.hodometro is None else f"{guia.hodometro} km"
     periodo = f"{guia.periodo_uso_dias} dias" if guia.periodo_uso_dias is not None else ""
     
     def draw_field_with_line(pdf, x, y, label, value, font_name="Helvetica", font_size=11, line_width_extra=0):
