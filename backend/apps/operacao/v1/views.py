@@ -21,6 +21,7 @@ from apps.operacao.services import guia_service
 from apps.operacao.services import hodometro_service
 from apps.operacao.services.pdf_service import gerar_pdf_guia
 from apps.operacao.services.sugestoes_service import get_sugestoes_pessoa
+from apps.operacao.services.relatorio_service import obter_relatorio_consolidado
 
 
 class TipoAtividadeViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
@@ -98,6 +99,21 @@ class GuiaAbastecimentoViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
             return Response({"detail": "Parâmetro 'pessoa' é obrigatório."}, status=status.HTTP_400_BAD_REQUEST)
         
         dados = get_sugestoes_pessoa(pessoa_id)
+        return Response(dados, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=["get"], url_path="relatorio-consolidado")
+    def relatorio_consolidado(self, request):
+        data_inicio = request.query_params.get("data_inicio")
+        data_fim = request.query_params.get("data_fim")
+        secretaria_id = request.query_params.get("secretaria")
+        tipo_combustivel_id = request.query_params.get("tipo_combustivel")
+
+        dados = obter_relatorio_consolidado(
+            data_inicio=data_inicio,
+            data_fim=data_fim,
+            secretaria_id=secretaria_id,
+            tipo_combustivel_id=tipo_combustivel_id,
+        )
         return Response(dados, status=status.HTTP_200_OK)
 
 

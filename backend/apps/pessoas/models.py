@@ -41,6 +41,8 @@ class Pessoa(models.Model):
             self.cpf = cpf_limpo
     
     def save(self, *args, **kwargs):
+        if self.cpf:
+            self.cpf = ''.join(filter(str.isdigit, str(self.cpf)))
         self.full_clean()
         super().save(*args, **kwargs)
 
