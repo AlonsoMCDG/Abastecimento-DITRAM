@@ -134,6 +134,7 @@ export default function Home() {
         <h2 className="home-section-title">Acesso Rápido</h2>
         <div className="home-links">
           <Link className="home-link" to={ROUTES.operacao.guias.list}>📄 Histórico de Guias</Link>
+          <Link className="home-link" to={ROUTES.operacao.relatorios.consolidado}>📊 Relatórios de Consumo</Link>
           <Link className="home-link" to={ROUTES.frota.veiculos.list}>🚛 Veículos</Link>
           <Link className="home-link" to={ROUTES.pessoas.base.list}>👷 Motoristas</Link>
           <Link className="home-link" to={ROUTES.organizacao.secretarias.list}>🏛️ Secretarias</Link>

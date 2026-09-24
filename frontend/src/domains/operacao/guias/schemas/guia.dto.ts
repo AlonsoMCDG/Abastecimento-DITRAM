@@ -138,3 +138,58 @@ export const guiaListParamsSchema = z.object({
   page_size: z.number().optional(),
 })
 export type GuiaListParams = z.infer<typeof guiaListParamsSchema>;
+
+// ============================================================
+// SUGESTÕES E CONSOLIDADOS
+// ============================================================
+
+export interface SugestoesPessoaDTO {
+  tipo_atividade?: { value: number; label: string } | null;
+  veiculo?: {
+    value: number;
+    label: string;
+    tipo_combustivel_id?: number | null;
+    consumo_estimado_combustivel?: number | null;
+    unidade_consumo?: string | null;
+    hodometro_atual?: number | null;
+  } | null;
+  secretaria?: { value: number; label: string; sigla: string } | null;
+  modalidade?: string | null;
+  rota?: { value: number; label: string; distancia_km?: number | null } | null;
+}
+
+export interface RelatorioConsolidadoDTO {
+  periodo: {
+    data_inicio: string | null;
+    data_fim: string | null;
+  };
+  kpis: {
+    total_combustivel: number;
+    total_oleo: number;
+    total_guias: number;
+    total_veiculos: number;
+  };
+  por_secretaria: Array<{
+    secretaria_id: number;
+    nome: string;
+    sigla: string;
+    total_guias: number;
+    total_combustivel: number;
+    total_oleo: number;
+  }>;
+  por_tipo_combustivel: Array<{
+    tipo_combustivel_id: number;
+    nome: string;
+    total_guias: number;
+    total_litros: number;
+    percentual: number;
+  }>;
+  por_modalidade: Array<{
+    modalidade: string;
+    modalidade_nome: string;
+    total_guias: number;
+    total_litros: number;
+    total_oleo: number;
+    percentual: number;
+  }>;
+}

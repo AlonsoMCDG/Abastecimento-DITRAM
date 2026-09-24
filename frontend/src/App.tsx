@@ -22,6 +22,7 @@ import GuiaAbastecimentoListPage from "./domains/operacao/guias/pages/GuiaAbaste
 import GuiaAbastecimentoFormPage from "./domains/operacao/guias/pages/GuiaAbastecimentoFormPage";
 import TipoAtividadeListPage from "./domains/operacao/tipos-atividade/pages/TipoAtividadeListPage";
 import TipoAtividadeFormPage from "./domains/operacao/tipos-atividade/pages/TipoAtividadeFormPage";
+import RelatoriosPage from "./domains/operacao/relatorios/pages/RelatoriosPage";
 
 import UsuarioListPage from "./domains/sistema/usuarios/pages/UsuarioListPage";
 import UsuarioFormPage from "./domains/sistema/usuarios/pages/UsuarioFormPage";
@@ -218,6 +219,8 @@ function App() {
                   </RequirePermission>
                 }
               />
+              {/* Relatórios Consolidados */}
+              <Route path="relatorios" element={<RelatoriosPage />} />
             </Route>
 
             {/* ==========================================

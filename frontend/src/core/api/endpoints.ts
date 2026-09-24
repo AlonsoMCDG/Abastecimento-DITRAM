@@ -77,5 +77,7 @@ export const ENDPOINTS = {
     tiposAtividade: "/v1/operacao/atividades/",
     tiposAtividadeLookup: "/v1/operacao/atividades/lookup/",
     guias: "/v1/operacao/guias/",
+    guiasSugestoes: "/v1/operacao/guias/sugestoes/",
+    guiasRelatorioConsolidado: "/v1/operacao/guias/relatorio-consolidado/",
   },
 }

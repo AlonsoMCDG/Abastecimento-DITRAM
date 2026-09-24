@@ -7,10 +7,12 @@ import { z } from 'zod';
 import { DynamicForm } from '../../../../core/ui/forms/dynamic-form/DynamicForm';
 import { getApiErrorMessage } from '../../../../core/api/errorHandlers';
 import { processPdfBlob } from '../../../../core/utils/pdfHandler';
+import { getCurrentDateTimeLocalISO } from '../../../../core/utils/dateUtils';
 import { ROUTES } from '../../../../core/routes/routes';
 
 import { guiasApi } from '../api/guias.api';
 import { veiculosApi } from '../../../frota/veiculos/api/veiculos.api';
+import { rotasApi } from '../../../frota/rotas/rotas.api';
 import { mapReadToForm, mapFormToWriteDTO } from '../api/guias.mapper';
 import { guiaAbastecimentoUISchema } from '../schemas/guia.ui';
 import { guiaAbastecimentoFormSchema, type GuiaAbastecimentoFormInput } from '../schemas/guia.form';
@@ -32,10 +34,10 @@ export default function GuiaAbastecimentoFormPage() {
   const [globalError, setGlobalError] = useState<string | null>(null);
   const [loading, setLoading] = useState(!!id);
   const [isPrinting, setIsPrinting] = useState(false);
+  const [sugestaoLitragem, setSugestaoLitragem] = useState<number | null>(null);
   const submitIntent = useRef<'save' | 'save_print'>('save');
 
-
-  const { handleSubmit, reset, watch, setValue } = methods;
+  const { handleSubmit, reset, watch, setValue, getValues } = methods;
 
   // BUSCA DE DADOS
   useEffect(() => {
@@ -50,8 +52,7 @@ export default function GuiaAbastecimentoFormPage() {
         .catch(err => setGlobalError(getApiErrorMessage(err, "Erro ao carregar a guia.")))
         .finally(() => setLoading(false));
     } else {
-      const tzoffset = (new Date()).getTimezoneOffset() * 60000;
-      const dataHora = new Date(Date.now() - tzoffset).toISOString().slice(0, 16);
+      const dataHora = getCurrentDateTimeLocalISO();
       const secretariaParam = searchParams.get("secretaria");
       
       reset({
@@ -62,11 +63,39 @@ export default function GuiaAbastecimentoFormPage() {
     }
   }, [id, searchParams, reset]);
 
-  // EFEITOS COLATERAIS
-  const veiculoIdSelecionado = watch('veiculo');
-  
+  // EFEITOS COLATERAIS: 1. AUTOPREENCHIMENTO AO SELECIONAR CONDUTOR (PESSOA)
+  const pessoaIdSelecionada = watch('pessoa_id');
   useEffect(() => {
-    console.log("Selecionou veiculo "+ veiculoIdSelecionado);
+    if (typeof pessoaIdSelecionada === 'number' && pessoaIdSelecionada > 0 && !id) {
+      guiasApi.obterSugestoes(pessoaIdSelecionada)
+        .then(sugestoes => {
+          const currentValues = getValues();
+          if (sugestoes.secretaria && !currentValues.secretaria_id) {
+            setValue('secretaria_id', sugestoes.secretaria.value, { shouldValidate: true });
+          }
+          if (sugestoes.modalidade && !currentValues.modalidade) {
+            setValue('modalidade', sugestoes.modalidade, { shouldValidate: true });
+          }
+          if (sugestoes.tipo_atividade && !currentValues.tipo_atividade) {
+            setValue('tipo_atividade', sugestoes.tipo_atividade.value, { shouldValidate: true });
+          }
+          if (sugestoes.veiculo && !currentValues.veiculo) {
+            setValue('veiculo', sugestoes.veiculo.value, { shouldValidate: true });
+            if (sugestoes.veiculo.tipo_combustivel_id) {
+              setValue('tipo_combustivel_id', sugestoes.veiculo.tipo_combustivel_id, { shouldValidate: true });
+            }
+          }
+          if (sugestoes.rota && !currentValues.rota) {
+            setValue('rota', sugestoes.rota.value, { shouldValidate: true });
+          }
+        })
+        .catch(err => console.error("Erro ao obter sugestões do condutor", err));
+    }
+  }, [pessoaIdSelecionada, setValue, getValues, id]);
+
+  // EFEITOS COLATERAIS: 2. ATUALIZAÇÃO DO TIPO DE COMBUSTÍVEL AO SELECIONAR VEÍCULO
+  const veiculoIdSelecionado = watch('veiculo');
+  useEffect(() => {
     if (typeof veiculoIdSelecionado === 'number') {
       veiculosApi.buscar(veiculoIdSelecionado)
         .then(res => {
@@ -77,6 +106,38 @@ export default function GuiaAbastecimentoFormPage() {
         .catch(err => console.error("Erro ao buscar veículo", err));
     }
   }, [veiculoIdSelecionado, setValue]);
+
+  // EFEITOS COLATERAIS: 3. CÁLCULO DE LITRAGEM SUGERIDA (DISTÂNCIA / CONSUMO)
+  const rotaIdSelecionada = watch('rota');
+  useEffect(() => {
+    if (typeof veiculoIdSelecionado === 'number' && typeof rotaIdSelecionada === 'number') {
+      Promise.all([
+        veiculosApi.buscar(veiculoIdSelecionado),
+        rotasApi.buscar(rotaIdSelecionada)
+      ])
+        .then(([veic, rot]) => {
+          const distancia = rot.distancia_km ? Number(rot.distancia_km) : 0;
+          const consumo = veic.consumo_estimado_combustivel ? Number(veic.consumo_estimado_combustivel) : 0;
+          
+          if (distancia > 0 && consumo > 0) {
+            let litros = 0;
+            if (veic.unidade_consumo === 'KM_POR_L') {
+              litros = Number((distancia / consumo).toFixed(1));
+            } else if (veic.unidade_consumo === 'L_POR_H') {
+              litros = Number((distancia * consumo).toFixed(1));
+            }
+            if (litros > 0) {
+              setSugestaoLitragem(litros);
+              return;
+            }
+          }
+          setSugestaoLitragem(null);
+        })
+        .catch(() => setSugestaoLitragem(null));
+    } else {
+      setSugestaoLitragem(null);
+    }
+  }, [veiculoIdSelecionado, rotaIdSelecionada]);
 
   // SUBMISSÃO
   const onSubmit: SubmitHandler<GuiaAbastecimentoFormInput> = async (rawFormData) => {
@@ -122,6 +183,42 @@ export default function GuiaAbastecimentoFormPage() {
       {globalError && (
         <div className={layoutStyles.alertError}>
           ⚠️ {globalError}
+        </div>
+      )}
+
+      {/* Sugestão de Consumo Estimado */}
+      {sugestaoLitragem !== null && (
+        <div style={{
+          padding: '12px 16px',
+          backgroundColor: '#eff6ff',
+          border: '1px solid #bfdbfe',
+          borderRadius: '8px',
+          marginBottom: '16px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '12px',
+          color: '#1e40af'
+        }}>
+          <span style={{ fontSize: '0.92rem' }}>
+            💡 <strong>Consumo sugerido para este percurso:</strong> {sugestaoLitragem} Litros
+          </span>
+          <button
+            type="button"
+            onClick={() => setValue('quantidade_combustivel', sugestaoLitragem, { shouldValidate: true })}
+            style={{
+              background: '#2563eb',
+              color: '#ffffff',
+              border: 'none',
+              borderRadius: '6px',
+              padding: '6px 14px',
+              cursor: 'pointer',
+              fontWeight: 600,
+              fontSize: '0.85rem'
+            }}
+          >
+            Aplicar {sugestaoLitragem} L
+          </button>
         </div>
       )}
 

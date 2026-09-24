@@ -54,9 +54,9 @@ export const ROUTES = {
       edit: (id: number) => `/frota/rotas/editar/${id}`,
     },
     tiposCombustivel: {
-      list: "/frota/rotas",
-      create: "/frota/rotas/criar",
-      edit: (id: number) => `/frota/rotas/editar/${id}`,
+      list: "/frota/tipos-combustivel",
+      create: "/frota/tipos-combustivel/criar",
+      edit: (id: number) => `/frota/tipos-combustivel/editar/${id}`,
     }
   },
 
@@ -65,14 +65,17 @@ export const ROUTES = {
   // -----------------------
   operacao: {
     tiposAtividade: {
-      list: "/operacao/atividades",
-      create: "/operacao/atividades/criar",
-      edit: (id: number) => `/operacao/atividades/editar/${id}`,
+      list: "/operacao/tipos-servico",
+      create: "/operacao/tipos-servico/criar",
+      edit: (id: number) => `/operacao/tipos-servico/editar/${id}`,
     },
     guias: {
       list: "/operacao/guias",
       create: "/operacao/guias/criar",
       edit: (id: number) => `/operacao/guias/editar/${id}`,
+    },
+    relatorios: {
+      consolidado: "/operacao/relatorios",
     }
   },
 };

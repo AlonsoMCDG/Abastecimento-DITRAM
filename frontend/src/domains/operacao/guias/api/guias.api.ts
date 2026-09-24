@@ -5,7 +5,9 @@ import { ENDPOINTS } from "../../../../core/api/endpoints";
 import {
   guiaAbastecimentoReadSchema,
   guiaAbastecimentoWriteSchema,
-  type GuiaListParams
+  type GuiaListParams,
+  type SugestoesPessoaDTO,
+  type RelatorioConsolidadoDTO
 } from "../schemas/guia.dto"; 
 
 // Cria os métodos base (listar, buscar, criar, atualizar, deletar)
@@ -19,7 +21,7 @@ const baseCrud = createCrudApi<
   writeSchema: guiaAbastecimentoWriteSchema
 })
 
-// Estende a API base com os métodos específicos da Guia (PDF)
+// Estende a API base com os métodos específicos da Guia (PDF, Sugestões, Relatórios)
 export const guiasApi = {
   ...baseCrud,
 
@@ -29,5 +31,24 @@ export const guiasApi = {
       { responseType: "blob" }
     )
     return response.data
+  },
+
+  async obterSugestoes(pessoaId: number): Promise<SugestoesPessoaDTO> {
+    const response = await client.get(ENDPOINTS.operacao.guiasSugestoes, {
+      params: { pessoa: pessoaId }
+    });
+    return response.data;
+  },
+
+  async obterRelatorioConsolidado(params?: {
+    data_inicio?: string;
+    data_fim?: string;
+    secretaria?: number;
+    tipo_combustivel?: number;
+  }): Promise<RelatorioConsolidadoDTO> {
+    const response = await client.get(ENDPOINTS.operacao.guiasRelatorioConsolidado, {
+      params
+    });
+    return response.data;
   }
 }
