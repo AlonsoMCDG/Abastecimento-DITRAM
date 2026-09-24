@@ -1,7 +1,7 @@
 from django.db import transaction
 from django.core.exceptions import ValidationError
+
 from apps.operacao.models import GuiaAbastecimento
-from apps.operacao.services.tipo_atividade_service import get_or_create_tipo_atividade
 
 
 def criar_guia(dados: dict, usuario) -> GuiaAbastecimento:
@@ -9,11 +9,7 @@ def criar_guia(dados: dict, usuario) -> GuiaAbastecimento:
     _validar_regras_guia(dados)
 
     with transaction.atomic():
-        nome_atividade = dados.pop("tipo_atividade_nome", None)
-
-        if not dados.get("tipo_atividade") and nome_atividade:
-            tipo_atividade, _ = get_or_create_tipo_atividade(nome_atividade)
-            dados["tipo_atividade"] = tipo_atividade
+        dados.pop("tipo_atividade_nome", None)
 
         if dados.get("hodometro_quebrado"):
             dados["hodometro"] = None
@@ -40,10 +36,10 @@ def atualizar_guia(guia: GuiaAbastecimento, dados: dict) -> GuiaAbastecimento:
 
 def _validar_regras_guia(dados: dict, instancia_atual=None):
     """
-    Valida somente as regras que realmente pertencem à emissão da guia.
+    Valida somente o que é necessário para emitir a guia.
 
-    Relacionamentos entre motorista, secretaria, veículo e rota são
-    facilidades para preenchimento e não pré-requisitos para salvar.
+    Relações como secretaria -> motorista -> veículo são facilidades
+    para preenchimento e serão usadas nos filtros futuros.
     """
     veiculo = dados.get("veiculo") if "veiculo" in dados else (
         instancia_atual.veiculo if instancia_atual else None
@@ -57,7 +53,11 @@ def _validar_regras_guia(dados: dict, instancia_atual=None):
             "veiculo": "Informe o veículo ou o equipamento/recurso abastecido."
         })
 
-    if dados.get("tipo_atividade") and dados.get("tipo_atividade_nome"):
-        raise ValidationError({
-            "tipo_atividade": "Informe a atividade por referência ou por nome, não as duas."
-        })
+    hodometro_quebrado = (
+        dados.get("hodometro_quebrado")
+        if "hodometro_quebrado" in dados
+        else (instancia_atual.hodometro_quebrado if instancia_atual else False)
+    )
+
+    if hodometro_quebrado:
+        dados["hodometro"] = None
