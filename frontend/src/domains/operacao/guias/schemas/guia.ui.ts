@@ -8,12 +8,11 @@ export const guiaAbastecimentoUISchema: FormSchema<GuiaAbastecimentoFormInput> =
   fields: [
     { name: 'data_hora', label: 'Data e Hora', type: 'datetime-local', required: true },
     {
-      name: 'tipo_atividade',
-      label: 'Rota / Serviço',
+      name: 'modalidade',
+      label: 'Tipo de Guia / Operação',
       type: 'select',
-      endpoint: ENDPOINTS.operacao.tiposAtividadeLookup,
+      endpoint: ENDPOINTS.choices.guiaModalidade,
       required: true,
-      creatable: true,
     },
     {
       name: 'secretaria_id',
@@ -30,11 +29,11 @@ export const guiaAbastecimentoUISchema: FormSchema<GuiaAbastecimentoFormInput> =
       required: true,
     },
     {
-      name: 'modalidade',
-      label: 'Tipo do recurso abastecido',
+      name: 'tipo_atividade',
+      label: 'Rota / Serviço',
       type: 'select',
-      endpoint: ENDPOINTS.choices.guiaModalidade,
-      required: true,
+      endpoint: ENDPOINTS.operacao.tiposAtividadeLookup,
+      creatable: true,
     },
     {
       name: 'veiculo',
