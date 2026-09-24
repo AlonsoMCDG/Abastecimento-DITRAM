@@ -160,29 +160,29 @@ def _draw_guia_impressao_copy(pdf: canvas.Canvas, guia: GuiaAbastecimento, y_bot
     y -= 8 * mm
     draw_field_with_line(pdf, x_left, y, f"{label_nome}: ", nome_condutor)
 
-    if tipo_servico_raw in vehicle_services or not tipo_servico_raw:
-        y -= 8 * mm
-        draw_field_with_line(pdf, x_left, y, "Modelo/placa do Veículo: ", veiculo_text)
+    y -= 8 * mm
+    draw_field_with_line(pdf, x_left, y, "Modelo/placa do Veículo / Equipamento: ", veiculo_text)
 
     y -= 8 * mm
     draw_field_with_line(pdf, x_left, y, f"{label_instituicao}: ", instituicao)
 
     y -= 8 * mm
+    draw_field_with_line(pdf, x_left, y, "Rota / Serviço: ", rota_servico)
+
+    y -= 8 * mm
     combustivel_litros_val = f"{litros_combustivel} L ({tipo_combustivel_display})"
     draw_field_with_line(pdf, x_left, y, "Quantidade de Litros: ", combustivel_litros_val, line_width_extra=60 * mm)
 
-    if tipo_servico_nome.lower() == 'barqueiro':
-        y -= 8 * mm
-        oleo_litros_val = f"{litros_oleo} L"
-        draw_field_with_line(pdf, x_left, y, "Óleo Lubrificante: ", oleo_litros_val, line_width_extra=60 * mm)
+    y -= 8 * mm
+    oleo_litros_val = f"{litros_oleo} L"
+    draw_field_with_line(pdf, x_left, y, "Óleo Lubrificante: ", oleo_litros_val, line_width_extra=60 * mm)
 
-        y -= 8 * mm
-        draw_field_with_line(pdf, x_left, y, "Período de uso: ", periodo, line_width_extra=50 * mm)
+    y -= 8 * mm
+    draw_field_with_line(pdf, x_left, y, "Período de uso: ", periodo, line_width_extra=50 * mm)
 
-    if tipo_servico_raw in vehicle_services or not tipo_servico_raw:
-        y -= 8 * mm
-        draw_field_with_line(pdf, x_left, y, "Hodômetro Atual: ", hodometro, line_width_extra=50 * mm)
-    
+    y -= 8 * mm
+    draw_field_with_line(pdf, x_left, y, "Hodômetro Atual: ", hodometro, line_width_extra=50 * mm)
+
     y -= 8 * mm
     draw_field_with_line(pdf, x_left, y, "Observação: ", observacao)
 
