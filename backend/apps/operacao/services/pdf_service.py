@@ -92,7 +92,6 @@ def _draw_guia_impressao_copy(pdf: canvas.Canvas, guia: GuiaAbastecimento, y_bot
     
     tipo_combustivel_display = guia.tipo_combustivel.nome if getattr(guia, 'tipo_combustivel', None) else ""
 
-    vehicle_services = {"CAMINHONETE", "ONIBUS", "MOTOCICLETA", "CARRO"}
     escola_services = {"CAMINHONETE", "ONIBUS", "MOTOCICLETA", "CARRO", "BARQUEIRO"}
 
     if tipo_servico_raw in {"ROCAGEM", "COROTE"}:
