@@ -35,11 +35,11 @@ else:
     DEBUG = DJANGO_PROFILE == "dev"
 
 allowed_hosts_env = os.getenv("ALLOWED_HOSTS", "").strip()
-if allowed_hosts_env:
+if allowed_hosts_env and not DEBUG:
     ALLOWED_HOSTS = [h.strip() for h in allowed_hosts_env.split(",") if h.strip()]
 elif DEBUG:
-    # Fallback seguro apenas em desenvolvimento local
-    ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
+    # Em desenvolvimento local, aceita qualquer host (localhost, 127.0.0.1, IP da rede, WSL)
+    ALLOWED_HOSTS = ["*"]
 else:
     # FAIL-CLOSED: em validação/produção, ALLOWED_HOSTS é OBRIGATÓRIO.
     # Levantar erro aqui impede o app de subir aceitando Hosts arbitrários
@@ -244,12 +244,15 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Leitura do CORS
 cors_allowed_origins_env = os.getenv("CORS_ALLOWED_ORIGINS", "").strip()
-if cors_allowed_origins_env:
+if cors_allowed_origins_env and not DEBUG:
     CORS_ALLOW_ALL_ORIGINS = False
     CORS_ALLOWED_ORIGINS = [o.strip() for o in cors_allowed_origins_env.split(",") if o.strip()]
 elif DEBUG:
-    # Fallback seguro apenas em desenvolvimento local (Vite)
-    CORS_ALLOWED_ORIGINS = ["http://localhost:5173", "http://127.0.0.1:5173"]
+    # Em desenvolvimento local, permite qualquer porta de localhost / 127.0.0.1
+    CORS_ALLOW_ALL_ORIGINS = True
+    CORS_ALLOWED_ORIGIN_REGEXES = [
+        r"^http://(localhost|127\.0\.0\.1)(:\d+)?$",
+    ]
 else:
     # FAIL-CLOSED fora de dev: sem env var, nenhuma origem externa é permitida
     CORS_ALLOWED_ORIGINS = []
@@ -259,7 +262,11 @@ csrf_trusted_env = os.getenv("CSRF_TRUSTED_ORIGINS", "").strip()
 if csrf_trusted_env:
     CSRF_TRUSTED_ORIGINS = [o.strip() for o in csrf_trusted_env.split(",") if o.strip()]
 elif DEBUG:
-    CSRF_TRUSTED_ORIGINS = ["http://localhost:5173", "http://127.0.0.1:5173"]
+    CSRF_TRUSTED_ORIGINS = [
+        "http://localhost:5173", "http://127.0.0.1:5173",
+        "http://localhost:5174", "http://127.0.0.1:5174",
+        "http://localhost:3000", "http://127.0.0.1:3000",
+    ]
 else:
     CSRF_TRUSTED_ORIGINS = []
 
