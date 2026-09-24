@@ -34,7 +34,6 @@ export default function GuiaAbastecimentoFormPage() {
   const [globalError, setGlobalError] = useState<string | null>(null);
   const [loading, setLoading] = useState(!!id);
   const [isPrinting, setIsPrinting] = useState(false);
-  const [sugestaoLitragem, setSugestaoLitragem] = useState<number | null>(null);
   const submitIntent = useRef<'save' | 'save_print'>('save');
 
   const { handleSubmit, reset, watch, setValue, getValues } = methods;
