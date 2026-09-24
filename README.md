@@ -131,3 +131,38 @@ npm run dev
 
 
 
+
+---
+
+## 🧪 Execução de Testes e Validação
+
+### Backend (Testes Automatizados e Sanidade)
+```bash
+cd backend
+python manage.py check
+python manage.py test
+```
+
+### Frontend (Tipagem e Build)
+```bash
+cd frontend
+npm run build
+npm run lint
+```
+
+---
+
+## 📁 Documentações Específicas
+* [📖 Documentação Técnica do Backend](./backend/README.md)
+* [📖 Documentação Técnica do Frontend](./frontend/README.md)
+
+---
+
+## 👥 Equipe de Desenvolvimento
+* **Alonso Martins de Araújo**
+* **Ana Heloísa Freire Aires**
+* **Elias da Cruz de Souza Junior**
+* **Marcos Vinícius Moraes Costa**
+
+*Prefeitura Municipal de Sena Madureira – AC / Rio Branco – AC (2026)*
+
