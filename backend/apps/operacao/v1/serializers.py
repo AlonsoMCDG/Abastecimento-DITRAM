@@ -18,7 +18,7 @@ class TipoAtividadeLookupSerializer(serializers.ModelSerializer):
         fields = ['value', 'label']
 
 class GuiaReadSerializer(serializers.ModelSerializer):
-    modalidade_nome = serializers.CharField(source='modalidade', read_only=True)
+    modalidade_nome = serializers.CharField(source='get_modalidade_display', read_only=True)
     pessoa_id = serializers.IntegerField(read_only=True)
     pessoa_nome = serializers.CharField(source='pessoa.nome', read_only=True)
     veiculo_id = serializers.IntegerField(read_only=True)
