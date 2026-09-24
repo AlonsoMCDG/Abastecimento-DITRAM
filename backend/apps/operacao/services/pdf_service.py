@@ -85,9 +85,10 @@ def _draw_guia_impressao_copy(pdf: canvas.Canvas, guia: GuiaAbastecimento, y_bot
     if os.path.exists(path_brasao_dir):
         pdf.drawImage(path_brasao_dir, x_right - logo_size, y_logo, width=logo_size, height=logo_size, preserveAspectRatio=True, mask='auto')
 
-    # Acesso seguro aos novos relacionamentos (ForeignKeys)
-    tipo_servico_nome = guia.tipo_atividade.nome if getattr(guia, 'tipo_atividade', None) else ""
+    # A modalidade representa o tipo/contexto da operação da guia.
+    tipo_servico_nome = (guia.modalidade or "").strip()
     tipo_servico_raw = tipo_servico_nome.upper().strip()
+    rota_servico = (guia.rota_manual or "").strip()
     
     tipo_combustivel_display = guia.tipo_combustivel.nome if getattr(guia, 'tipo_combustivel', None) else ""
 
@@ -119,6 +120,10 @@ def _draw_guia_impressao_copy(pdf: canvas.Canvas, guia: GuiaAbastecimento, y_bot
         modelo = getattr(guia.veiculo, 'modelo', '')
         placa = getattr(guia.veiculo, 'placa', '')
         veiculo_text = f"{modelo} - {placa}".strip(" -") or "-"
+    elif guia.veiculo_descricao:
+        veiculo_text = guia.veiculo_descricao
+        if guia.tipo_veiculo:
+            veiculo_text = f"{veiculo_text} ({guia.tipo_veiculo})"
     else:
         veiculo_text = "-"
         
