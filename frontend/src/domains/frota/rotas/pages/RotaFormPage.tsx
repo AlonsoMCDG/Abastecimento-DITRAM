@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 
 import { rotasApi } from "../rotas.api";
 import { ROUTES } from "../../../../core/routes/routes";
-import { DynamicForm } from "../../../../core/ui/forms/dynamic-form/DynamicFormOld";
+import { StandaloneForm } from "../../../../core/ui/forms/dynamic-form/StandaloneForm";
 import { getApiErrorMessage } from "../../../../core/api/errorHandlers";
 
 import { rotaUISchema } from "../schemas/rota.schema";
@@ -60,7 +60,7 @@ export default function RotaFormPage() {
 
   return (
     <div className="page-container">
-      <DynamicForm<RotaFormData>
+      <StandaloneForm<RotaFormData>
         title={id ? "Editar Rota" : "Nova Rota"}
         subtitle={id ? `Atualize o trajeto ou os detalhes da rota.` : "Adicione caminhos e trajetos frequentes para auto-completar nas guias."}
         

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 import { usuarioApi } from "../../usuarios/usuarios.api";
 import { getApiErrorMessage } from "../../../../core/api/errorHandlers";
-import { DynamicForm } from "../../../../core/ui/forms/dynamic-form/DynamicFormOld";
+import { StandaloneForm } from "../../../../core/ui/forms/dynamic-form/StandaloneForm";
 
 import { perfilUISchema } from "../../usuarios/schemas/usuario.schema";
 import { perfilEditFormSchema, type PerfilEditFormData } from "../../usuarios/schemas/usuario.form.zod";
@@ -46,7 +46,7 @@ export default function PerfilEditPage() {
 
   return (
     <div className="page-container">
-      <DynamicForm<PerfilEditFormData>
+      <StandaloneForm<PerfilEditFormData>
         title="Editar Meu Perfil"
         subtitle="Atualize seus dados pessoais e de acesso."
         

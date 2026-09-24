@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 
 import { tiposAtividadeApi } from "../tiposAtividade.api";
 import { ROUTES } from "../../../../core/routes/routes";
-import { DynamicForm } from "../../../../core/ui/forms/dynamic-form/DynamicFormOld";
+import { StandaloneForm } from "../../../../core/ui/forms/dynamic-form/StandaloneForm";
 import { getApiErrorMessage } from "../../../../core/api/errorHandlers";
 
 import { tipoAtividadeUISchema } from "../schemas/tipoAtividade.schema";
@@ -61,7 +61,7 @@ export default function TipoAtividadeFormPage() {
 
   return (
     <div className="page-container">
-      <DynamicForm<TipoAtividadeFormData>
+      <StandaloneForm<TipoAtividadeFormData>
         title={id ? "Editar Tipo de Atividade" : "Cadastrar Tipo de Atividade"}
         subtitle={id ? "Atualize o nome ou o status da atividade." : "Crie uma nova atividade que poderá ser vinculada nas guias."}
         

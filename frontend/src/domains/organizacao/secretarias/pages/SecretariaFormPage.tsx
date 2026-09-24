@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 
 import { secretariaApi } from "../secretarias.api";
 import { ROUTES } from "../../../../core/routes/routes";
-import { DynamicForm } from "../../../../core/ui/forms/dynamic-form/DynamicFormOld";
+import { StandaloneForm } from "../../../../core/ui/forms/dynamic-form/StandaloneForm";
 import { getApiErrorMessage } from "../../../../core/api/errorHandlers";
 
 import { secretariaUISchema } from "../schemas/secretaria.schema";
@@ -61,7 +61,7 @@ export default function SecretariaFormPage() {
 
   return (
     <div className="page-container">
-      <DynamicForm<SecretariaFormData>
+      <StandaloneForm<SecretariaFormData>
         title={id ? "Editar Secretaria" : "Cadastrar Secretaria"}
         subtitle={id ? "Atualize as informações organizacionais." : "Registre uma nova secretaria ou autarquia no sistema."}
         

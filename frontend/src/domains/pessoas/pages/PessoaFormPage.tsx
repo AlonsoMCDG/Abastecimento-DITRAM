@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 
 import { pessoasApi } from "../pessoas.api";
 import { ROUTES } from "../../../core/routes/routes";
-import { DynamicForm } from "../../../core/ui/forms/dynamic-form/DynamicFormOld";
+import { StandaloneForm } from "../../../core/ui/forms/dynamic-form/StandaloneForm";
 import { getApiErrorMessage } from "../../../core/api/errorHandlers";
 
 import { pessoaUISchema } from "../schemas/pessoa.schema";
@@ -60,7 +60,7 @@ export default function PessoaFormPage() {
 
   return (
     <div className="page-container">
-      <DynamicForm<PessoaFormData>
+      <StandaloneForm<PessoaFormData>
         title={id ? "Editar Pessoa" : "Cadastrar Nova Pessoa"}
         subtitle={id ? "Atualize os dados de identificação e status." : "Preencha os dados básicos do novo cadastro."}
         

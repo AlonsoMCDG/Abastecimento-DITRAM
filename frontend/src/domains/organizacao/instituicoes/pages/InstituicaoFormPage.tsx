@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 
 import { instituicoesApi } from "../instituicoes.api"; 
 import { ROUTES } from "../../../../core/routes/routes";
-import { DynamicForm } from "../../../../core/ui/forms/dynamic-form/DynamicFormOld";
+import { StandaloneForm } from "../../../../core/ui/forms/dynamic-form/StandaloneForm";
 import { getApiErrorMessage } from "../../../../core/api/errorHandlers";
 
 import { instituicaoUISchema } from "../schemas/instituicao.schema";
@@ -61,7 +61,7 @@ export default function InstituicaoFormPage() {
 
   return (
     <div className="page-container">
-      <DynamicForm<InstituicaoFormData>
+      <StandaloneForm<InstituicaoFormData>
         title={id ? "Editar Instituição" : "Cadastrar Instituição"}
         subtitle={id ? "Atualize as informações do local." : "Registre um novo local (Escola, Creche, Posto) no sistema."}
         

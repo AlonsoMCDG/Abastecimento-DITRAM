@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 
 import { usuarioApi } from "../usuarios.api";
 import { ROUTES } from "../../../../core/routes/routes";
-import { DynamicForm } from "../../../../core/ui/forms/dynamic-form/DynamicFormOld";
+import { StandaloneForm } from "../../../../core/ui/forms/dynamic-form/StandaloneForm";
 import { getApiErrorMessage } from "../../../../core/api/errorHandlers";
 
 import { usuarioUISchema } from "../schemas/usuario.schema";
@@ -62,7 +62,7 @@ export default function UsuarioFormPage() {
 
   return (
     <div className="page-container">
-      <DynamicForm<UsuarioFormData>
+      <StandaloneForm<UsuarioFormData>
         title={id ? "Editar Usuário" : "Novo Usuário"}
         subtitle={id ? "Modifique as informações de acesso." : "Preencha os dados básicos do novo acesso."}
         
