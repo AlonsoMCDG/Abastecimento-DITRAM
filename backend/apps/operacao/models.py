@@ -31,16 +31,6 @@ class TipoAtividade(models.Model):
 
 
 class GuiaAbastecimento(models.Model):
-    TIPO_VEICULO_CHOICES = [
-        ('CARRO', 'Carro'),
-        ('CAMINHONETE', 'Caminhonete'),
-        ('ONIBUS', 'Ônibus'),
-        ('MOTO', 'Moto'),
-        ('VAN', 'Van'),
-        ('CATRAIA', 'Catraia (Embarcação)'),
-        ('MAQUINA_PESADA', 'Máquina Pesada/Trator'),
-    ]
-
     data_hora = models.DateTimeField(verbose_name="Data e Hora")
 
     # No MVP, a modalidade é o tipo/contexto da guia. Não deve ser
