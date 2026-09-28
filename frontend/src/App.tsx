@@ -68,27 +68,19 @@ function App() {
 
             <Route path="usuarios">
               <Route index element={
-                  <RequirePermission allow={(me) => Boolean(me.is_staff)}>
-                    <UsuarioListPage />
-                  </RequirePermission>
+                                      <UsuarioListPage />
                 }
               />
               <Route path="criar" element={
-                  <RequirePermission allow={(me) => Boolean(me.is_staff)}>
-                    <UsuarioFormPage />
-                  </RequirePermission>
+                                      <UsuarioFormPage />
                 }
               />
               <Route path="editar/:id" element={
-                  <RequirePermission allow={(me) => Boolean(me.is_staff)}>
-                    <UsuarioFormPage />
-                  </RequirePermission>
+                                      <UsuarioFormPage />
                 }
               />
               <Route path="permissoes" element={
-                  <RequirePermission allow={(me) => Boolean(me.is_staff)}>
-                    <UsuariosPermissoesPage />
-                  </RequirePermission>
+                                      <UsuariosPermissoesPage />
                 }
               />
             </Route>
@@ -97,15 +89,11 @@ function App() {
             <Route path="pessoas">
               <Route index element={<PessoaListPage />} />
               <Route path="criar" element={
-                  <RequirePermission allow={(me) => Boolean(me.is_staff || me.can_write_cadastros)}>
-                    <PessoaFormPage />
-                  </RequirePermission>
+                                      <PessoaFormPage />
                 }
               />
               <Route path="editar/:id" element={
-                  <RequirePermission allow={(me) => Boolean(me.is_staff || me.can_write_frota)}>
-                    <PessoaFormPage />
-                  </RequirePermission>
+                                      <PessoaFormPage />
                 }
               />
             </Route>
@@ -114,29 +102,21 @@ function App() {
             <Route path="organizacao">
               <Route path="secretarias" element={<SecretariaListPage />} />
               <Route path="secretarias/criar" element={
-                  <RequirePermission allow={(me) => Boolean(me.is_staff || me.can_write_cadastros)}>
-                    <SecretariaFormPage />
-                  </RequirePermission>
+                                      <SecretariaFormPage />
                 }
               />
               <Route path="secretarias/editar/:id" element={
-                  <RequirePermission allow={(me) => Boolean(me.is_staff || me.can_write_cadastros)}>
-                    <SecretariaFormPage />
-                  </RequirePermission>
+                                      <SecretariaFormPage />
                 }
               />
 
               <Route path="instituicoes" element={<InstituicaoListPage />} />
               <Route path="instituicoes/criar" element={
-                  <RequirePermission allow={(me) => Boolean(me.is_staff || me.can_write_cadastros)}>
-                    <InstituicaoFormPage />
-                  </RequirePermission>
+                                      <InstituicaoFormPage />
                 }
               />
               <Route path="instituicoes/editar/:id" element={
-                  <RequirePermission allow={(me) => Boolean(me.is_staff || me.can_write_cadastros)}>
-                    <InstituicaoFormPage />
-                  </RequirePermission>
+                                      <InstituicaoFormPage />
                 }
               />
             </Route>
@@ -146,45 +126,33 @@ function App() {
               {/* Veículos */}
               <Route path="veiculos" element={<VeiculoListPage />} />
               <Route path="veiculos/criar" element={
-                  <RequirePermission allow={(me) => Boolean(me.is_staff || me.can_write_frota)}>
-                    <VeiculoFormPage />
-                  </RequirePermission>
+                                      <VeiculoFormPage />
                 }
               />
               <Route path="veiculos/editar/:id" element={
-                  <RequirePermission allow={(me) => Boolean(me.is_staff || me.can_write_frota)}>
-                    <VeiculoFormPage />
-                  </RequirePermission>
+                                      <VeiculoFormPage />
                 }
               />
 
               {/* Rotas */}
               <Route path="rotas" element={<RotaListPage />} />
               <Route path="rotas/criar" element={
-                  <RequirePermission allow={(me) => Boolean(me.is_staff || me.can_write_cadastros)}>
-                    <RotaFormPage />
-                  </RequirePermission>
+                                      <RotaFormPage />
                 }
               />
               <Route path="rotas/editar/:id" element={
-                  <RequirePermission allow={(me) => Boolean(me.is_staff || me.can_write_cadastros)}>
-                    <RotaFormPage />
-                  </RequirePermission>
+                                      <RotaFormPage />
                 }
               />
 
               {/* Tipos de Combustível */}
               <Route path="tipos-combustivel" element={<TipoCombustivelListPage />} />
               <Route path="tipos-combustivel/criar" element={
-                  <RequirePermission allow={(me) => Boolean(me.is_staff || me.can_write_cadastros)}>
-                    <TipoCombustivelFormPage />
-                  </RequirePermission>
+                                      <TipoCombustivelFormPage />
                 }
               />
               <Route path="tipos-combustivel/editar/:id" element={
-                  <RequirePermission allow={(me) => Boolean(me.is_staff || me.can_write_cadastros)}>
-                    <TipoCombustivelFormPage />
-                  </RequirePermission>
+                                      <TipoCombustivelFormPage />
                 }
               />
             </Route>
@@ -194,29 +162,21 @@ function App() {
               {/* Guias de Abastecimento */}
               <Route path="guias" element={<GuiaAbastecimentoListPage />} />
               <Route path="guias/criar" element={
-                  <RequirePermission allow={(me) => Boolean(me.is_staff || me.can_create_guia_abastecimento)}>
-                    <GuiaAbastecimentoFormPage />
-                  </RequirePermission>
+                                      <GuiaAbastecimentoFormPage />
                 }
               />
               <Route path="guias/editar/:id" element={
-                  <RequirePermission allow={(me) => Boolean(me.is_staff || me.can_edit_guia_abastecimento)}>
-                    <GuiaAbastecimentoFormPage />
-                  </RequirePermission>
+                                      <GuiaAbastecimentoFormPage />
                 }
               />
               {/* Tipos de Atividade */}
               <Route path="tipos-servico" element={<TipoAtividadeListPage />} />
               <Route path="tipos-servico/criar" element={
-                  <RequirePermission allow={(me) => Boolean(me.is_staff || me.can_write_cadastros)}>
-                    <TipoAtividadeFormPage />
-                  </RequirePermission>
+                                      <TipoAtividadeFormPage />
                 }
               />
               <Route path="tipos-servico/editar/:id" element={
-                  <RequirePermission allow={(me) => Boolean(me.is_staff || me.can_write_cadastros)}>
-                    <TipoAtividadeFormPage />
-                  </RequirePermission>
+                                      <TipoAtividadeFormPage />
                 }
               />
               {/* Relatórios Consolidados */}
