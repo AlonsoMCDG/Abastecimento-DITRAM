@@ -20,12 +20,5 @@ export function Can({ action, children }: Props) {
 
   if (!user) return null;
 
-  // Se for staff ou superuser, sempre libera.
-  // Caso contrário, checa a permissão específica.
-  const hasAccess = user.is_staff || user.is_superuser || user[action];
-
-  if (!hasAccess) return null;
-
-  // Se tiver permissão, mostra o botão/componente
   return <>{children}</>;
 }
