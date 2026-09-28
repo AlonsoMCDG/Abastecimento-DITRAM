@@ -6,7 +6,6 @@ import { QuickViewModal } from "../../../../core/ui/overlays/QuickViewModal";
 
 import { instituicoesApi } from "../instituicoes.api";
 import { ROUTES } from "../../../../core/routes/routes";
-import { Can } from "../../../../core/auth/components/Can";
 import { getApiErrorMessage } from "../../../../core/api/errorHandlers";
 
 import type { InstituicaoReadDTO } from "../schemas/instituicao.read.zod";
@@ -66,11 +65,9 @@ export default function InstituicaoListPage() {
         </div>
 
         <div className="list-actions">
-          <Can action="can_write_cadastros">
             <Link className="list-create" to={ROUTES.organizacao.instituicoes.create}>
               <span className="plus">+</span> Nova Instituição
             </Link>
-          </Can>
         </div>
       </div>
       
