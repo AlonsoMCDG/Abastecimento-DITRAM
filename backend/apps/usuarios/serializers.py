@@ -51,34 +51,6 @@ class UsuarioSerializer(serializers.ModelSerializer):
         return normalize_cpf(value)
 
 
-class UsuarioRegisterSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True, required=True)
-
-    class Meta:
-        model = Usuario
-        fields = ("id", "cpf", "password", "first_name", "last_name", "email")
-        read_only_fields = ("id",)
-
-    def create(self, validated_data):
-        password = validated_data.pop("password")
-        user = Usuario(**validated_data)
-
-        user.is_staff = False
-        user.is_superuser = False
-        try:
-            validate_password(password, user)
-        except DjangoValidationError as e:
-            raise serializers.ValidationError({"password": list(e.messages)})
-        user.set_password(password)
-        user.save()
-        return user
-    
-    def validate_cpf(self, value):
-        from utils.validators import normalize_cpf
-        return normalize_cpf(value)
-
-
-
 class UsuarioSelfUpdateSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=False, allow_blank=True)
 
