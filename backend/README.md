@@ -1,6 +1,6 @@
 # ⚙️ Backend - API DITRAM Abastecimento
 
-API REST construída com **Django 5.x** e **Django REST Framework (DRF)** para gerenciamento da frota, emissão de guias de abastecimento e relatórios analíticos da DITRAM.
+API REST construída com **Django 6.x** e **Django REST Framework (DRF)** para gerenciamento da frota, emissão de guias de abastecimento e relatórios analíticos da DITRAM.
 
 ---
 
@@ -29,8 +29,6 @@ backend/
 * `POST /api/login/`: Obtenção do token JWT (CPF + Senha).
 * `POST /api/token/refresh/`: Atualização de token JWT.
 * `GET/PATCH /api/v1/usuarios/me/`: Perfil do usuário autenticado.
-* `GET /api/v1/usuarios/permissions/`: Listagem de operadores e permissões (Admin).
-* `PATCH /api/v1/usuarios/{id}/permissions/`: Atualização de permissões de operador.
 
 ### Operação & Guias
 * `GET/POST /api/v1/operacao/guias/`: Listagem com filtros e criação de Guia.
@@ -52,11 +50,11 @@ backend/
 
 ## 🛠️ Serviços de Negócio (`apps/operacao/services/`)
 
-* `guia_service.py`: Criação atômica de guias, resolução de rotas manuais e atividades dinâmicas.
+* `guia_service.py`: Criação e atualização atômica de guias, com validações básicas de veículo/equipamento e hodômetro.
 * `sugestoes_service.py`: Cálculo de frequência histórica para autopreenchimento de dados por condutor.
 * `relatorio_service.py`: Agregação de dados para relatórios consolidados mensais e por período.
 * `pdf_service.py`: Montagem de PDF com ReportLab contendo brasões, duas vias e adaptação dinâmica de termos.
-* `tipo_atividade_service.py`: Algoritmo de fuzzy matching (`RapidFuzz`) para deduplicar serviços digitados com grafias semelhantes.
+* `tipo_atividade_service.py`: Serviço legado mantido separado do fluxo principal de emissão de guias.
 
 ---
 
