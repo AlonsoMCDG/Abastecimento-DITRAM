@@ -4,16 +4,14 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from apps.frota.models import Veiculo
-from apps.operacao.models import GuiaAbastecimento
 from apps.organizacao.models import Instituicao
 
 # ============================================================
 # FONTE ÚNICA DE VERDADE PARA OS ENUMS DO SISTEMA
 #
-# Todos os choices vivem nos models do backend. Este endpoint os
-# expõe para o frontend popular dropdowns SEM copiar as listas,
-# eliminando a classe de bugs "enum divergente entre front e back"
-# (ex.: VEICULO_PESADO, CAMINHAO, BARQUEIRO no passado).
+# Os choices que continuam existindo como enums vivem nos models
+# do backend. Este endpoint os expõe para o frontend sem duplicar
+# listas de opções nos schemas de UI.
 #
 # GET /api/v1/choices/                      -> todos os grupos
 # GET /api/v1/choices/veiculo/categoria/    -> um enum específico
@@ -24,10 +22,6 @@ ENUM_GROUPS = {
     "veiculo": {
         "categoria": Veiculo.CATEGORIA_CHOICES,
         "unidade_consumo": Veiculo.UNIDADE_CONSUMO_CHOICES,
-    },
-    "guia": {
-        "modalidade": GuiaAbastecimento.MODALIDADE_CHOICES,
-        "tipo_veiculo": GuiaAbastecimento.TIPO_VEICULO_CHOICES,
     },
     "instituicao": {
         "tipo": Instituicao.TIPO_CHOICES,
@@ -74,9 +68,6 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         return self.write_serializer_class
 
     def get_lookup_queryset(self, queryset):
-        """
-        Sobrescrever se precisar otimizar
-        """
         return queryset
 
     @action(detail=False, methods=['get'])
