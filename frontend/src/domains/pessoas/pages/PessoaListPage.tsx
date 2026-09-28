@@ -6,7 +6,6 @@ import { QuickViewModal } from "../../../core/ui/overlays/QuickViewModal";
 
 import { pessoasApi } from "../pessoas.api";
 import { ROUTES } from "../../../core/routes/routes";
-import { useAuth } from "../../../core/auth/useAuth";
 import { Can } from "../../../core/auth/components/Can";
 import { getApiErrorMessage } from "../../../core/api/errorHandlers";
 
@@ -17,7 +16,6 @@ import "../../../core/ui/layouts/ListPage.css"; // Atualizado para o caminho do 
 
 export default function PessoaListPage() {
   const navigate = useNavigate();
-  const { user: me } = useAuth();
 
   const [pessoas, setPessoas] = useState<PessoaReadDTO[]>([]);
   const [total, setTotal] = useState(0);
