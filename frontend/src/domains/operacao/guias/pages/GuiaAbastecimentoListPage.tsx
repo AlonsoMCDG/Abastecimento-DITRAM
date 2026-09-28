@@ -26,6 +26,8 @@ export default function GuiaAbastecimentoListPage() {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [viewItem, setViewItem] = useState<GuiaAbastecimentoReadDTO | null>(null);
+  const [dataInicio, setDataInicio] = useState('');
+  const [dataFim, setDataFim] = useState('');
 
   const canEdit = Boolean(me?.is_staff || me?.can_edit_guia_abastecimento);
   const canDelete = Boolean(me?.is_staff || me?.can_delete_guia_abastecimento);
@@ -38,7 +40,9 @@ export default function GuiaAbastecimentoListPage() {
         page: params.page,
         page_size: params.pageSize,
         search: params.search,
-        ordering: params.ordering || undefined, 
+        ordering: params.ordering || undefined,
+        data_inicio: dataInicio || undefined,
+        data_fim: dataFim || undefined,
       });
 
       // O zodClient já entrega a raiz dos dados
@@ -50,7 +54,7 @@ export default function GuiaAbastecimentoListPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [dataInicio, dataFim]);
 
   async function handleDelete(item: GuiaAbastecimentoReadDTO) {
     if (!item.id) return;
@@ -98,7 +102,24 @@ export default function GuiaAbastecimentoListPage() {
         </div>
       </div>
 
+      <div className="guia-filters">
+        <div className="guia-filter-field">
+          <label htmlFor="guia-data-inicio">De</label>
+          <input id="guia-data-inicio" type="date" value={dataInicio} onChange={(e) => setDataInicio(e.target.value)} />
+        </div>
+        <div className="guia-filter-field">
+          <label htmlFor="guia-data-fim">Até</label>
+          <input id="guia-data-fim" type="date" value={dataFim} onChange={(e) => setDataFim(e.target.value)} />
+        </div>
+        {(dataInicio || dataFim) && (
+          <button type="button" className="guia-filter-clear" onClick={() => { setDataInicio(''); setDataFim(''); }}>
+            Limpar período
+          </button>
+        )}
+      </div>
+
       <DataTable
+        key={'periodo-' + dataInicio + '-' + dataFim}
         data={guiasAbastecimento}
         total={total}
         loading={loading}
