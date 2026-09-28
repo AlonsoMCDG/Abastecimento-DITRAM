@@ -132,12 +132,12 @@ class GuiaAbastecimento(models.Model):
     @property
     def veiculo_display(self):
         if self.veiculo:
-            return str(self.veiculo)
-        if self.veiculo_descricao:
-            if self.tipo_veiculo:
-                return f"{self.veiculo_descricao} ({self.tipo_veiculo})"
-            return self.veiculo_descricao
-        return "-"
+            descricao = str(self.veiculo)
+        else:
+            descricao = self.veiculo_descricao or "-"
+        if self.tipo_veiculo and descricao != "-":
+            return f"{descricao} ({self.tipo_veiculo})"
+        return descricao
 
     def __str__(self):
         return (

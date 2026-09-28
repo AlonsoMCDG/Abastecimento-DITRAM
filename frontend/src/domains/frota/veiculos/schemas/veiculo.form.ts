@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-// Helper para transformar strings do IMask em números válidos (ou null se vazio)
+// Aceita números digitados em campos HTML e os valores numéricos da API.
 const nullableNumberFromInput = z
   .union([z.string(), z.number()])
   .optional()
@@ -16,8 +16,9 @@ const nullableNumberFromInput = z
 
     const number = Number(value.replace(",", "."));
 
-    return Number.isNaN(number) ? null : number;
-  });
+    return number;
+  })
+  .pipe(z.number({ message: "Informe um número válido." }).finite().nullable());
 
 const numberFromInput = z
   .union([z.string(), z.number()])
@@ -29,8 +30,9 @@ const numberFromInput = z
     const normalized = value.replace(",", ".");
     const number = Number(normalized);
 
-    return isNaN(number) ? 0 : number;
-  });
+    return number;
+  })
+  .pipe(z.number({ message: "Informe um número válido." }).finite());
 
 export const veiculoFormSchema = z.object({
   categoria: z

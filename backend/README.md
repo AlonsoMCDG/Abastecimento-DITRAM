@@ -68,8 +68,8 @@ python manage.py migrate
 python manage.py seed
 
 # Executar testes automatizados
-python manage.py test
+DEBUG=True python manage.py test
 
 # Verificar integridade do projeto
-python manage.py check
+DEBUG=True python manage.py check
 ```

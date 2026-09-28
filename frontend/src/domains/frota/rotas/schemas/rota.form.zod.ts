@@ -8,8 +8,8 @@ export const rotaFormSchema = z.object({
     if (val === null || val === undefined || val === '') return null;
     if (typeof val === 'number') return val;
     const num = Number(val.replace(',', '.'));
-    return isNaN(num) ? null : num;
-  }),
+    return num;
+  }).pipe(z.number({ message: "Informe uma distância válida." }).finite().nonnegative().nullable()),
   
   detalhes: z.string().optional().nullable(),
   ativa: z.boolean().default(true),

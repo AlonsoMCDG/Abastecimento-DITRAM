@@ -9,11 +9,10 @@ export default defineConfig({
       output: {
         manualChunks: {
           'vendor-react': ['react', 'react-dom', 'react-router-dom'],
-          'vendor-forms': ['react-hook-form', '@hookform/resolvers', 'zod', 'react-imask', 'imask'],
+          'vendor-forms': ['react-hook-form', '@hookform/resolvers', 'zod'],
           'vendor-utils': ['axios'],
         }
       }
     }
   }
 })
-

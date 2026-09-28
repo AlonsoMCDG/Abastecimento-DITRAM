@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { authApi } from '../auth.api';
 import { useAuth } from '../useAuth';
 import { isAuthenticated } from '../auth.utils';
 import { getApiErrorMessage } from '../../api/errorHandlers';
-import { IMaskInput } from 'react-imask';
 
 import styles from './LoginPage.module.css';
-import { MASKS } from '../../utils/masks';
 
 export const LoginPage = () => {
   const [cpf, setCpf] = useState('');
@@ -42,10 +41,17 @@ export const LoginPage = () => {
       await authApi.login(cpfDigits, password);
       
       // Busca dados do usuário.
-      await refreshUser();
+      await refreshUser(true);
       navigate('/home', { replace: true });
       
     } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        console.error('Falha na autenticação', {
+          endpoint: err.config?.url,
+          status: err.response?.status,
+          code: err.code,
+        });
+      }
       let message = getApiErrorMessage(err, "Falha ao realizar login.");
       
       // Tradução rápida para mensagens comuns do Django/SimpleJWT
@@ -78,15 +84,14 @@ export const LoginPage = () => {
 
         <div className={styles.inputGroup}>
           <label htmlFor="cpf" className={styles.label}>CPF</label>
-          <IMaskInput
-            mask={MASKS.CPF}
+          <input
             id="cpf"
             type="text"
             className={styles.input}
             placeholder="000.000.000-00"
             value={cpf}
-            unmask={false} // false = mantém a máscara visualmente no value
-            onAccept={(value) => setCpf(value)} // Na IMask usamos onAccept em vez de onChange
+            inputMode="numeric"
+            onChange={(event) => setCpf(event.target.value)}
             required
           />
         </div>

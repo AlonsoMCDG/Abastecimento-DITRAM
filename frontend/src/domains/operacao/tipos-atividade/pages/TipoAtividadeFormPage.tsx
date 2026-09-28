@@ -19,10 +19,6 @@ export default function TipoAtividadeFormPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [globalError, setGlobalError] = useState<string | null>(null);
 
-  const defaultValues: Partial<TipoAtividadeFormData> = {
-    ativo: true,
-  };
-
   useEffect(() => {
     if (id) {
       tiposAtividadeApi.buscar(Number(id))
@@ -32,7 +28,7 @@ export default function TipoAtividadeFormPage() {
         })
         .finally(() => setLoading(false));
     } else {
-      setInitialValues(defaultValues);
+      setInitialValues({ ativo: true });
     }
   }, [id]);
 

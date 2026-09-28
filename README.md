@@ -77,7 +77,7 @@ npm run dev
 
 ### Convenção de Contrato da API REST
 - **Sufixo `_id` em FKs:** Toda chave estrangeira nos DTOs de leitura e escrita utiliza o sufixo `_id` (ex.: `tipo_combustivel_id`, `secretaria_id`, `pessoa_id`).
-- **Fonte Única de Verdade dos Enums:** Os selects de enums consome o endpoint `/api/v1/choices/` alimentado diretamente pelos `CHOICES` dos models Django, garantindo consistência total entre frontend e backend.
+- **Opções dos formulários:** Cada select consulta diretamente seu endpoint de lookup ou de choices no backend. Na guia, a secretaria filtra instituições e rotas; ao selecionar um veículo cadastrado, o tipo de combustível é preenchido a partir do cadastro e pode ser alterado. Motoristas continuam disponíveis independentemente da secretaria, pois não há vínculo direto no cadastro.
 
 ---
 
@@ -86,6 +86,9 @@ npm run dev
 1. **Backend:** Web Service com build `bash build.sh` e start `gunicorn api.wsgi:application`.
    - Requer as variáveis: `DJANGO_PROFILE=validation`, `DEBUG=False`, `SECRET_KEY`, `ALLOWED_HOSTS`, `DATABASE_URL`, `CORS_ALLOWED_ORIGINS`, `CSRF_TRUSTED_ORIGINS`.
 2. **Frontend:** Static Site com build `npm run build` e publish directory `dist`.
+   - `VITE_API_URL` deve apontar para a URL HTTPS do backend com sufixo `/api` no momento do build.
+
+Se o login retornar HTTP 500, confira no painel **Logs do Web Service do backend** a exceção no horário da tentativa. No navegador, a aba Network distingue `POST /api/login/` de `GET /api/v1/usuarios/me/`; o console mostra o endpoint e o status sem exibir CPF, senha ou token. A rota `/` verifica apenas se o processo responde, não a conexão com o banco. No Shell do backend, `python manage.py showmigrations usuarios token_blacklist` mostra as migrações aplicadas. Para verificar a consulta que o login precisa fazer, sem usar credenciais reais, execute `python manage.py shell -c "from django.contrib.auth import get_user_model; get_user_model().objects.exists(); print('Tabela de usuários acessível')"`.
 
 ---
 
@@ -97,9 +100,9 @@ npm run dev
 | **RF02** | **Gestão de Condutores** | Cadastro de condutores com Nome, CPF e vínculo com secretaria. |
 | **RF03** | **Gestão de Frota** | Cadastro de veículos com Placa, Modelo, Categoria, Combustível e dados de consumo. |
 | **RF04** | **Gestão de Destinos** | Cadastro de Escolas, Postos de Saúde e Rotas por secretaria. |
-| **RF05** | **Emissão de Guias** | Formulário inteligente com hodômetro opcional para medidores quebrados. |
-| **RF06** | **Preenchimento assistido** | Filtra motorista por secretaria e veículo/equipamento por motorista; utiliza dados do cadastro para sugestões de preenchimento. |
-| **RF07** | **Cálculo Sugerido** | Sugestão de litragem baseada no consumo médio da rota/veículo. |
+| **RF05** | **Emissão de Guias** | Formulário simples com hodômetro opcional para medidores quebrados. |
+| **RF06** | **Consulta de opções** | Carrega opções diretamente do backend; secretaria filtra instituições e rotas, e veículo cadastrado preenche o tipo de combustível. |
+| **RF07** | **Preenchimento manual** | Permite informar veículo/equipamento e rota/serviço manualmente quando não houver cadastro. |
 | **RF08** | **Geração de PDF** | Exportação da guia em formato PDF para impressão (duas vias idênticas). |
 | **RF09** | **Relatórios por Período** | Geração de consolidados baseados em intervalos de datas customizáveis. |
 | **RF10** | **Histórico** | Consulta de guias emitidas para fins de conferência e auditoria. |
@@ -139,8 +142,8 @@ npm run dev
 ### Backend (Testes Automatizados e Sanidade)
 ```bash
 cd backend
-python manage.py check
-python manage.py test
+DEBUG=True python manage.py check
+DEBUG=True python manage.py test
 ```
 
 ### Frontend (Tipagem e Build)
@@ -165,4 +168,3 @@ npm run lint
 * **Marcos Vinícius Moraes Costa**
 
 *Prefeitura Municipal de Sena Madureira – AC / Rio Branco – AC (2026)*
-

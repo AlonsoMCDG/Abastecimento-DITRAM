@@ -340,6 +340,12 @@ LOGGING = {
     
     # LOGGERS: Os detetives que ficam escutando o código
     'loggers': {
+        # Exceções não tratadas devem aparecer nos logs do serviço no Render.
+        'django.request': {
+            'handlers': ['console', 'file'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
         # Captura os erros internos do próprio Django
         'django': {
             'handlers': ['console', 'file'],

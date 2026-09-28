@@ -30,7 +30,7 @@ export function mapFormToWriteDTO(form: GuiaAbastecimentoFormOutput): GuiaAbaste
     veiculo_descricao: registeredVehicle
       ? null
       : (typeof veiculo === 'string' ? veiculo.trim() : null),
-    tipo_veiculo: registeredVehicle ? null : (tipo_veiculo?.trim() || null),
+    tipo_veiculo: tipo_veiculo?.trim() || null,
     rota_id: typeof rota_manual === 'number' ? rota_manual : null,
     rota_manual: typeof rota_manual === 'string' ? rota_manual.trim() : null,
     tipo_atividade_id: null,
@@ -46,7 +46,7 @@ export function mapReadToForm(data: GuiaAbastecimentoReadDTO): GuiaAbastecimento
     modalidade: data.modalidade,
     secretaria_id: data.secretaria_id,
     pessoa_id: data.pessoa_id,
-    veiculo: data.veiculo_id != null ? data.veiculo_id : (data.veiculo_display || ''),
+    veiculo: data.veiculo_id != null ? data.veiculo_id : (data.veiculo_descricao || ''),
     tipo_veiculo: data.tipo_veiculo ?? undefined,
     instituicao_id: data.instituicao_id ?? null,
     rota_manual: data.rota_id != null ? data.rota_id : (data.rota_manual ?? data.rota_nome ?? ''),

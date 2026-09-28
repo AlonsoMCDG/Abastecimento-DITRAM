@@ -10,6 +10,7 @@ export const guiaAbastecimentoReadSchema = z.object({
   pessoa_nome: z.string(),
 
   veiculo_id: z.coerce.number().nullable().optional(),
+  veiculo_descricao: z.string().nullable(),
   veiculo_display: z.string(),
   tipo_veiculo: z.string().nullable().optional(),
 
