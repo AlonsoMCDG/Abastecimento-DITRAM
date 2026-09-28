@@ -9,7 +9,7 @@ import {
   type PathValue
 } from 'react-hook-form';
 import { client } from '../../api/apiClient';
-import styles from './dynamic-form/DynamicForm.module.css';
+import styles from './SimpleForm.module.css';
 import type { FormField } from '../../types/form';
 
 interface Option {
@@ -41,13 +41,7 @@ export const SearchableAsyncSelect = <T extends FieldValues>({
   
   const wrapperRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLUListElement>(null);
-  const mounted = useRef(false);
-  const previousParentValue = useRef<unknown>(undefined);
-
   const fieldPath = field.name as Path<T>;
-  const dependsOnPath = (field.dependsOn || '_none_') as Path<T>;
-
-  const parentValue = useWatch({ control, name: dependsOnPath });
   const currentValue = useWatch({ control, name: fieldPath });
 
   // 1. EFEITO DE BUSCA (Fetch API)
@@ -58,11 +52,7 @@ export const SearchableAsyncSelect = <T extends FieldValues>({
     const fetchOptions = async () => {
       setLoading(true);
       try {
-        const params = field.dependsOnParam && parentValue 
-          ? { [field.dependsOnParam]: parentValue } 
-          : {};
-        
-        const response = await client.get(field.endpoint as string, { params });
+        const response = await client.get(field.endpoint as string);
         if (isSubscribed) setOptions(response.data);
       } catch (err) {
         if (isSubscribed) {
@@ -76,7 +66,7 @@ export const SearchableAsyncSelect = <T extends FieldValues>({
 
     fetchOptions();
     return () => { isSubscribed = false; };
-  }, [parentValue, field.endpoint, field.dependsOnParam, field.name]);
+  }, [field.endpoint, field.name]);
 
   // 2. SINCRONIA VISUAL
   useEffect(() => {
@@ -94,29 +84,8 @@ export const SearchableAsyncSelect = <T extends FieldValues>({
     }
   }, [currentValue, options, isOpen, field.creatable]);
 
-  // 3. LIMPEZA EM CASCATA
-  useEffect(() => {
-    if (!field.dependsOn) return;
 
-    // A primeira leitura apenas registra o valor atual. Isso evita
-    // apagar dados ao abrir uma guia já existente com reset().
-    if (!mounted.current) {
-      mounted.current = true;
-      previousParentValue.current = parentValue;
-      return;
-    }
-
-    if (previousParentValue.current === parentValue) return;
-
-    previousParentValue.current = parentValue;
-    setValue(fieldPath, "" as PathValue<T, Path<T>>, {
-      shouldValidate: true,
-      shouldDirty: true,
-    });
-    setSearchTerm('');
-  }, [parentValue, field.dependsOn, fieldPath, setValue]);
-
-  // 4. CLICK OUTSIDE INTELIGENTE
+  // 3. CLICK OUTSIDE
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
@@ -138,7 +107,7 @@ export const SearchableAsyncSelect = <T extends FieldValues>({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [currentValue, options, searchTerm, field.creatable, fieldPath, setValue]);
 
-  // 5. FILTRAGEM LOCAL
+  // 4. FILTRAGEM LOCAL
   const filteredOptions = useMemo(() => {
     if (!searchTerm) return options;
     const lowerSearch = searchTerm.toLowerCase();
@@ -152,7 +121,7 @@ export const SearchableAsyncSelect = <T extends FieldValues>({
   );
   const showCreatableOption = field.creatable && searchTerm.trim() !== '' && !hasExactMatch;
 
-  // 6. RESET DO ÍNDICE AO DIGITAR
+  // 5. RESET DO ÍNDICE AO DIGITAR
   useEffect(() => {
     if (isOpen) {
       // Sempre que a lista for filtrada, seleciona o primeiro item automaticamente
@@ -160,7 +129,7 @@ export const SearchableAsyncSelect = <T extends FieldValues>({
     }
   }, [searchTerm, filteredOptions.length, showCreatableOption, isOpen]);
 
-  // 7. ROLAGEM AUTOMÁTICA (Scroll Into View)
+  // 6. ROLAGEM AUTOMÁTICA (Scroll Into View)
   useEffect(() => {
     if (isOpen && dropdownRef.current && highlightedIndex >= 0) {
       const activeElement = dropdownRef.current.children[highlightedIndex] as HTMLElement;
@@ -177,7 +146,7 @@ export const SearchableAsyncSelect = <T extends FieldValues>({
     setIsOpen(false);
   };
 
-  // 8. O MOTOR DO TECLADO
+  // 7. O MOTOR DO TECLADO
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     const totalItems = filteredOptions.length + (showCreatableOption ? 1 : 0);
 

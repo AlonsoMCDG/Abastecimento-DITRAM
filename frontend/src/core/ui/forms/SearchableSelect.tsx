@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from "react";
-import styles from './dynamic-form/DynamicForm.module.css';
+import styles from './SimpleForm.module.css';
 
 export interface Option {
   value: string | number;

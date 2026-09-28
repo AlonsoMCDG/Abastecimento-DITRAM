@@ -12,11 +12,11 @@ import {
 import type { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { FormSchema, FormField } from '../../../types/form';
-import styles from './DynamicForm.module.css';
+import styles from './SimpleForm.module.css';
 import { SearchableAsyncSelect } from '../SearchableAsyncSelect';
 import { SearchableSelect } from '../SearchableSelect';
 
-export interface StandaloneFormProps<T extends FieldValues> {
+export interface SimpleFormProps<T extends FieldValues> {
   title?: string;
   subtitle?: string;
   uiSchema: FormSchema;
@@ -38,7 +38,7 @@ export interface StandaloneFormProps<T extends FieldValues> {
   extraActions?: React.ReactNode;
 }
 
-export function StandaloneForm<T extends FieldValues>({
+export function SimpleForm<T extends FieldValues>({
   title,
   subtitle,
   uiSchema,
@@ -53,7 +53,7 @@ export function StandaloneForm<T extends FieldValues>({
   cancelLabel = "Cancelar",
   onCancel,
   extraActions
-}: StandaloneFormProps<T>) {
+}: SimpleFormProps<T>) {
   const { register, handleSubmit, control, setValue, watch, reset, formState: { errors } } = useForm<T>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(zodSchema as any),
@@ -235,4 +235,3 @@ export function StandaloneForm<T extends FieldValues>({
   );
 }
 
-export const DynamicForm = StandaloneForm;
