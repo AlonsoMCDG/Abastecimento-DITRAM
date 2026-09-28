@@ -6,7 +6,6 @@ import { QuickViewModal } from "../../../../core/ui/overlays/QuickViewModal";
 
 import { tiposAtividadeApi } from "../tiposAtividade.api";
 import { ROUTES } from "../../../../core/routes/routes";
-import { Can } from "../../../../core/auth/components/Can";
 import { getApiErrorMessage } from "../../../../core/api/errorHandlers";
 
 import type { TipoAtividadeReadDTO } from "../schemas/tipoAtividade.read.zod";
@@ -67,11 +66,9 @@ export default function TipoAtividadeListPage() {
         </div>
 
         <div className="list-actions">
-          <Can action="can_write_cadastros">
             <Link className="list-create" to={ROUTES.operacao.tiposAtividade.create}>
               <span className="plus">+</span> Nova Atividade
             </Link>
-          </Can>
         </div>
       </div>
       
