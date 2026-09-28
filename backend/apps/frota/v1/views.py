@@ -5,7 +5,6 @@ from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
 
 from apps.core.viewset_cache import ModelViewSetCacheMixin
-from apps.usuarios.permissions import FrotaPermission
 
 from apps.frota.models import Veiculo, Rota, TipoCombustivel
 from .serializers import (
@@ -21,7 +20,7 @@ from .serializers import (
 
 class VeiculoViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
     queryset = Veiculo.objects.all()
-    permission_classes = [IsAuthenticated, FrotaPermission]
+    permission_classes = [IsAuthenticated]
 
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
 
@@ -73,7 +72,7 @@ class VeiculoViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
 
 class RotaViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
     queryset = Rota.objects.select_related('secretaria').all()
-    permission_classes = [IsAuthenticated, FrotaPermission]
+    permission_classes = [IsAuthenticated]
 
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
 
