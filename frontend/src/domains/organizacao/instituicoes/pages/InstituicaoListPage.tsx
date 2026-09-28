@@ -6,7 +6,6 @@ import { QuickViewModal } from "../../../../core/ui/overlays/QuickViewModal";
 
 import { instituicoesApi } from "../instituicoes.api";
 import { ROUTES } from "../../../../core/routes/routes";
-import { useAuth } from "../../../../core/auth/useAuth";
 import { Can } from "../../../../core/auth/components/Can";
 import { getApiErrorMessage } from "../../../../core/api/errorHandlers";
 
@@ -17,7 +16,6 @@ import "../../../../core/ui/layouts/ListPage.css";
 
 export default function InstituicaoListPage() {
   const navigate = useNavigate();
-  const { user: me } = useAuth();
 
   const [instituicoes, setInstituicoes] = useState<InstituicaoReadDTO[]>([]);
   const [total, setTotal] = useState(0);
@@ -25,7 +23,7 @@ export default function InstituicaoListPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [viewItem, setViewItem] = useState<InstituicaoReadDTO | null>(null);
 
-  const hasWritePermission = Boolean(me?.is_staff || me?.can_write_cadastros);
+  const hasWritePermission = true;
 
   const fetchInstituicoes = useCallback(async (params: DataTableParams) => {
     setLoading(true);
