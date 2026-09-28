@@ -29,8 +29,8 @@ export default function GuiaAbastecimentoListPage() {
   const [dataInicio, setDataInicio] = useState('');
   const [dataFim, setDataFim] = useState('');
 
-  const canEdit = Boolean(me?.is_staff || me?.can_edit_guia_abastecimento);
-  const canDelete = Boolean(me?.is_staff || me?.can_delete_guia_abastecimento);
+  const canEdit = true;
+  const canDelete = true;
 
   const fetchGuias = useCallback(async (params: DataTableParams) => {
     setLoading(true);
