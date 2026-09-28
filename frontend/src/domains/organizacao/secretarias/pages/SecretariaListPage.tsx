@@ -6,7 +6,6 @@ import { QuickViewModal } from "../../../../core/ui/overlays/QuickViewModal";
 
 import { secretariaApi } from "../secretarias.api";
 import { ROUTES } from "../../../../core/routes/routes";
-import { Can } from "../../../../core/auth/components/Can";
 import { getApiErrorMessage } from "../../../../core/api/errorHandlers";
 
 import type { SecretariaReadDTO } from "../schemas/secretaria.read.zod";
@@ -66,11 +65,9 @@ export default function SecretariaListPage() {
         </div>
 
         <div className="list-actions">
-          <Can action="can_write_cadastros">
             <Link className="list-create" to={ROUTES.organizacao.secretarias.create}>
               <span className="plus">+</span> Nova secretaria
             </Link>
-          </Can>
         </div>
       </div>
       
