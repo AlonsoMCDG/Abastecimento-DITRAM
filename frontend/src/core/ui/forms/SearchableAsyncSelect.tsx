@@ -9,7 +9,7 @@ import {
   type PathValue
 } from 'react-hook-form';
 import { client } from '../../api/apiClient';
-import styles from './dynamic-form/DynamicForm.module.css';
+import styles from './SimpleForm.module.css';
 import type { FormField } from '../../types/form';
 
 interface Option {
