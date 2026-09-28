@@ -13,7 +13,6 @@ class OrganizacaoTests(TestCase):
         self.user = Usuario.objects.create_user(
             cpf="77777777777",
             password="testpassword",
-            can_write_cadastros=True
         )
         self.client.force_authenticate(user=self.user)
 
