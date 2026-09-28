@@ -11,6 +11,7 @@ import { getCurrentDateTimeLocalISO } from '../../../../core/utils/dateUtils';
 import { ROUTES } from '../../../../core/routes/routes';
 
 import { guiasApi } from '../api/guias.api';
+import type { VeiculoReadDTO } from '../../../frota/veiculos/schemas/veiculo.dto';
 import { veiculosApi } from '../../../frota/veiculos/api/veiculos.api';
 import { mapReadToForm, mapFormToWriteDTO } from '../api/guias.mapper';
 import { guiaAbastecimentoUISchema } from '../schemas/guia.ui';
@@ -30,6 +31,7 @@ export default function GuiaAbastecimentoFormPage() {
   const [globalError, setGlobalError] = useState<string | null>(null);
   const [loading, setLoading] = useState(!!id);
   const [isPrinting, setIsPrinting] = useState(false);
+  const [veiculoReferencia, setVeiculoReferencia] = useState<VeiculoReadDTO | null>(null);
   const submitIntent = useRef<'save' | 'save_print'>('save');
 
   const { control, handleSubmit, reset, setValue } = methods;
@@ -59,13 +61,19 @@ export default function GuiaAbastecimentoFormPage() {
   useEffect(() => {
     // Ao editar uma guia, preservamos os dados já registrados.
     // A automação abaixo vale somente para uma nova guia.
-    if (id || typeof veiculoSelecionado !== 'number') return;
+    if (id || typeof veiculoSelecionado !== 'number') {
+      if (!id) setVeiculoReferencia(null);
+      return;
+    }
 
     let active = true;
+    setVeiculoReferencia(null);
 
     veiculosApi.buscar(veiculoSelecionado)
       .then((veiculo) => {
         if (!active) return;
+
+        setVeiculoReferencia(veiculo);
 
         // Dados cadastrais usados como sugestão inicial.
         setValue('tipo_combustivel_id', veiculo.tipo_combustivel_id, {
@@ -145,6 +153,19 @@ export default function GuiaAbastecimentoFormPage() {
 
       <div className={layoutStyles.card}>
         <FormProvider {...methods}>
+          {veiculoReferencia && (
+            <div className={layoutStyles.alertInfo} role="status">
+              <strong>Referência do veículo:</strong>{' '}
+              {veiculoReferencia.consumo_estimado_combustivel != null
+                ? `consumo estimado de ${veiculoReferencia.consumo_estimado_combustivel} ${veiculoReferencia.unidade_consumo_nome}`
+                : 'consumo estimado não cadastrado'}
+              {veiculoReferencia.consumo_estimado_oleo != null
+                ? ` • óleo: ${veiculoReferencia.consumo_estimado_oleo} L`
+                : ''}
+              {' '}— use esses dados como referência e informe manualmente a quantidade da guia.
+            </div>
+          )}
+
           <DynamicForm<GuiaAbastecimentoFormInput>
             uiSchema={guiaAbastecimentoUISchema}
             onSubmit={methods.handleSubmit(onSubmit)}
