@@ -15,7 +15,7 @@ type Props = {
   children: React.ReactNode;
 };
 
-export function Can({ action, children }: Props) {
+export function Can({ children }: Props) {
   const { user } = useAuth();
 
   if (!user) return null;
