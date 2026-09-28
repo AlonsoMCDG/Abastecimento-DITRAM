@@ -59,7 +59,7 @@ export const guiaAbastecimentoWriteSchema = z.object({
   instituicao_id: z.number().nullable().optional(),
 
   rota_id: z.coerce.number().nullable().optional(),
-  rota_manual: z.string().nullable().optional(),
+  rota_manual: z.union([z.number(), z.string()]).nullable().optional(),
 
   tipo_atividade_id: z.coerce.number().nullable().optional(),
   tipo_atividade_nome: z.string().optional(),
