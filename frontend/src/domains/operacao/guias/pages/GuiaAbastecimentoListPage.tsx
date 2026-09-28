@@ -6,7 +6,6 @@ import { QuickViewModal } from "../../../../core/ui/overlays/QuickViewModal";
 
 import { guiasApi } from "../api/guias.api";
 import { ROUTES } from "../../../../core/routes/routes";
-import { Can } from "../../../../core/auth/components/Can";
 import { getApiErrorMessage } from "../../../../core/api/errorHandlers";
 import { processPdfBlob } from "../../../../core/utils/pdfHandler";
 
@@ -92,11 +91,9 @@ export default function GuiaAbastecimentoListPage() {
         </div>
 
         <div className="list-actions">
-          <Can action="can_create_guia_abastecimento">
             <Link className="list-create" to={ROUTES.operacao.guias.create}>
               <span className="plus">+</span> Nova guia
             </Link>
-          </Can>
         </div>
       </div>
 
