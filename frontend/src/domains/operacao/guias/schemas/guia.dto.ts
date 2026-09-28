@@ -81,6 +81,8 @@ export const guiaListParamsSchema = z.object({
   pessoa: z.number().optional(),
   veiculo: z.number().optional(),
   secretaria: z.number().optional(),
+  data_inicio: z.string().optional(),
+  data_fim: z.string().optional(),
   search: z.string().optional(),
   ordering: z.string().optional(),
   page: z.number().optional(),
