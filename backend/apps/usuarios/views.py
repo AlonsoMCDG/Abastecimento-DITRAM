@@ -28,6 +28,11 @@ class UsuarioViewSet(ModelViewSet):
     search_fields = ['first_name', 'last_name', 'cpf', 'email']
     ordering_fields = ['id', 'first_name', 'cpf', 'is_staff', 'is_superuser']
 
+    def get_permissions(self):
+        if self.action in ('me', 'lookup'):
+            return [IsAuthenticated()]
+        return super().get_permissions()
+
     def get_serializer_class(self):
         if self.action == 'me':
             return UsuarioSelfUpdateSerializer if self.request.method in ['PUT', 'PATCH'] else UsuarioSerializer
