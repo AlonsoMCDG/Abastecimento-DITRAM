@@ -3,12 +3,16 @@ from django.utils import timezone
 from rest_framework.test import APIClient
 from rest_framework import status
 from decimal import Decimal
+from io import BytesIO
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
 
 from apps.usuarios.models import Usuario
 from apps.organizacao.models import Secretaria
 from apps.frota.models import TipoCombustivel, Veiculo, Rota
 from apps.operacao.models import TipoAtividade, GuiaAbastecimento
 from apps.pessoas.models import Pessoa
+from apps.operacao.services.pdf_service import _draw_guia_impressao_copy
 
 
 class OperacaoV1Tests(TestCase):
@@ -104,4 +108,49 @@ class OperacaoV1Tests(TestCase):
         self.assertIn("por_modalidade", data)
         self.assertEqual(len(data["por_modalidade"]), 1)
         self.assertEqual(data["por_modalidade"][0]["modalidade"], "ONIBUS")
+        self.assertEqual(data["por_modalidade"][0]["modalidade_nome"], "ONIBUS")
 
+    def test_tipo_equipamento_persiste_com_veiculo_cadastrado_ou_manual(self):
+        url = f"/api/v1/operacao/guias/{self.guia.id}/"
+        response = self.client.patch(url, {"tipo_veiculo": "Micro-ônibus"}, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json()["tipo_veiculo"], "Micro-ônibus")
+
+        self.guia.refresh_from_db()
+        self.assertEqual(self.guia.tipo_veiculo, "Micro-ônibus")
+        self.assertIn("Micro-ônibus", self.guia.veiculo_display)
+        pdf_response = self.client.get(f"{url}pdf/")
+        self.assertEqual(pdf_response.status_code, status.HTTP_200_OK)
+        self.assertTrue(pdf_response.content.startswith(b"%PDF"))
+
+        self.guia.modalidade = "Roçagem"
+        pdf = canvas.Canvas(BytesIO(), pagesize=A4)
+        textos = []
+        draw_string = pdf.drawString
+
+        def registrar_texto(x, y, value):
+            textos.append(str(value))
+            return draw_string(x, y, value)
+
+        pdf.drawString = registrar_texto
+        _draw_guia_impressao_copy(pdf, self.guia, A4[1] / 2, A4[1])
+        self.assertIn("Linha Escolar Rural", textos)
+        self.assertTrue(any("Micro-ônibus" in value for value in textos))
+        self.assertTrue(any(value.startswith("Nome do Responsável") for value in textos))
+
+        response = self.client.post("/api/v1/operacao/guias/", {
+            "data_hora": timezone.now().isoformat(),
+            "modalidade": "Roçagem",
+            "secretaria_id": self.sec.id,
+            "pessoa_id": self.pessoa.id,
+            "veiculo_id": None,
+            "veiculo_descricao": "Corote",
+            "tipo_veiculo": "Recipiente",
+            "tipo_combustivel_id": self.combustivel_diesel.id,
+            "quantidade_combustivel": "5.000",
+            "rota_manual": "Serviço externo",
+        }, format="json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.json()["veiculo_descricao"], "Corote")
+        self.assertEqual(response.json()["tipo_veiculo"], "Recipiente")
+        self.assertEqual(response.json()["veiculo_display"], "Corote (Recipiente)")

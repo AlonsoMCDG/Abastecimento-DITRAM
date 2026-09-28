@@ -64,9 +64,8 @@ export const veiculoUISchema: FormSchema<VeiculoFormInput> = {
     // -------------------------
     {
       name: "hodometro_atual",
-      label: "Hodômetro Atual",
+      label: "Hodômetro Atual (km)",
       type: "number",
-      suffix: "km",
     },
 
     // -------------------------
@@ -74,16 +73,14 @@ export const veiculoUISchema: FormSchema<VeiculoFormInput> = {
     // -------------------------
     {
       name: "consumo_estimado_combustivel",
-      label: "Consumo Estimado de Combustível",
+      label: "Consumo Estimado de Combustível (km/L ou L/h)",
       type: "number",
-      suffix: "km/L ou L/h",
     },
 
     {
       name: "consumo_estimado_oleo",
-      label: "Consumo Estimado de Óleo",
+      label: "Consumo Estimado de Óleo (L)",
       type: "number",
-      suffix: "L",
     },
 
     // -------------------------
@@ -91,16 +88,14 @@ export const veiculoUISchema: FormSchema<VeiculoFormInput> = {
     // -------------------------
     {
       name: "capacidade_carga_kg",
-      label: "Capacidade de Carga",
+      label: "Capacidade de Carga (kg)",
       type: "number",
-      suffix: "kg",
     },
 
     {
       name: "capacidade_pessoas",
       label: "Capacidade de Pessoas",
       type: "number",
-      suffix: "pessoas",
     },
 
     // -------------------------

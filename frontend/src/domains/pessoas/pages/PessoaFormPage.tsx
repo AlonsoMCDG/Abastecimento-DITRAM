@@ -19,10 +19,6 @@ export default function PessoaFormPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [globalError, setGlobalError] = useState<string | null>(null);
 
-  const defaultValues: Partial<PessoaFormData> = {
-    ativo: true,
-  };
-
   useEffect(() => {
     if (id) {
       pessoasApi.buscar(Number(id))
@@ -32,7 +28,7 @@ export default function PessoaFormPage() {
         })
         .finally(() => setLoading(false));
     } else {
-      setInitialValues(defaultValues);
+      setInitialValues({ ativo: true });
     }
   }, [id]);
 

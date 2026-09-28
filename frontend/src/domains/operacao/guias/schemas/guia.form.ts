@@ -12,7 +12,7 @@ export const guiaAbastecimentoFormSchema = z.object({
   pessoa_id: z.coerce.number().min(1, 'Selecione o motorista / condutor.'),
 
   veiculo: z.union([z.number(), z.string()]).nullable().optional(),
-  tipo_veiculo: z.string().nullable().optional(),
+  tipo_veiculo: z.string().max(50, 'O tipo do equipamento deve ter até 50 caracteres.').nullable().optional(),
 
   instituicao_id: optionalNumber,
 
@@ -36,11 +36,14 @@ export const guiaAbastecimentoFormSchema = z.object({
       { message: 'Informe uma quantidade válida de óleo.' }
     ),
 
-  periodo_uso_dias: optionalNumber,
+  periodo_uso_dias: z.preprocess(
+    (value) => value === '' || value === null || value === undefined ? null : value,
+    z.coerce.number().int('Informe dias inteiros.').min(0, 'O período não pode ser negativo.').nullable().optional()
+  ),
 
   hodometro: z.preprocess(
     (value) => value === '' || value === null || value === undefined ? null : value,
-    z.coerce.number().min(0, 'O hodômetro não pode ser negativo.').nullable().optional()
+    z.coerce.number().int('Informe um hodômetro inteiro.').min(0, 'O hodômetro não pode ser negativo.').nullable().optional()
   ),
 
   hodometro_quebrado: z.boolean().default(false).optional(),

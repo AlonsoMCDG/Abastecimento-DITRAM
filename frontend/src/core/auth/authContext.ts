@@ -7,7 +7,7 @@ export interface AuthContextType {
   isLoading: boolean;
   logout: () => void;
   // Função para forçar o recarregamento (útil logo após o usuário fazer login na tela de login)
-  refreshUser: () => Promise<void>;
+  refreshUser: (throwOnError?: boolean) => Promise<void>;
 }
 
 // Contexto em arquivo próprio para que o AuthProvider (componente) e o

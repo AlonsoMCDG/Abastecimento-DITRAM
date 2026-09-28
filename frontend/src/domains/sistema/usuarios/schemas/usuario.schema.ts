@@ -1,6 +1,5 @@
 import type { FormSchema, TableSchema } from "../../../../core/types/form";
 import type { ViewSchema } from "../../../../core/types/views";
-import { MASKS } from "../../../../core/utils/masks";
 import type { UsuarioReadDTO } from "./usuario.read.zod";
 
 // --------------------------------------------------------
@@ -10,7 +9,7 @@ export const usuarioUISchema: FormSchema = {
   fields: [
     { name: "first_name", label: "Nome", type: "text", colSpan: 1, required: true },
     { name: "last_name", label: "Sobrenome", type: "text", colSpan: 2, required: true },
-    { name: "cpf", label: "CPF", type: "text", mask: MASKS.CPF, colSpan: 1, required: true },
+    { name: "cpf", label: "CPF", type: "text", colSpan: 1, required: true },
     { name: "email", label: "E-mail", type: "email", colSpan: 2 },
     { 
       name: "password", 
@@ -24,11 +23,10 @@ export const usuarioUISchema: FormSchema = {
 
 export const perfilUISchema: FormSchema = {
   fields: [
-    { name: "cpf", label: "CPF (Apenas Leitura)", type: "text", mask: MASKS.CPF, colSpan: 2, disabled: true },
+    { name: "cpf", label: "CPF (Apenas Leitura)", type: "text", colSpan: 2, readOnly: true },
     { name: "email", label: "E-mail", type: "email", colSpan: 2 },
     { name: "first_name", label: "Primeiro nome", type: "text", colSpan: 2, required: true },
     { name: "last_name", label: "Sobrenome", type: "text", colSpan: 2, required: true },
-    // A mágica de edição de perfil:
     { name: "password", label: "Nova senha (opcional)", type: "password", colSpan: 2 },
     { name: "password2", label: "Confirmar nova senha", type: "password", colSpan: 2 },
   ]

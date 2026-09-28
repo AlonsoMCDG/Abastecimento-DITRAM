@@ -43,7 +43,7 @@ class GuiaReadSerializer(serializers.ModelSerializer):
             'id', 'data_hora', 'modalidade', 'modalidade_nome',
             'quantidade_combustivel', 'quantidade_oleo', 'periodo_uso_dias',
             'hodometro', 'hodometro_quebrado', 'observacao', 'rota_manual',
-            'veiculo_id', 'veiculo_display', 'tipo_veiculo',
+            'veiculo_id', 'veiculo_descricao', 'veiculo_display', 'tipo_veiculo',
             'pessoa_id', 'pessoa_nome', 'rota_id', 'rota_nome',
             'tipo_atividade_id', 'tipo_atividade_nome',
             'secretaria_id', 'secretaria_nome', 'secretaria_sigla',

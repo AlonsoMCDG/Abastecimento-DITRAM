@@ -73,7 +73,6 @@ export default function DatabaseDangerPage() {
 
   useEffect(() => {
     refreshStats();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // --- FUNÇÕES DE EXPORTAÇÃO ---

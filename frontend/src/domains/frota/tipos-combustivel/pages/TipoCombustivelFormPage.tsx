@@ -19,10 +19,6 @@ export default function TipoCombustivelFormPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [globalError, setGlobalError] = useState<string | null>(null);
 
-  const defaultValues: Partial<TipoCombustivelFormData> = {
-    ativo: true,
-  };
-
   useEffect(() => {
     if (id) {
       tiposCombustivelApi.buscar(Number(id))
@@ -32,7 +28,7 @@ export default function TipoCombustivelFormPage() {
         })
         .finally(() => setLoading(false));
     } else {
-      setInitialValues(defaultValues);
+      setInitialValues({ ativo: true });
     }
   }, [id]);
 

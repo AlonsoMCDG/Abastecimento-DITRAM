@@ -102,7 +102,6 @@ def obter_relatorio_consolidado(data_inicio=None, data_fim=None, secretaria_id=N
     ]
 
     # 4. Consolidado por Modalidade
-    modalidades_dict = dict(GuiaAbastecimento.MODALIDADE_CHOICES)
     modalidade_agg = (
         qs.values('modalidade')
         .annotate(
@@ -116,7 +115,7 @@ def obter_relatorio_consolidado(data_inicio=None, data_fim=None, secretaria_id=N
     por_modalidade = [
         {
             "modalidade": item['modalidade'],
-            "modalidade_nome": modalidades_dict.get(item['modalidade'], item['modalidade']),
+            "modalidade_nome": item['modalidade'],
             "total_guias": item['total_guias'],
             "total_litros": float(item['total_litros'] or Decimal('0')),
             "total_oleo": float(item['total_oleo'] or Decimal('0')),

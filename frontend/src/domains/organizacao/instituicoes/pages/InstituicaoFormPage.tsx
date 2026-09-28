@@ -19,11 +19,6 @@ export default function InstituicaoFormPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [globalError, setGlobalError] = useState<string | null>(null);
 
-  const defaultValues: Partial<InstituicaoFormData> = {
-    ativo: true,
-    tipo: 'OUTRO'
-  };
-
   useEffect(() => {
     if (id) {
       instituicoesApi.buscar(Number(id))
@@ -33,7 +28,7 @@ export default function InstituicaoFormPage() {
         })
         .finally(() => setLoading(false));
     } else {
-      setInitialValues(defaultValues);
+      setInitialValues({ ativo: true, tipo: 'OUTRO' });
     }
   }, [id]);
 

@@ -3,12 +3,13 @@ import { usuarioApi } from "../../domains/sistema/usuarios/usuarios.api";
 import type { Usuario } from "../types/models";
 import { AuthContext } from "./authContext";
 import { isAuthenticated, clearAuthTokens } from "./auth.utils";
+import { getApiErrorMessage } from "../api/errorHandlers";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<Usuario | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const refreshUser = async () => {
+  const refreshUser = async (throwOnError = false) => {
     if (!isAuthenticated()) {
       setUser(null);
       setIsLoading(false);
@@ -20,9 +21,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const response = await usuarioApi.me();
       setUser(response.data);
     } catch (error) {
-      console.error("Erro ao buscar dados do usuário", error);
+      console.error("Erro ao buscar dados do usuário", getApiErrorMessage(error));
       clearAuthTokens();
       setUser(null);
+      if (throwOnError) throw error;
     } finally {
       setIsLoading(false);
     }

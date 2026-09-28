@@ -19,10 +19,6 @@ export default function RotaFormPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [globalError, setGlobalError] = useState<string | null>(null);
 
-  const defaultValues: Partial<RotaFormData> = {
-    ativa: true,
-  };
-
   useEffect(() => {
     if (id) {
       rotasApi.buscar(Number(id))
@@ -32,7 +28,7 @@ export default function RotaFormPage() {
         })
         .finally(() => setLoading(false));
     } else {
-      setInitialValues(defaultValues);
+      setInitialValues({ ativa: true });
     }
   }, [id]);
 

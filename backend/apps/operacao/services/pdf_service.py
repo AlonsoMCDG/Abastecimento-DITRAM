@@ -1,4 +1,5 @@
 import os
+import unicodedata
 from io import BytesIO
 from decimal import Decimal
 from django.conf import settings
@@ -87,8 +88,11 @@ def _draw_guia_impressao_copy(pdf: canvas.Canvas, guia: GuiaAbastecimento, y_bot
 
     # A modalidade representa o tipo/contexto da operação da guia.
     tipo_servico_nome = (guia.modalidade or "").strip()
-    tipo_servico_raw = tipo_servico_nome.upper().strip()
-    rota_servico = (guia.rota_manual or "").strip()
+    tipo_servico_raw = ''.join(
+        char for char in unicodedata.normalize('NFD', tipo_servico_nome.upper())
+        if unicodedata.category(char) != 'Mn'
+    ).strip()
+    rota_servico = (guia.rota_manual or (guia.rota.nome if guia.rota else "")).strip()
     
     tipo_combustivel_display = guia.tipo_combustivel.nome if getattr(guia, 'tipo_combustivel', None) else ""
 
@@ -121,10 +125,10 @@ def _draw_guia_impressao_copy(pdf: canvas.Canvas, guia: GuiaAbastecimento, y_bot
         veiculo_text = f"{modelo} - {placa}".strip(" -") or "-"
     elif guia.veiculo_descricao:
         veiculo_text = guia.veiculo_descricao
-        if guia.tipo_veiculo:
-            veiculo_text = f"{veiculo_text} ({guia.tipo_veiculo})"
     else:
         veiculo_text = "-"
+    if guia.tipo_veiculo and veiculo_text != "-":
+        veiculo_text = f"{veiculo_text} ({guia.tipo_veiculo})"
         
     observacao = guia.observacao or ""
     

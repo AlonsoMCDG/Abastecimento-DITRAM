@@ -1,7 +1,6 @@
 import { ENDPOINTS } from "../../../../core/api/endpoints";
 import type { FormSchema, TableSchema } from "../../../../core/types/form";
 import type { ViewSchema } from "../../../../core/types/views";
-import { MASKS } from "../../../../core/utils/masks";
 import type { RotaReadDTO } from "./rota.read.zod";
 
 // --------------------------------------------------------
@@ -28,12 +27,10 @@ export const rotaUISchema: FormSchema = {
     {
       name: 'distancia_km',
       label: 'Distância do percurso',
-      type: 'text',
-      suffix: 'km',
-      placeholder: '0,00',
+      type: 'number',
+      placeholder: '0.00',
       colSpan: 2,
       required: false,
-      mask: MASKS.DECIMAL,
     },
     {
       name: 'detalhes',

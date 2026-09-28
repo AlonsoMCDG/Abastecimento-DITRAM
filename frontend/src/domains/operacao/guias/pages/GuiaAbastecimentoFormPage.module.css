@@ -57,6 +57,7 @@
 }
 
 .field input,
+.field select,
 .field textarea {
   width: 100%;
   box-sizing: border-box;
@@ -72,7 +73,12 @@
   resize: vertical;
 }
 
+.field select + input {
+  margin-top: 8px;
+}
+
 .field input:focus,
+.field select:focus,
 .field textarea:focus {
   outline: none;
   border-color: #1351b4;
@@ -80,6 +86,7 @@
 }
 
 .field input:disabled,
+.field select:disabled,
 .field textarea:disabled {
   background: #f8fafc;
   color: #64748b;

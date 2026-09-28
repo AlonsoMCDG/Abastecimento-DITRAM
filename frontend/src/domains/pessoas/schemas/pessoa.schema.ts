@@ -1,7 +1,6 @@
 import type { FormSchema, TableSchema } from "../../../core/types/form";
 import type { ViewSchema } from "../../../core/types/views";
 import type { PessoaReadDTO } from "./pessoa.read.zod";
-import { MASKS } from "../../../core/utils/masks";
 
 // --------------------------------------------------------
 // FORMULÁRIO (UI SCHEMA)
@@ -20,7 +19,6 @@ export const pessoaUISchema: FormSchema = {
       name: "cpf",
       label: "CPF",
       type: "text",
-      mask: MASKS.CPF,
       placeholder: "000.000.000-00",
       colSpan: 1,
       required: true

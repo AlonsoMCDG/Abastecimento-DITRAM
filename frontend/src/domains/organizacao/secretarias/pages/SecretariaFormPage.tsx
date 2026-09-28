@@ -19,10 +19,6 @@ export default function SecretariaFormPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [globalError, setGlobalError] = useState<string | null>(null);
 
-  const defaultValues: Partial<SecretariaFormData> = {
-    ativo: true,
-  };
-
   useEffect(() => {
     if (id) {
       secretariaApi.buscar(Number(id))
@@ -32,7 +28,7 @@ export default function SecretariaFormPage() {
         })
         .finally(() => setLoading(false));
     } else {
-      setInitialValues(defaultValues);
+      setInitialValues({ ativo: true });
     }
   }, [id]);
 
