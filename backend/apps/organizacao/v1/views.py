@@ -2,7 +2,6 @@ from rest_framework import viewsets, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from apps.usuarios.permissions import CadastrosPermission
 from apps.core.viewset_cache import ModelViewSetCacheMixin
 from django_filters.rest_framework import DjangoFilterBackend
 
@@ -16,7 +15,7 @@ from .serializers import (
 class SecretariaViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
     queryset = Secretaria.objects.all().order_by('-ativo', 'nome')
     serializer_class = SecretariaSerializer
-    permission_classes = [IsAuthenticated, CadastrosPermission]
+    permission_classes = [IsAuthenticated]
 
     filter_backends = [
         DjangoFilterBackend, 
@@ -51,7 +50,7 @@ class SecretariaViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
 
 class InstituicaoViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
     queryset = Instituicao.objects.select_related('secretaria').all()
-    permission_classes = [IsAuthenticated, CadastrosPermission]
+    permission_classes = [IsAuthenticated]
 
     filter_backends = [
         DjangoFilterBackend, 
