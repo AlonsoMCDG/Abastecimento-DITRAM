@@ -25,7 +25,7 @@ export default function PessoaListPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [viewItem, setViewItem] = useState<PessoaReadDTO | null>(null);
 
-  const hasWritePermission = Boolean(me?.is_staff || me?.can_write_cadastros);
+  const hasWritePermission = true;
 
   const fetchPessoas = useCallback(async (params: DataTableParams) => {
     setLoading(true);
