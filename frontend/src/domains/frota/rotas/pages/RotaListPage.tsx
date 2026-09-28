@@ -25,7 +25,7 @@ export default function RotaListPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [viewItem, setViewItem] = useState<RotaReadDTO | null>(null);
 
-  const hasWritePermission = Boolean(me?.is_staff || me?.can_write_cadastros);
+  const hasWritePermission = true;
 
   const fetchRotas = useCallback(async (params: DataTableParams) => {
     setLoading(true);
