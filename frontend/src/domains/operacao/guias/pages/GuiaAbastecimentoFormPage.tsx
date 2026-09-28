@@ -49,7 +49,6 @@ export default function GuiaAbastecimentoFormPage() {
     formState: { errors },
   } = methods;
 
-  const veiculoSelecionado = useWatch({ control, name: 'veiculo' });
   const hodometroQuebrado = useWatch({ control, name: 'hodometro_quebrado' });
 
   useEffect(() => {
@@ -180,8 +179,6 @@ export default function GuiaAbastecimentoFormPage() {
                 label: 'Motorista / Condutor',
                 type: 'select',
                 endpoint: ENDPOINTS.pessoas.lookup,
-                dependsOn: 'secretaria_id',
-                dependsOnParam: 'secretaria_id',
                 required: true,
               }, 'pessoa_id')}
               {errors.pessoa_id && <span className={styles.fieldError}>{errors.pessoa_id.message}</span>}
@@ -194,8 +191,6 @@ export default function GuiaAbastecimentoFormPage() {
                 label: 'Veículo / Equipamento',
                 type: 'select',
                 endpoint: ENDPOINTS.frota.veiculosLookup,
-                dependsOn: 'pessoa_id',
-                dependsOnParam: 'pessoa_id',
                 creatable: true,
                 required: true,
                 placeholder: 'Selecione ou digite o equipamento',
@@ -203,19 +198,17 @@ export default function GuiaAbastecimentoFormPage() {
               {errors.veiculo && <span className={styles.fieldError}>{errors.veiculo.message}</span>}
             </div>
 
-            {typeof veiculoSelecionado !== 'number' && (
-              <div className={styles.field}>
-                <label htmlFor="tipo_veiculo">Tipo do equipamento</label>
-                <input
-                  id="tipo_veiculo"
-                  type="text"
-                  placeholder="Ex.: roçador, corote, máquina"
-                  {...register('tipo_veiculo')}
-                  disabled={isPrinting}
-                />
-                {errors.tipo_veiculo && <span className={styles.fieldError}>{errors.tipo_veiculo.message}</span>}
-              </div>
-            )}
+            <div className={styles.field}>
+              <label htmlFor="tipo_veiculo">Tipo do equipamento</label>
+              <input
+                id="tipo_veiculo"
+                type="text"
+                placeholder="Ex.: roçador, corote, máquina"
+                {...register('tipo_veiculo')}
+                disabled={isPrinting}
+              />
+              {errors.tipo_veiculo && <span className={styles.fieldError}>{errors.tipo_veiculo.message}</span>}
+            </div>
 
             <div className={styles.field}>
               <label>Instituição / local atendido</label>
@@ -224,8 +217,6 @@ export default function GuiaAbastecimentoFormPage() {
                 label: 'Instituição / Local atendido',
                 type: 'select',
                 endpoint: ENDPOINTS.organizacao.instituicoesLookup,
-                dependsOn: 'secretaria_id',
-                dependsOnParam: 'secretaria',
               }, 'instituicao_id')}
               {errors.instituicao_id && <span className={styles.fieldError}>{errors.instituicao_id.message}</span>}
             </div>
