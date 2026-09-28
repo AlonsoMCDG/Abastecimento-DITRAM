@@ -1,5 +1,5 @@
 from rest_framework.decorators import action, api_view, permission_classes
-from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.viewsets import ModelViewSet
@@ -9,7 +9,6 @@ from django_filters.rest_framework import DjangoFilterBackend
 from .models import Usuario
 from .serializers import (
     UsuarioSerializer,
-    UsuarioRegisterSerializer,
     UsuarioSelfUpdateSerializer,
     UsuarioLookupSerializer
 )
@@ -66,19 +65,3 @@ class UsuarioViewSet(ModelViewSet):
         user = serializer.save()
         return Response(UsuarioSerializer(user).data)
 
-
-# ==========================================
-# ENDPOINTS DESVINCULADOS (PUBLICOS)
-# ==========================================
-
-@api_view(["POST"])
-@permission_classes([AllowAny])
-def register(request):
-    serializer = UsuarioRegisterSerializer(data=request.data)
-    serializer.is_valid(raise_exception=True)
-    user = serializer.save()
-    return Response({
-        "id": user.id,
-        "cpf": user.cpf,
-        "nome": user.get_full_name(),
-    }, status=status.HTTP_201_CREATED)
