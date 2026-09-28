@@ -1,5 +1,5 @@
 from rest_framework.decorators import action, api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.viewsets import ModelViewSet
@@ -19,7 +19,7 @@ class UsuarioViewSet(ModelViewSet):
         "is_staff", "is_superuser", "is_active"
     ).order_by("id")
         
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAuthenticated]
     
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     
