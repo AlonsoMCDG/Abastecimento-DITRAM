@@ -11,7 +11,10 @@ export const guiaAbastecimentoFormSchema = z.object({
 
   instituicao_id: z.coerce.number().nullable().optional(),
 
-  rota_manual: z.string().trim().min(1, 'Informe a rota ou serviço.'),
+  rota_manual: z.union([z.number(), z.string()]).refine(
+    (value) => typeof value === 'number' || value.trim().length > 0,
+    { message: 'Informe a rota ou serviço.' }
+  ),
 
   tipo_combustivel_id: z.coerce.number().min(1, 'Selecione o tipo de combustível.'),
 
