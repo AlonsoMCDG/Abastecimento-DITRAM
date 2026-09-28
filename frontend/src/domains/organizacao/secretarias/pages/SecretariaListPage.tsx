@@ -6,7 +6,6 @@ import { QuickViewModal } from "../../../../core/ui/overlays/QuickViewModal";
 
 import { secretariaApi } from "../secretarias.api";
 import { ROUTES } from "../../../../core/routes/routes";
-import { useAuth } from "../../../../core/auth/useAuth";
 import { Can } from "../../../../core/auth/components/Can";
 import { getApiErrorMessage } from "../../../../core/api/errorHandlers";
 
@@ -17,7 +16,6 @@ import "../../../../core/ui/layouts/ListPage.css";
 
 export default function SecretariaListPage() {
   const navigate = useNavigate();
-  const { user: me } = useAuth();
 
   const [secretarias, setSecretarias] = useState<SecretariaReadDTO[]>([]);
   const [total, setTotal] = useState(0);
@@ -25,7 +23,7 @@ export default function SecretariaListPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [viewItem, setViewItem] = useState<SecretariaReadDTO | null>(null);
 
-  const hasWritePermission = Boolean(me?.is_staff || me?.can_write_cadastros);
+  const hasWritePermission = true;
 
   const fetchSecretarias = useCallback(async (params: DataTableParams) => {
     setLoading(true);
