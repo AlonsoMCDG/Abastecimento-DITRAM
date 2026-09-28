@@ -42,6 +42,7 @@ export const SearchableAsyncSelect = <T extends FieldValues>({
   const wrapperRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLUListElement>(null);
   const mounted = useRef(false);
+  const previousParentValue = useRef<unknown>(undefined);
 
   const fieldPath = field.name as Path<T>;
   const dependsOnPath = (field.dependsOn || '_none_') as Path<T>;
@@ -95,14 +96,24 @@ export const SearchableAsyncSelect = <T extends FieldValues>({
 
   // 3. LIMPEZA EM CASCATA
   useEffect(() => {
+    if (!field.dependsOn) return;
+
+    // A primeira leitura apenas registra o valor atual. Isso evita
+    // apagar dados ao abrir uma guia já existente com reset().
     if (!mounted.current) {
       mounted.current = true;
+      previousParentValue.current = parentValue;
       return;
     }
-    if (field.dependsOn) {
-      setValue(fieldPath, "" as PathValue<T, Path<T>>); 
-      setSearchTerm('');
-    }
+
+    if (previousParentValue.current === parentValue) return;
+
+    previousParentValue.current = parentValue;
+    setValue(fieldPath, "" as PathValue<T, Path<T>>, {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
+    setSearchTerm('');
   }, [parentValue, field.dependsOn, fieldPath, setValue]);
 
   // 4. CLICK OUTSIDE INTELIGENTE
