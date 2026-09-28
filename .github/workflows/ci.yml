@@ -10,6 +10,8 @@ jobs:
   backend-check:
     name: Backend (Django)
     runs-on: ubuntu-latest
+    env:
+      SECRET_KEY: ci-secret-key-not-for-production
 
     steps:
       - name: Checkout do Código
