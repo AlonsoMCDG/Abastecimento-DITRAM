@@ -267,10 +267,4 @@ export interface Usuario {
   is_superuser: boolean;
   is_active: boolean;
 
-  can_write_cadastros: boolean;
-  can_write_frota: boolean;
-
-  can_create_guia_abastecimento: boolean;
-  can_edit_guia_abastecimento: boolean;
-  can_delete_guia_abastecimento: boolean;
 }
