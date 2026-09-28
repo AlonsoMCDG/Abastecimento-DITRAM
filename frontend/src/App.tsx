@@ -97,7 +97,7 @@ function App() {
             <Route path="pessoas">
               <Route index element={<PessoaListPage />} />
               <Route path="criar" element={
-                  <RequirePermission allow={(me) => Boolean(me.is_staff || me.can_write_frota)}>
+                  <RequirePermission allow={(me) => Boolean(me.is_staff || me.can_write_cadastros)}>
                     <PessoaFormPage />
                   </RequirePermission>
                 }
