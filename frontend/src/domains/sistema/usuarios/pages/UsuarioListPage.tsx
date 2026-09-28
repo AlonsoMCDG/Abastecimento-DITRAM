@@ -6,7 +6,6 @@ import { QuickViewModal } from "../../../../core/ui/overlays/QuickViewModal";
 
 import { usuarioApi } from "../usuarios.api";
 import { ROUTES } from "../../../../core/routes/routes";
-import { useAuth } from "../../../../core/auth/useAuth";
 import { Can } from "../../../../core/auth/components/Can";
 import { getApiErrorMessage } from "../../../../core/api/errorHandlers";
 
@@ -17,7 +16,6 @@ import "../../../../core/ui/layouts/ListPage.css";
 
 export default function UsuarioListPage() {
   const navigate = useNavigate();
-  const { user: me } = useAuth();
 
   const [usuarios, setUsuarios] = useState<UsuarioReadDTO[]>([]);
   const [total, setTotal] = useState(0);
@@ -25,7 +23,7 @@ export default function UsuarioListPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [viewItem, setViewItem] = useState<UsuarioReadDTO | null>(null);
 
-  const isAdmin = Boolean(me?.is_staff);
+  const isAdmin = true;
 
   const fetchUsuarios = useCallback(async (params: DataTableParams) => {
     setLoading(true);
