@@ -8,7 +8,6 @@ from django.core.exceptions import ValidationError
 
 from apps.pessoas.models import Pessoa
 from apps.core.viewset_cache import ModelViewSetCacheMixin
-from apps.usuarios.permissions import GuiaAbastecimentoPermission, CadastrosPermission
 
 from apps.operacao.models import TipoAtividade, GuiaAbastecimento, RegistroHodometroDiario
 from .serializers import (
@@ -27,7 +26,7 @@ from apps.operacao.services.relatorio_service import obter_relatorio_consolidado
 class TipoAtividadeViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
     queryset = TipoAtividade.objects.all()
     serializer_class = TipoAtividadeSerializer
-    permission_classes = [IsAuthenticated, CadastrosPermission]
+    permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['ativo']
     search_fields = ['nome']
@@ -47,7 +46,7 @@ class GuiaAbastecimentoViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
         'pessoa', 'veiculo', 'secretaria', 'rota', 'tipo_atividade',
         'instituicao', 'tipo_combustivel', 'usuario'
     ).all()
-    permission_classes = [IsAuthenticated, GuiaAbastecimentoPermission]
+    permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['modalidade', 'pessoa', 'veiculo', 'secretaria']
     search_fields = ['veiculo__placa', 'veiculo_descricao', 'pessoa__nome']
@@ -132,7 +131,7 @@ class GuiaAbastecimentoViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
 class RegistroHodometroDiarioViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
     queryset = RegistroHodometroDiario.objects.all()
     serializer_class = RegistroHodometroDiarioSerializer
-    permission_classes = [IsAuthenticated, GuiaAbastecimentoPermission]
+    permission_classes = [IsAuthenticated]
     filterset_fields = ['guia', 'data_referencia']
 
     def create(self, request, *args, **kwargs):
