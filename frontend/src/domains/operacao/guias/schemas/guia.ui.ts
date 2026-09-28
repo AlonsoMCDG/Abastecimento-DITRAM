@@ -29,6 +29,8 @@ export const guiaAbastecimentoUISchema: FormSchema<GuiaAbastecimentoFormInput> =
       label: 'Motorista / Condutor',
       type: 'select',
       endpoint: ENDPOINTS.pessoas.lookup,
+      dependsOn: 'secretaria_id',
+      dependsOnParam: 'secretaria_id',
       required: true,
     },
 
@@ -37,6 +39,8 @@ export const guiaAbastecimentoUISchema: FormSchema<GuiaAbastecimentoFormInput> =
       label: 'Veículo / Equipamento',
       type: 'select',
       endpoint: ENDPOINTS.frota.veiculosLookup,
+      dependsOn: 'pessoa_id',
+      dependsOnParam: 'pessoa_id',
       creatable: true,
       required: true,
     },
