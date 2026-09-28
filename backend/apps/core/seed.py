@@ -21,15 +21,21 @@ def ensure_superadmin(
         password=password,
         first_name="Super",
         last_name="Admin",
-        can_write_cadastros=True,
-        can_write_frota=True,
-        can_create_guia_abastecimento=True,
-        can_edit_guia_abastecimento=True,
-        can_delete_guia_abastecimento=True,
     )
 
 def load_default_data(fixture_name: str = DEFAULT_FIXTURE_NAME, verbosity: int = 1):
-    call_command("loaddata", fixture_name, verbosity=verbosity)
+    try:
+        call_command(
+            "loaddata",
+            fixture_name,
+            verbosity=verbosity,
+        )
+    except Exception as e:
+        import traceback
+
+        traceback.print_exc()
+
+        raise
 
 def seed_if_empty(verbosity: int = 1):
     # CORREÇÃO: Desativado propositalmente!
@@ -38,5 +44,8 @@ def seed_if_empty(verbosity: int = 1):
     return False
 
 def seed_force(verbosity: int = 1):
-    ensure_superadmin()
+    print("[SEED] 1. Iniciando carregamento dos dados padrão")
     load_default_data(verbosity=verbosity)
+    print("[SEED] 2. Garantindo superadmin")
+    ensure_superadmin()
+    print("[SEED] 3. Dados carregados com sucesso")

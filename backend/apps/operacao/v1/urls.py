@@ -1,18 +1,27 @@
 from rest_framework.routers import DefaultRouter
-from .views import OperadorVeiculoViewSet, GuiaViewSet, TipoServicoViewSet, AlocacaoServicoViewSet
+from .views import (
+    GuiaAbastecimentoViewSet,
+    TipoAtividadeViewSet,
+    RegistroHodometroDiarioViewSet,
+)
 
 router = DefaultRouter()
 
-# Rota final: /api/v1/tipos-servico/
-router.register(r'tipos-servico', TipoServicoViewSet, basename='tipo-servico')
+# =========================================================
+# OPERAÇÃO (CORE DOMAIN API)
+# =========================================================
+# Recursos principais:
+# - GuiaAbastecimento (transações)
+# - TipoAtividade (catálogo dinâmico com deduplicação)
+#
+# Endpoints auxiliares:
+# - /atividades/lookup/ (autocomplete frontend)
+# =========================================================
 
-# Rota final: /api/v1/alocacoes-servicos/
-router.register(r'alocacoes-servicos', AlocacaoServicoViewSet, basename='alocacao-servico')
-
-# Rota final: /api/v1/operadores-veiculos/
-router.register(r'operadores-veiculos', OperadorVeiculoViewSet, basename='operador-veiculo')
-
-# Rota final: /api/v1/guias/
-router.register(r'guias', GuiaViewSet, basename='guia')
+router.register(r'atividades', TipoAtividadeViewSet, basename='tipo-atividade')
+router.register(r'guias', GuiaAbastecimentoViewSet, basename='guia')
+# Registros de hodômetro diário (ViewSet/Service já existiam, mas não
+# estavam roteados — endpoint inacessível por qualquer cliente)
+router.register(r'registros-hodometro', RegistroHodometroDiarioViewSet, basename='registro-hodometro')
 
 urlpatterns = router.urls

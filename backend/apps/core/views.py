@@ -4,6 +4,7 @@ from datetime import datetime
 from io import StringIO
 
 from django.conf import settings
+from django.core.cache import cache
 from django.core.management import call_command
 from django.core.serializers import deserialize
 from django.db import IntegrityError, transaction, connection
@@ -69,6 +70,9 @@ def upload_seed_files(request):
                 with connection.cursor() as cursor:
                     cursor.execute(sql)
 
+        cache.clear() # Limpa o cache após a inserção dos novos dados
+
+
         return Response({
             "detail": f"Upload concluído! {criados} novos registros salvos, {ignorados} já existentes ignorados."
         })
@@ -81,6 +85,7 @@ def upload_seed_files(request):
 @permission_classes([IsSuperAdmin])
 def seed_default_data_force(request):
     seed_force(verbosity=0)
+    cache.clear() # Limpa o cache após a inserção dos novos dados
     return Response({"detail": "Seed carregado (force)."})
 
 
@@ -90,6 +95,7 @@ def reset_db_and_seed_default_data(request):
     call_command("flush", interactive=False, verbosity=0, allow_cascade=True)
     call_command("migrate", verbosity=0)
     seed_force(verbosity=0)
+    cache.clear() # Limpa o cache após a inserção dos novos dados
     return Response({"detail": "Banco resetado e seed carregado."})
 
 
@@ -98,6 +104,7 @@ def reset_db_and_seed_default_data(request):
 def flush_db_keep_superadmin(request):
     call_command("flush", interactive=False, verbosity=0, allow_cascade=True)
     ensure_superadmin()
+    cache.clear() # Limpa o cache após a inserção dos novos dados
     return Response({"detail": "Banco apagado (mantendo superadmin)."})
 
 
@@ -149,7 +156,7 @@ def db_stats(request):
     from apps.organizacao.models import Instituicao, Secretaria
     from apps.frota.models import Rota, Veiculo
     from apps.pessoas.models import Pessoa
-    from apps.operacao.models import Guia, OperadorVeiculo, AlocacaoServico, TipoServico
+    from apps.operacao.models import GuiaAbastecimento, TipoAtividade
     from django.contrib.auth import get_user_model
 
     User = get_user_model()
@@ -165,8 +172,8 @@ def db_stats(request):
                 "rotas": Rota.objects.count(),
                 "condutores": Pessoa.objects.count(),
                 "veiculos": Veiculo.objects.count(),
-                "lotacoes": AlocacaoServico.objects.count(),
-                "guias": Guia.objects.count(),
+                "atividades": TipoAtividade.objects.count(),
+                "guias": GuiaAbastecimento.objects.count(),
                 "usuarios": User.objects.count(),
             },
         }

@@ -18,8 +18,14 @@ class UsuarioManager(BaseUserManager):
         return user
 
     def create_superuser(self, cpf, password=None, **extra_fields):
-        extra_fields.setdefault('is_staff', True)
-        extra_fields.setdefault('is_superuser', True)
+        extra_fields['is_staff'] = True
+        extra_fields['is_superuser'] = True
+
+        if extra_fields.get('is_staff') is not True:
+            raise ValueError('Superuser precisa ter is_staff=True.')
+        if extra_fields.get('is_superuser') is not True:
+            raise ValueError('Superuser precisa ter is_superuser=True.')
+
         return self.create_user(cpf, password, **extra_fields)
 
 class Usuario(AbstractUser):
@@ -27,21 +33,26 @@ class Usuario(AbstractUser):
     
     cpf = models.CharField(max_length=11, unique=True, verbose_name="CPF")
 
-    can_write_cadastros = models.BooleanField(default=False)
-    can_write_frota = models.BooleanField(default=False)
-
-    can_create_guia_abastecimento = models.BooleanField(default=True)
-    can_edit_guia_abastecimento = models.BooleanField(default=False)
-    can_delete_guia_abastecimento = models.BooleanField(default=False)
-
     USERNAME_FIELD = 'cpf' 
-    REQUIRED_FIELDS = ['email', 'first_name', 'last_name']
+    REQUIRED_FIELDS = ['first_name', 'last_name']
 
     objects = UsuarioManager()
 
     class Meta:
         verbose_name = "Usuário"
         verbose_name_plural = "Usuários"
+    
+    def clean(self):
+        super().clean()
+        if self.cpf:
+            from utils.validators import normalize_cpf
+
+            self.cpf = normalize_cpf(self.cpf)
+
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.get_full_name() or self.cpf

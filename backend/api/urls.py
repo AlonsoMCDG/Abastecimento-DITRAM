@@ -25,5 +25,7 @@ urlpatterns = [
 
     # Core/Legacy
     path('api/core/', include('apps.core.urls')),
-    path('api/usuarios/', include('apps.usuarios.urls')), 
+    # NOTA: apps.usuarios.urls NÃO é mais montado em /api/usuarios/.
+    # Já é montado em /api/v1/usuarios/ (via api.urls_v1) — a duplicação
+    # expunha o mesmo UsuarioViewSet em dois caminhos.
 ]

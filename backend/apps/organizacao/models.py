@@ -14,55 +14,72 @@ class Secretaria(models.Model):
     class Meta:
         verbose_name = "Secretaria"
         verbose_name_plural = "Secretarias"
+        indexes = [
+            models.Index(fields=['nome']),
+        ]
+    
+    def clean(self):
+        if self.nome:
+            self.nome = " ".join(self.nome.split())
+        if self.sigla:
+            self.sigla = "".join(self.sigla.split()).upper()
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
 
     def __str__(self):
-        return self.sigla
+        return f"{self.sigla} - {self.nome}"
 
     def natural_key(self):
         return (self.sigla,)
 
-    def save(self, *args, **kwargs):
-        if self.nome:
-            self.nome = self.nome.strip()
-        if self.sigla:
-            self.sigla = self.sigla.strip().upper()
-        super().save(*args, **kwargs)
-
 
 class InstituicaoManager(models.Manager):
     def get_by_natural_key(self, nome, secretaria_sigla):
-        return self.get(nome=nome, secretaria__sigla=secretaria_sigla)
+        return self.select_related('secretaria').get(
+            nome=nome,
+            secretaria__sigla=secretaria_sigla
+        )
 
 class Instituicao(models.Model):
     TIPO_CHOICES = [
-        ('ESCOLA', 'Escola'), ('CRECHE', 'Creche'),
-        ('UPA', 'UPA'), ('HOSPITAL', 'Hospital'), ('OUTRO', 'Outro'),
+        ('ESCOLA', 'Escola'), ('UPA', 'UPA'), 
+        ('HOSPITAL', 'Hospital'), ('OUTRO', 'Outro'),
     ]
-
     nome = models.CharField(max_length=100, verbose_name="Nome")
-    tipo = models.CharField(max_length=100, choices=TIPO_CHOICES, verbose_name="Tipo", null=True, blank=True)
-    secretaria = models.ForeignKey(Secretaria, on_delete=models.PROTECT, related_name="instituicoes")
+    tipo = models.CharField(max_length=50, choices=TIPO_CHOICES, verbose_name="Tipo", default='OUTRO')
+    secretaria = models.ForeignKey(Secretaria, on_delete=models.CASCADE, related_name="instituicoes")
     ativo = models.BooleanField(default=True, verbose_name="Ativa")
-
+    
     objects = InstituicaoManager()
 
     class Meta:
         verbose_name = "Instituição"
         verbose_name_plural = "Instituições"
-        # Evita cadastrar a mesma escola duas vezes na mesma secretaria
-        unique_together = ['nome', 'secretaria'] 
-
-    def __str__(self):
-        if self.tipo:
-            return f"{self.nome} ({self.get_tipo_display()})"
-        return self.nome
-
-    def natural_key(self):
-        # A chave natural depende da secretaria associada
-        return (self.nome,) + self.secretaria.natural_key()
-    natural_key.dependencies = ['organizacao.secretaria']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['nome', 'secretaria'],
+                name='unique_instituicao_por_secretaria'
+            )
+        ]   
+        indexes = [
+            models.Index(fields=['nome', 'secretaria']),
+            models.Index(fields=['tipo']),
+        ]
+    
+    def clean(self):
+        if self.nome:
+            self.nome = " ".join(self.nome.split()).title()
 
     def save(self, *args, **kwargs):
-        if self.nome:
-            self.nome = " ".join(self.nome.split())
+        self.full_clean()
         super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.nome} ({self.secretaria.sigla})"
+
+    def natural_key(self):
+        return (self.nome,) + self.secretaria.natural_key()
+    
+    natural_key.dependencies = ['organizacao.secretaria']
