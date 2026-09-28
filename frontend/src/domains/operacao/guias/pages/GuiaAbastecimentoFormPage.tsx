@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { useForm, FormProvider, type SubmitHandler } from 'react-hook-form';
+import { useForm, FormProvider, useWatch, type SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 
@@ -11,6 +11,7 @@ import { getCurrentDateTimeLocalISO } from '../../../../core/utils/dateUtils';
 import { ROUTES } from '../../../../core/routes/routes';
 
 import { guiasApi } from '../api/guias.api';
+import { veiculosApi } from '../../../frota/veiculos/api/veiculos.api';
 import { mapReadToForm, mapFormToWriteDTO } from '../api/guias.mapper';
 import { guiaAbastecimentoUISchema } from '../schemas/guia.ui';
 import { guiaAbastecimentoFormSchema, type GuiaAbastecimentoFormInput } from '../schemas/guia.form';
@@ -31,7 +32,8 @@ export default function GuiaAbastecimentoFormPage() {
   const [isPrinting, setIsPrinting] = useState(false);
   const submitIntent = useRef<'save' | 'save_print'>('save');
 
-  const { handleSubmit, reset } = methods;
+  const { control, handleSubmit, reset, setValue } = methods;
+  const veiculoSelecionado = useWatch({ control, name: 'veiculo' });
 
   useEffect(() => {
     if (id) {
@@ -53,6 +55,44 @@ export default function GuiaAbastecimentoFormPage() {
       hodometro_quebrado: false,
     });
   }, [id, searchParams, reset]);
+
+  useEffect(() => {
+    // Ao editar uma guia, preservamos os dados já registrados.
+    // A automação abaixo vale somente para uma nova guia.
+    if (id || typeof veiculoSelecionado !== 'number') return;
+
+    let active = true;
+
+    veiculosApi.buscar(veiculoSelecionado)
+      .then((veiculo) => {
+        if (!active) return;
+
+        // Dados cadastrais usados como sugestão inicial.
+        setValue('tipo_combustivel_id', veiculo.tipo_combustivel_id, {
+          shouldValidate: true,
+          shouldDirty: true,
+        });
+
+        if (veiculo.hodometro_atual != null && Number(veiculo.hodometro_atual) > 0) {
+          setValue('hodometro', Number(veiculo.hodometro_atual), {
+            shouldValidate: true,
+            shouldDirty: true,
+          });
+          setValue('hodometro_quebrado', false, {
+            shouldValidate: true,
+            shouldDirty: true,
+          });
+        }
+      })
+      .catch(() => {
+        // O cadastro do veículo é apenas uma fonte de sugestão.
+        // Se falhar, o usuário continua podendo preencher manualmente.
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [id, veiculoSelecionado, setValue]);
 
   const onSubmit: SubmitHandler<GuiaAbastecimentoFormInput> = async (rawFormData) => {
     setGlobalError(null);
