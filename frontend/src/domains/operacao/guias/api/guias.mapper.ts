@@ -1,3 +1,4 @@
+import { toDateTimeLocalInput } from '../../../../core/utils/dateUtils';
 import type { GuiaAbastecimentoFormOutput, GuiaAbastecimentoFormInput } from '../schemas/guia.form';
 import type { GuiaAbastecimentoWriteDTO, GuiaAbastecimentoReadDTO } from '../schemas/guia.dto';
 
@@ -41,7 +42,7 @@ export function mapFormToWriteDTO(form: GuiaAbastecimentoFormOutput): GuiaAbaste
 
 export function mapReadToForm(data: GuiaAbastecimentoReadDTO): GuiaAbastecimentoFormInput {
   return {
-    data_hora: data.data_hora ? new Date(data.data_hora).toISOString().slice(0, 16) : '',
+    data_hora: toDateTimeLocalInput(data.data_hora),
     modalidade: data.modalidade,
     secretaria_id: data.secretaria_id,
     pessoa_id: data.pessoa_id,
