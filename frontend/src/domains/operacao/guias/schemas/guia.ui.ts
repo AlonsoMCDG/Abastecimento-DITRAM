@@ -58,6 +58,8 @@ export const guiaAbastecimentoUISchema: FormSchema<GuiaAbastecimentoFormInput> =
       label: 'Instituição / Local atendido',
       type: 'select',
       endpoint: ENDPOINTS.organizacao.instituicoesLookup,
+      dependsOn: 'secretaria_id',
+      dependsOnParam: 'secretaria',
     },
 
     {
