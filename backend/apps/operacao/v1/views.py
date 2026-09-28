@@ -53,6 +53,18 @@ class GuiaAbastecimentoViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
     search_fields = ['veiculo__placa', 'veiculo_descricao', 'pessoa__nome']
     ordering = ['-data_hora']
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        data_inicio = self.request.query_params.get('data_inicio')
+        data_fim = self.request.query_params.get('data_fim')
+
+        if data_inicio:
+            queryset = queryset.filter(data_hora__date__gte=data_inicio)
+        if data_fim:
+            queryset = queryset.filter(data_hora__date__lte=data_fim)
+
+        return queryset
+
     def get_serializer_class(self):
         if self.request.method in ['GET', 'HEAD', 'OPTIONS']:
             return GuiaReadSerializer
