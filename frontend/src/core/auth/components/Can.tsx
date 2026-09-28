@@ -1,24 +1,15 @@
 import React from "react";
-import { useAuth } from "../useAuth";
-
-type PermissionKeys = 
-  | "is_staff" 
-  | "is_superuser" 
-  | "can_write_cadastros" 
-  | "can_write_frota" 
-  | "can_create_guia_abastecimento" 
-  | "can_edit_guia_abastecimento" 
-  | "can_delete_guia_abastecimento";
 
 type Props = {
-  action: PermissionKeys;
+  action?: string;
   children: React.ReactNode;
 };
 
+/**
+ * Mantido por compatibilidade com as telas existentes.
+ * A aplicação possui um único usuário operacional; a autorização
+ * administrativa real permanece somente na rota do banco de dados.
+ */
 export function Can({ children }: Props) {
-  const { user } = useAuth();
-
-  if (!user) return null;
-
   return <>{children}</>;
 }
