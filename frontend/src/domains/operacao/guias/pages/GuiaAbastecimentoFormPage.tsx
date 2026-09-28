@@ -46,7 +46,6 @@ export default function GuiaAbastecimentoFormPage() {
     if (id) {
       guiasApi.buscar(Number(id))
         .then((res) => {
-          if (res.data_hora) res.data_hora = new Date(res.data_hora).toISOString().slice(0, 16);
           reset(mapReadToForm(res));
         })
         .catch((err) => setGlobalError(getApiErrorMessage(err, 'Erro ao carregar a guia.')))
