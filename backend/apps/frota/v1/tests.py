@@ -14,7 +14,6 @@ class FrotaTests(TestCase):
         self.user = Usuario.objects.create_user(
             cpf="66666666666",
             password="testpassword",
-            can_write_frota=True
         )
         self.client.force_authenticate(user=self.user)
 
