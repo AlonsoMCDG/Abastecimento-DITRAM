@@ -44,11 +44,4 @@ export const usuarioApi = {
     return client.patch<UsuarioReadDTO>(ENDPOINTS.usuarios.me, data);
   },
 
-  // Permissões
-  listarPermissoes(params?: UsuarioListParams) {
-    return client.get<PaginatedResponse<UsuarioReadDTO>>(`${ENDPOINTS.usuarios.base}permissions/`, { params });
-  },
-  atualizarPermissoes(id: number, data: Partial<UsuarioReadDTO>) {
-    return client.patch<UsuarioReadDTO>(`${ENDPOINTS.usuarios.base}${id}/permissions/`, data);
-  },
 };
