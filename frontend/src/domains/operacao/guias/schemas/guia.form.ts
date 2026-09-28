@@ -1,5 +1,10 @@
 import { z } from 'zod';
 
+const optionalNumber = z.preprocess(
+  (value) => value === '' || value === null || value === undefined ? null : value,
+  z.coerce.number().nullable().optional()
+);
+
 export const guiaAbastecimentoFormSchema = z.object({
   data_hora: z.string().min(1, 'A data e hora são obrigatórias.'),
   modalidade: z.string().min(1, 'Informe o tipo de guia / operação.'),
@@ -9,7 +14,7 @@ export const guiaAbastecimentoFormSchema = z.object({
   veiculo: z.union([z.number(), z.string()]).nullable().optional(),
   tipo_veiculo: z.string().nullable().optional(),
 
-  instituicao_id: z.coerce.number().nullable().optional(),
+  instituicao_id: optionalNumber,
 
   rota_manual: z.union([z.number(), z.string()]).refine(
     (value) => typeof value === 'number' || value.trim().length > 0,
@@ -31,12 +36,12 @@ export const guiaAbastecimentoFormSchema = z.object({
       { message: 'Informe uma quantidade válida de óleo.' }
     ),
 
-  periodo_uso_dias: z.coerce.number().nullable().optional(),
+  periodo_uso_dias: optionalNumber,
 
-  hodometro: z.coerce.number()
-    .min(0, 'O hodômetro não pode ser negativo.')
-    .nullable()
-    .optional(),
+  hodometro: z.preprocess(
+    (value) => value === '' || value === null || value === undefined ? null : value,
+    z.coerce.number().min(0, 'O hodômetro não pode ser negativo.').nullable().optional()
+  ),
 
   hodometro_quebrado: z.boolean().default(false).optional(),
 
