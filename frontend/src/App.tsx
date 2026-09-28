@@ -26,7 +26,6 @@ import RelatoriosPage from "./domains/operacao/relatorios/pages/RelatoriosPage";
 
 import UsuarioListPage from "./domains/sistema/usuarios/pages/UsuarioListPage";
 import UsuarioFormPage from "./domains/sistema/usuarios/pages/UsuarioFormPage";
-import UsuariosPermissoesPage from "./domains/sistema/usuarios/pages/UsuariosPermissoesPage";
 import PerfilPage from "./domains/sistema/perfil/pages/PerfilPage";
 import PerfilEditPage from "./domains/sistema/perfil/pages/PerfilEditPage";
 import DatabaseDangerPage from "./domains/system/database/pages/DatabaseDangerPage";
