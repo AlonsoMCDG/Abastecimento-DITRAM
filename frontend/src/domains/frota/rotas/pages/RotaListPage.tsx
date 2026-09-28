@@ -6,7 +6,6 @@ import { QuickViewModal } from "../../../../core/ui/overlays/QuickViewModal";
 
 import { rotasApi } from "../rotas.api";
 import { ROUTES } from "../../../../core/routes/routes";
-import { Can } from "../../../../core/auth/components/Can";
 import { getApiErrorMessage } from "../../../../core/api/errorHandlers";
 
 import type { RotaReadDTO } from "../schemas/rota.read.zod";
@@ -66,11 +65,9 @@ export default function RotaListPage() {
         </div>
 
         <div className="list-actions">
-          <Can action="can_write_cadastros">
             <Link className="list-create" to={ROUTES.frota.rotas.create}>
               <span className="plus">+</span> Nova rota
             </Link>
-          </Can>
         </div>
       </div>
 
