@@ -19,7 +19,6 @@ class OperacaoV1Tests(TestCase):
             password="testpassword",
             first_name="Operador",
             last_name="Teste",
-            can_create_guia_abastecimento=True
         )
         self.client.force_authenticate(user=self.user)
 
