@@ -8,7 +8,6 @@ import { QuickViewModal } from "../../../../core/ui/overlays/QuickViewModal";
 
 import { veiculosApi } from "../api/veiculos.api";
 import { ROUTES } from "../../../../core/routes/routes";
-import { Can } from "../../../../core/auth/components/Can";
 import { getApiErrorMessage } from "../../../../core/api/errorHandlers";
 
 import type { VeiculoReadDTO } from "../schemas/veiculo.dto";
@@ -108,14 +107,12 @@ export default function VeiculoListPage() {
 
 
         <div className="list-actions">
-          <Can action="can_write_frota">
             <Link
               className="list-create"
               to={ROUTES.frota.veiculos.create}
             >
               <span className="plus">+</span> Novo veículo
             </Link>
-          </Can>
         </div>
 
       </div>
