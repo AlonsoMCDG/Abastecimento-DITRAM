@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 
 import { tiposCombustivelApi } from "../tiposCombustivel.api";
 import { ROUTES } from "../../../../core/routes/routes";
-import { StandaloneForm } from "../../../../core/ui/forms/dynamic-form/StandaloneForm";
+import { SimpleForm } from "../../../../core/ui/forms/SimpleForm";
 import { getApiErrorMessage } from "../../../../core/api/errorHandlers";
 
 import { tipoCombustivelUISchema } from "../schemas/tipoCombustivel.schema";
@@ -60,7 +60,7 @@ export default function TipoCombustivelFormPage() {
 
   return (
     <div className="page-container">
-      <StandaloneForm<TipoCombustivelFormData>
+      <SimpleForm<TipoCombustivelFormData>
         title={id ? "Editar Combustível" : "Cadastrar Combustível"}
         subtitle={id ? "Atualize o nome ou o status do combustível." : "Adicione um novo tipo de combustível ao sistema."}
         
