@@ -8,7 +8,6 @@ import { QuickViewModal } from "../../../../core/ui/overlays/QuickViewModal";
 
 import { veiculosApi } from "../api/veiculos.api";
 import { ROUTES } from "../../../../core/routes/routes";
-import { useAuth } from "../../../../core/auth/useAuth";
 import { Can } from "../../../../core/auth/components/Can";
 import { getApiErrorMessage } from "../../../../core/api/errorHandlers";
 
@@ -23,7 +22,6 @@ import "../../../../core/ui/layouts/ListPage.css";
 
 export default function VeiculoListPage() {
   const navigate = useNavigate();
-  const { user: me } = useAuth();
 
   const [veiculos, setVeiculos] = useState<VeiculoReadDTO[]>([]);
   const [total, setTotal] = useState(0);
