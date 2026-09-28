@@ -1,8 +1,6 @@
 import { createCrudApi } from "../../../core/api/crudFactory";
 import { client } from "../../../core/api/apiClient";
 import { ENDPOINTS } from "../../../core/api/endpoints";
-import type { PaginatedResponse } from "../../../core/types/api";
-
 import { usuarioReadSchema, type UsuarioReadDTO } from "./schemas/usuario.read.zod";
 import { usuarioWriteSchema } from "./schemas/usuario.write.zod";
 import type { UsuarioListParams } from "./schemas/usuario.filters.zod";
