@@ -32,7 +32,6 @@ import DatabaseDangerPage from "./domains/system/database/pages/DatabaseDangerPa
 
 // ================= CORE & AUTH =================
 import { LoginPage } from "./core/auth/pages/LoginPage";
-import { RegisterPage } from "./core/auth/pages/RegisterPage";
 import { PrivateRoute } from "./core/auth/components/PrivateRoute";
 import { RequirePermission } from "./core/auth/components/RequirePermission";
 import NotFoundPage from "./core/ui/pages/NotFoundPage";
@@ -42,7 +41,6 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
 
         {/* ==========================================
             ROTAS PRIVADAS (Requerem Login)
