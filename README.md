@@ -95,7 +95,7 @@ npm run dev
 | :--- | :--- | :--- |
 | **RF01** | **Gestão de Secretarias** | Cadastro e edição de secretarias (Nome e Sigla). |
 | **RF02** | **Gestão de Condutores** | Cadastro de condutores com Nome, CPF e vínculo com secretaria. |
-| **RF03** | **Gestão de Frota** | Cadastro de veículos com Placa, Modelo, Ano e Combustível. |
+| **RF03** | **Gestão de Frota** | Cadastro de veículos com Placa, Modelo, Categoria, Combustível e dados de consumo. |
 | **RF04** | **Gestão de Destinos** | Cadastro de Escolas, Postos de Saúde e Rotas por secretaria. |
 | **RF05** | **Emissão de Guias** | Formulário inteligente com hodômetro opcional para medidores quebrados. |
 | **RF06** | **Preenchimento assistido** | Filtra motorista por secretaria e veículo/equipamento por motorista; utiliza dados do cadastro para sugestões de preenchimento. |
@@ -127,7 +127,7 @@ npm run dev
 ### Automações de Campo
 * **Concatenação:** Modelo e Placa são unidos automaticamente no PDF (`L200 - MXX-0000`).
 * **Rótulos:** A interface usa campos genéricos para operação, motorista/condutor, veículo/equipamento e rota/serviço.
-* **Validação de Hodômetro:** O sistema bloqueia KM inferior à última registrada, mas permite confirmação manual caso o campo seja deixado vazio (medidor quebrado).
+* **Validação de Hodômetro:** O hodômetro é opcional quando estiver quebrado ou indisponível; nesse caso, a guia é emitida sem o valor.
 
 
 
