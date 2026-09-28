@@ -65,9 +65,13 @@ export const guiaAbastecimentoUISchema: FormSchema<GuiaAbastecimentoFormInput> =
     {
       name: 'rota_manual',
       label: 'Rota / Serviço',
-      type: 'text',
+      type: 'select',
+      endpoint: ENDPOINTS.frota.rotasLookup,
+      dependsOn: 'secretaria_id',
+      dependsOnParam: 'secretaria',
+      creatable: true,
       required: true,
-      placeholder: 'Ex.: Escola São José, roçagem, transporte de pacientes',
+      placeholder: 'Selecione uma rota ou digite um serviço',
     },
 
     {
