@@ -6,7 +6,6 @@ import { QuickViewModal } from "../../../../core/ui/overlays/QuickViewModal";
 
 import { usuarioApi } from "../usuarios.api";
 import { ROUTES } from "../../../../core/routes/routes";
-import { Can } from "../../../../core/auth/components/Can";
 import { getApiErrorMessage } from "../../../../core/api/errorHandlers";
 
 import type { UsuarioReadDTO } from "../schemas/usuario.read.zod";
@@ -66,11 +65,9 @@ export default function UsuarioListPage() {
         </div>
 
         <div className="list-actions">
-          <Can action="is_staff">
             <Link className="list-create" to={ROUTES.sistema.usuarios.create}>
               <span className="plus">+</span> Novo usuário
             </Link>
-          </Can>
         </div>
       </div>
 
