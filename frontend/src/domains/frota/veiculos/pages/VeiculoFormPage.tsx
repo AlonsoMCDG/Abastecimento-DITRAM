@@ -8,13 +8,13 @@ import { SimpleForm } from "../../../../core/ui/forms/SimpleForm";
 import { veiculosApi } from "../api/veiculos.api";
 import { mapReadToForm, mapFormToWriteDTO } from "../api/veiculos.mapper";
 import { veiculoUISchema } from "../schemas/veiculo.ui";
-import { veiculoFormSchema, type VeiculoFormData } from "../schemas/veiculo.form";
+import { veiculoFormSchema, type VeiculoFormInput } from "../schemas/veiculo.form";
 
 export default function VeiculoFormPage() {
   const navigate = useNavigate();
   const { id } = useParams();
 
-  const [initialValues, setInitialValues] = useState<Partial<VeiculoFormData>>();
+  const [initialValues, setInitialValues] = useState<Partial<VeiculoFormInput>>();
   const [loading, setLoading] = useState(!!id);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [globalError, setGlobalError] = useState<string | null>(null);
@@ -34,12 +34,13 @@ export default function VeiculoFormPage() {
     }
   }, [id]);
 
-  async function handleSubmit(data: VeiculoFormData) {
+  async function handleSubmit(data: VeiculoFormInput) {
     setIsSubmitting(true);
     setGlobalError(null);
 
     try {
-      const payload = mapFormToWriteDTO(data);
+      const formData = veiculoFormSchema.parse(data);
+      const payload = mapFormToWriteDTO(formData);
 
       if (id) {
         await veiculosApi.atualizar(Number(id), payload);
@@ -64,7 +65,7 @@ export default function VeiculoFormPage() {
 
   return (
     <div className="page-container">
-      <SimpleForm<VeiculoFormData>
+      <SimpleForm<VeiculoFormInput>
         title={id ? "Editar Veículo" : "Novo Veículo"}
         subtitle={id ? "Atualize os dados do veículo." : "Cadastre os dados do veículo."}
         uiSchema={veiculoUISchema}
