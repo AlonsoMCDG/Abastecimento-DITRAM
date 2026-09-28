@@ -34,7 +34,7 @@ cp .env.example .env
 python manage.py migrate
 
 # Popular com dados padrão de testes (138 registros)
-python manage.py seed_default_data --force
+python manage.py seed --force
 
 # Iniciar o servidor de desenvolvimento (http://127.0.0.1:8000)
 python manage.py runserver
@@ -98,14 +98,14 @@ npm run dev
 | **RF03** | **Gestão de Frota** | Cadastro de veículos com Placa, Modelo, Ano e Combustível. |
 | **RF04** | **Gestão de Destinos** | Cadastro de Escolas, Postos de Saúde e Rotas por secretaria. |
 | **RF05** | **Emissão de Guias** | Formulário inteligente com hodômetro opcional para medidores quebrados. |
-| **RF06** | **Autopreenchimento** | Carrega veículo, rota e combustível automaticamente ao selecionar condutor. |
+| **RF06** | **Preenchimento assistido** | Filtra motorista por secretaria e veículo/equipamento por motorista; utiliza dados do cadastro para sugestões de preenchimento. |
 | **RF07** | **Cálculo Sugerido** | Sugestão de litragem baseada no consumo médio da rota/veículo. |
 | **RF08** | **Geração de PDF** | Exportação da guia em formato PDF para impressão (duas vias idênticas). |
 | **RF09** | **Relatórios por Período** | Geração de consolidados baseados em intervalos de datas customizáveis. |
 | **RF10** | **Histórico** | Consulta de guias emitidas para fins de conferência e auditoria. |
 | **RF11** | **Gestão de Perfil** | Alteração de dados (nome, e-mail e senha) pelo próprio usuário. |
-| **RF12** | **Controle de Usuários** | Gestão de operadores e permissões realizada pelo Diretor (Admin). |
-| **RF13** | **Favoritos de Relatório** | Salvar filtros recorrentes para geração em um clique. |
+| **RF12** | **Controle de Usuários** | Gestão de usuários do sistema pelo usuário autenticado. |
+
 
 ## 🛠️ Requisitos Não Funcionais (RNF)
 
@@ -126,7 +126,7 @@ npm run dev
 
 ### Automações de Campo
 * **Concatenação:** Modelo e Placa são unidos automaticamente no PDF (`L200 - MXX-0000`).
-* **Rótulos Dinâmicos:** A guia altera termos conforme o serviço (ex: "Catraieiro" para barcos, "Responsável" para roçagem).
+* **Rótulos:** A interface usa campos genéricos para operação, motorista/condutor, veículo/equipamento e rota/serviço.
 * **Validação de Hodômetro:** O sistema bloqueia KM inferior à última registrada, mas permite confirmação manual caso o campo seja deixado vazio (medidor quebrado).
 
 
