@@ -34,8 +34,6 @@ export const ENDPOINTS = {
     base: "/v1/choices/",
     veiculoCategoria: "/v1/choices/veiculo/categoria/",
     veiculoUnidadeConsumo: "/v1/choices/veiculo/unidade_consumo/",
-    guiaModalidade: "/v1/choices/guia/modalidade/",
-    guiaTipoVeiculo: "/v1/choices/guia/tipo_veiculo/",
     instituicaoTipo: "/v1/choices/instituicao/tipo/",
   },
 
