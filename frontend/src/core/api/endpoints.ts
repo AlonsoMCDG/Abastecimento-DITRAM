@@ -10,7 +10,6 @@ export const ENDPOINTS = {
   usuarios: {
     base: "/v1/usuarios/",
     me: "/v1/usuarios/me/",
-    register: "/v1/usuarios/register/",
   },
 
   // -----------------------
