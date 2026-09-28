@@ -143,9 +143,6 @@ export default function Layout() {
                     <Link to={ROUTES.sistema.usuarios.list} className="nav-dropdown-link" onClick={closeDropdowns}>
                       Usuários
                     </Link>
-                    <Link to="/usuarios/permissoes" className="nav-dropdown-link" onClick={closeDropdowns}>
-                      Permissões
-                    </Link>
                     {me?.is_superuser && (
                       <Link to={ROUTES.sistema.db} className="nav-dropdown-link danger-link" onClick={closeDropdowns}>Banco de Dados</Link>
                     )}
