@@ -6,7 +6,6 @@ import { QuickViewModal } from "../../../core/ui/overlays/QuickViewModal";
 
 import { pessoasApi } from "../pessoas.api";
 import { ROUTES } from "../../../core/routes/routes";
-import { Can } from "../../../core/auth/components/Can";
 import { getApiErrorMessage } from "../../../core/api/errorHandlers";
 
 import type { PessoaReadDTO } from "../schemas/pessoa.read.zod";
@@ -66,11 +65,9 @@ export default function PessoaListPage() {
         </div>
 
         <div className="list-actions">
-          <Can action="can_write_cadastros">
             <Link className="list-create" to={ROUTES.pessoas.base.create}>
               <span className="plus">+</span> Nova pessoa
             </Link>
-          </Can>
         </div>
       </div>
       
