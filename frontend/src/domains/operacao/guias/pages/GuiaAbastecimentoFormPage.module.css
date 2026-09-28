@@ -1,0 +1,177 @@
+.page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.header {
+  margin-bottom: 20px;
+}
+
+.header h1 {
+  margin: 0 0 6px;
+  font-size: 1.75rem;
+}
+
+.header p {
+  margin: 0;
+  color: #64748b;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.section {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 22px;
+}
+
+.section h2 {
+  margin: 0 0 18px;
+  font-size: 1.1rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.field {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field label,
+.checkbox {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.field input,
+.field textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+  background: #fff;
+  color: #111827;
+  font: inherit;
+}
+
+.field textarea {
+  resize: vertical;
+}
+
+.field input:focus,
+.field textarea:focus {
+  outline: none;
+  border-color: #1351b4;
+  box-shadow: 0 0 0 2px rgba(19, 81, 180, 0.12);
+}
+
+.field input:disabled,
+.field textarea:disabled {
+  background: #f8fafc;
+  color: #64748b;
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  align-self: end;
+  min-height: 42px;
+}
+
+.checkbox input {
+  width: 16px;
+  height: 16px;
+}
+
+.fieldError {
+  color: #b42318;
+  font-size: 0.8rem;
+}
+
+.errorAlert {
+  margin-bottom: 18px;
+  padding: 12px 14px;
+  border: 1px solid #fecdca;
+  border-radius: 7px;
+  background: #fef3f2;
+  color: #b42318;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.actions button {
+  padding: 10px 16px;
+  border-radius: 7px;
+  border: 1px solid #cbd5e1;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.primaryButton {
+  border-color: #1351b4 !important;
+  background: #1351b4;
+  color: #fff;
+}
+
+.secondaryButton {
+  background: #fff;
+  color: #334155;
+}
+
+.cancelButton {
+  background: #f8fafc;
+  color: #475569;
+}
+
+.actions button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.loading {
+  padding: 32px;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .page {
+    padding: 16px;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .section {
+    padding: 16px;
+  }
+
+  .actions {
+    flex-direction: column;
+  }
+
+  .actions button {
+    width: 100%;
+  }
+}
