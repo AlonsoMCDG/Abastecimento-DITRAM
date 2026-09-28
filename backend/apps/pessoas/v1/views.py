@@ -5,7 +5,6 @@ from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
 
 from apps.core.viewset_cache import ModelViewSetCacheMixin
-from apps.usuarios.permissions import CadastrosPermission
 
 from apps.pessoas.models import Pessoa
 from .serializers import (
@@ -16,7 +15,7 @@ from .serializers import (
 
 class PessoaViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
     queryset = Pessoa.objects.all()
-    permission_classes = [IsAuthenticated, CadastrosPermission]
+    permission_classes = [IsAuthenticated]
 
     filter_backends = [
         DjangoFilterBackend, 
