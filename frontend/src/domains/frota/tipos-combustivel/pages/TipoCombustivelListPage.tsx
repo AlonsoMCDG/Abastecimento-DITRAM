@@ -6,7 +6,6 @@ import { QuickViewModal } from "../../../../core/ui/overlays/QuickViewModal";
 
 import { tiposCombustivelApi } from "../tiposCombustivel.api";
 import { ROUTES } from "../../../../core/routes/routes";
-import { Can } from "../../../../core/auth/components/Can";
 import { getApiErrorMessage } from "../../../../core/api/errorHandlers";
 
 import type { TipoCombustivelReadDTO } from "../schemas/tipoCombustivel.read.zod";
@@ -66,11 +65,9 @@ export default function TipoCombustivelListPage() {
         </div>
 
         <div className="list-actions">
-          <Can action="can_write_cadastros">
             <Link className="list-create" to={ROUTES.frota.tiposCombustivel.create}>
               <span className="plus">+</span> Novo Combustível
             </Link>
-          </Can>
         </div>
       </div>
       
