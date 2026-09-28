@@ -13,6 +13,8 @@ import { ROUTES } from '../../../../core/routes/routes';
 import { guiasApi } from '../api/guias.api';
 import type { VeiculoReadDTO } from '../../../frota/veiculos/schemas/veiculo.dto';
 import { veiculosApi } from '../../../frota/veiculos/api/veiculos.api';
+import type { RotaReadDTO } from '../../../frota/rotas/schemas/rota.read.zod';
+import { rotasApi } from '../../../frota/rotas/rotas.api';
 import { mapReadToForm, mapFormToWriteDTO } from '../api/guias.mapper';
 import { guiaAbastecimentoUISchema } from '../schemas/guia.ui';
 import { guiaAbastecimentoFormSchema, type GuiaAbastecimentoFormInput } from '../schemas/guia.form';
@@ -32,10 +34,13 @@ export default function GuiaAbastecimentoFormPage() {
   const [loading, setLoading] = useState(!!id);
   const [isPrinting, setIsPrinting] = useState(false);
   const [veiculoReferencia, setVeiculoReferencia] = useState<VeiculoReadDTO | null>(null);
+  const [rotaReferencia, setRotaReferencia] = useState<RotaReadDTO | null>(null);
   const submitIntent = useRef<'save' | 'save_print'>('save');
 
   const { control, handleSubmit, reset, setValue } = methods;
   const veiculoSelecionado = useWatch({ control, name: 'veiculo' });
+  const rotaSelecionada = useWatch({ control, name: 'rota_manual' });
+  const quantidadeCombustivel = useWatch({ control, name: 'quantidade_combustivel' });
 
   useEffect(() => {
     if (id) {
@@ -102,6 +107,51 @@ export default function GuiaAbastecimentoFormPage() {
     };
   }, [id, veiculoSelecionado, setValue]);
 
+  useEffect(() => {
+    if (id || typeof rotaSelecionada !== 'number') {
+      if (!id) setRotaReferencia(null);
+      return;
+    }
+
+    let active = true;
+    setRotaReferencia(null);
+
+    rotasApi.buscar(rotaSelecionada)
+      .then((rota) => {
+        if (!active) return;
+        setRotaReferencia(rota);
+
+        const distancia = Number(rota.distancia_km);
+        const consumo = veiculoReferencia
+          ? Number(veiculoReferencia.consumo_estimado_combustivel)
+          : NaN;
+
+        // Só calcula quando a unidade é km/L. Para L/h ainda não há
+        // uma duração em horas suficientemente precisa na guia.
+        if (
+          (!quantidadeCombustivel || Number(quantidadeCombustivel) <= 0) &&
+          Number.isFinite(distancia) &&
+          distancia > 0 &&
+          Number.isFinite(consumo) &&
+          consumo > 0 &&
+          veiculoReferencia?.unidade_consumo === 'KM_POR_L'
+        ) {
+          const estimativa = Number((distancia / consumo).toFixed(3));
+          setValue('quantidade_combustivel', estimativa, {
+            shouldValidate: true,
+            shouldDirty: true,
+          });
+        }
+      })
+      .catch(() => {
+        // A rota é apenas uma fonte de referência para a estimativa.
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [id, rotaSelecionada, quantidadeCombustivel, veiculoReferencia, setValue]);
+
   const onSubmit: SubmitHandler<GuiaAbastecimentoFormInput> = async (rawFormData) => {
     setGlobalError(null);
 
@@ -153,16 +203,29 @@ export default function GuiaAbastecimentoFormPage() {
 
       <div className={layoutStyles.card}>
         <FormProvider {...methods}>
-          {veiculoReferencia && (
+          {(veiculoReferencia || rotaReferencia) && (
             <div className={layoutStyles.alertInfo} role="status">
-              <strong>Referência do veículo:</strong>{' '}
-              {veiculoReferencia.consumo_estimado_combustivel != null
-                ? `consumo estimado de ${veiculoReferencia.consumo_estimado_combustivel} ${veiculoReferencia.unidade_consumo_nome}`
-                : 'consumo estimado não cadastrado'}
-              {veiculoReferencia.consumo_estimado_oleo != null
-                ? ` • óleo: ${veiculoReferencia.consumo_estimado_oleo} L`
-                : ''}
-              {' '}— use esses dados como referência e informe manualmente a quantidade da guia.
+              {veiculoReferencia && (
+                <>
+                  <strong>Referência do veículo:</strong>{' '}
+                  {veiculoReferencia.consumo_estimado_combustivel != null
+                    ? `consumo estimado de ${veiculoReferencia.consumo_estimado_combustivel} ${veiculoReferencia.unidade_consumo_nome}`
+                    : 'consumo estimado não cadastrado'}
+                  {veiculoReferencia.consumo_estimado_oleo != null
+                    ? ` • óleo: ${veiculoReferencia.consumo_estimado_oleo} L`
+                    : ''}
+                </>
+              )}
+              {rotaReferencia && (
+                <>
+                  {veiculoReferencia ? ' • ' : ''}
+                  <strong>Rota:</strong>{' '}
+                  {rotaReferencia.distancia_km != null
+                    ? `${rotaReferencia.distancia_km} km cadastrados`
+                    : 'distância não cadastrada'}
+                </>
+              )}
+              {' '}— os dados são referências; a quantidade da guia pode ser ajustada manualmente.
             </div>
           )}
 
