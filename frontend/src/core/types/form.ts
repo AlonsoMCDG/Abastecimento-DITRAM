@@ -47,8 +47,6 @@ export interface FormField<T extends FieldValues = any> {
   colSpan?: 1 | 2 | 3;     // Largura do campo na grade visual (3 = ocupa a linha inteira)
   options?: FieldOption[]; // Opções manuais/estáticas para selects
   endpoint?: string;       // Rota da API para carregar opções dinâmicas de lookup (Para campos Select)
-  dependsOn?: string;      // Nome (name) de outro campo que este observa para recarregar/filtrar dados
-  dependsOnParam?: string; // Nome do query parameter enviado à API (ex.: '?secretaria_id=') para filtrar opções
   quickActions?: QuickAction[]; // Botões de atalho embutidos no campo (ex.: '➕ Novo')
   prefix?: string | React.ReactNode;  // Elemento renderizado no início do input (ex.: 'R$')
   suffix?: string | React.ReactNode;  // Elemento renderizado no final do input (ex.: 'km/L')
