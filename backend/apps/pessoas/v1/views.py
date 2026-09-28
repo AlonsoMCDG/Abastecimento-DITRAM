@@ -35,7 +35,15 @@ class PessoaViewSet(ModelViewSetCacheMixin, viewsets.ModelViewSet):
     ordering = ['-ativo', 'nome']
 
     def get_queryset(self):
-        return super().get_queryset()
+        queryset = super().get_queryset()
+        secretaria_id = self.request.query_params.get('secretaria_id')
+
+        if secretaria_id:
+            queryset = queryset.filter(
+                guias__secretaria_id=secretaria_id
+            ).distinct()
+
+        return queryset
 
     def get_serializer_class(self):
         if self.action == 'lookup':
