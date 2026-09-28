@@ -13,8 +13,6 @@ class UsuarioSerializer(serializers.ModelSerializer):
         fields = (
             "id", "first_name", "last_name", "email", "cpf", "password",
             "is_staff", "is_superuser", "is_active",
-            "can_write_cadastros", "can_write_frota",
-            "can_create_guia_abastecimento", "can_edit_guia_abastecimento", "can_delete_guia_abastecimento",
         )
         read_only_fields = ("id", "is_superuser")
 
@@ -67,12 +65,6 @@ class UsuarioRegisterSerializer(serializers.ModelSerializer):
 
         user.is_staff = False
         user.is_superuser = False
-        user.can_write_cadastros = False
-        user.can_write_frota = False
-        user.can_create_guia_abastecimento = True
-        user.can_edit_guia_abastecimento = False
-        user.can_delete_guia_abastecimento = False
-
         try:
             validate_password(password, user)
         except DjangoValidationError as e:
@@ -86,17 +78,6 @@ class UsuarioRegisterSerializer(serializers.ModelSerializer):
         return normalize_cpf(value)
 
 
-
-class UsuarioPermissionsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Usuario
-        fields = (
-            "id", "cpf", "first_name", "last_name", "email",
-            "is_staff", "is_superuser", "is_active",
-            "can_write_cadastros", "can_write_frota",
-            "can_create_guia_abastecimento", "can_edit_guia_abastecimento", "can_delete_guia_abastecimento",
-        )
-        read_only_fields = ("id", "cpf", "is_superuser")
 
 class UsuarioSelfUpdateSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=False, allow_blank=True)
