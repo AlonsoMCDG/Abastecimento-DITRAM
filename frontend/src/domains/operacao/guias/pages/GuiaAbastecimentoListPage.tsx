@@ -6,7 +6,6 @@ import { QuickViewModal } from "../../../../core/ui/overlays/QuickViewModal";
 
 import { guiasApi } from "../api/guias.api";
 import { ROUTES } from "../../../../core/routes/routes";
-import { useAuth } from "../../../../core/auth/useAuth";
 import { Can } from "../../../../core/auth/components/Can";
 import { getApiErrorMessage } from "../../../../core/api/errorHandlers";
 import { processPdfBlob } from "../../../../core/utils/pdfHandler";
@@ -19,7 +18,6 @@ import "../../../../core/ui/layouts/ListPage.css";
 
 export default function GuiaAbastecimentoListPage() {
   const navigate = useNavigate();
-  const { user: me } = useAuth();
 
   const [guiasAbastecimento, setGuiasAbastecimento] = useState<GuiaAbastecimentoReadDTO[]>([]);
   const [total, setTotal] = useState(0);
