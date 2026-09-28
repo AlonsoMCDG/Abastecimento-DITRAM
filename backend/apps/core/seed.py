@@ -21,11 +21,6 @@ def ensure_superadmin(
         password=password,
         first_name="Super",
         last_name="Admin",
-        can_write_cadastros=True,
-        can_write_frota=True,
-        can_create_guia_abastecimento=True,
-        can_edit_guia_abastecimento=True,
-        can_delete_guia_abastecimento=True,
     )
 
 def load_default_data(fixture_name: str = DEFAULT_FIXTURE_NAME, verbosity: int = 1):
