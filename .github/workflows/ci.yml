@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [ main, trabajo-de-doido ]
+    branches: [ main, trabalho-de-doido-fix ]
   pull_request:
     branches: [ main ]
 
