@@ -45,6 +45,22 @@ export function formatDateBR(dateStr?: string | null): string {
 /**
  * Formata uma string ISO ou Date para data e hora brasileira: "DD/MM/YYYY HH:mm"
  */
+export function toDateTimeLocalInput(dateValue?: string | Date | null): string {
+  if (!dateValue) return '';
+  const date = typeof dateValue === 'string' ? new Date(dateValue) : dateValue;
+  if (isNaN(date.getTime())) return '';
+
+  const pad = (value: number) => String(value).padStart(2, '0');
+  return date.getFullYear() + '-' +
+    pad(date.getMonth() + 1) + '-' +
+    pad(date.getDate()) + 'T' +
+    pad(date.getHours()) + ':' +
+    pad(date.getMinutes());
+}
+
+/**
+ * Formata uma string ISO ou Date para data e hora brasileira: "DD/MM/YYYY HH:mm"
+ */
 export function formatDateTimeBR(dateValue?: string | Date | null): string {
   if (!dateValue) return "-";
   const date = typeof dateValue === "string" ? new Date(dateValue) : dateValue;
