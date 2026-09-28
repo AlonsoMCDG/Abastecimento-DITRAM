@@ -83,3 +83,49 @@
   border-radius: 6px;
   border: 1px solid #e2e8f0;
 }
+
+.guia-filters {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 12px 14px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+}
+
+.guia-filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.guia-filter-field label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #475569;
+}
+
+.guia-filter-field input {
+  min-height: 36px;
+  padding: 6px 9px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #fff;
+  color: #0f172a;
+}
+
+.guia-filter-clear {
+  min-height: 36px;
+  padding: 6px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #f8fafc;
+  color: #334155;
+  cursor: pointer;
+}
+
+.guia-filter-clear:hover {
+  background: #f1f5f9;
+}
