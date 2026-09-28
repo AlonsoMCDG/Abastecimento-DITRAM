@@ -78,10 +78,6 @@ function App() {
                                       <UsuarioFormPage />
                 }
               />
-              <Route path="permissoes" element={
-                                      <UsuariosPermissoesPage />
-                }
-              />
             </Route>
 
             {/* ====== 1. PESSOAS ====== */}
