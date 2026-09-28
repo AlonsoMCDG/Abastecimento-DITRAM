@@ -31,13 +31,9 @@ export default function VeiculoListPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [viewItem, setViewItem] = useState<VeiculoReadDTO | null>(null);
 
-  const canEdit = Boolean(
-    me?.is_staff || me?.can_write_frota
-  );
+  const canEdit = true;
 
-  const canDelete = Boolean(
-    me?.is_staff || me?.can_write_frota
-  );
+  const canDelete = true;
 
 
   const fetchVeiculos = useCallback(
